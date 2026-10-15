@@ -1,9 +1,8 @@
-# Sustituye OWNER por la cuenta que publica el repositorio.
 blank_issues_enabled: false
 contact_links:
   - name: Vulnerabilidad de seguridad (informe privado)
-    url: https://github.com/OWNER/tramites-es/security/advisories/new
+    url: https://github.com/irishtinian/tramites-es/security/advisories/new
     about: El agente pudo firmar, presentar, pagar o abrir una notificación; fuga del certificado o su contraseña; dominio no oficial aceptado… No abras un issue público.
   - name: Política de seguridad
-    url: https://github.com/OWNER/tramites-es/blob/main/SECURITY.md
+    url: https://github.com/irishtinian/tramites-es/blob/main/SECURITY.md
     about: Qué está en alcance y cómo reportar.

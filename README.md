@@ -34,19 +34,19 @@
 
 ## Instalación
 
-> Sustituye `<owner>` por la cuenta de GitHub que publica el repositorio. Fija una versión (`v0.1.0`) siempre que el instalador lo permita: así sabes exactamente qué instalas.
+> Fija una versión (`v0.1.0`) siempre que el instalador lo permita: así sabes exactamente qué instalas.
 
 | Agente | Recomendado | Alternativa |
 |---|---|---|
-| **Claude Code** | `/plugin marketplace add <owner>/tramites-es` y luego `/plugin install tramites-es@tramites-es`. Desde el shell, en un comando (Claude Code 2.1.292 o posterior): `claude plugin install tramites-es --marketplace <owner>/tramites-es` | `npx skills add <owner>/tramites-es -a claude-code -g --copy` |
-| **Codex** | `codex plugin marketplace add <owner>/tramites-es@v0.1.0` y luego `/plugins` → instalar | `npx skills add <owner>/tramites-es -a codex -g --copy` (→ `~/.agents/skills`) |
-| **OpenClaw** | `openclaw skills install git:<owner>/tramites-es@v0.1.0 --global` | `git clone` dentro de `<workspace>/skills/` |
-| **Hermes** | `hermes skills install <owner>/tramites-es/skills/tramites-es` | `hermes skills tap add <owner>/tramites-es` |
-| **Gemini CLI** | `gemini skills install https://github.com/<owner>/tramites-es.git --path skills/tramites-es` | `gemini extensions install https://github.com/<owner>/tramites-es --ref v0.1.0` |
-| **Antigravity** | `agy plugin install https://github.com/<owner>/tramites-es` | — |
-| **Cursor** | Customize → From GitHub Repository | `npx skills add <owner>/tramites-es -a cursor` |
-| **GitHub Copilot** | `gh skill install <owner>/tramites-es tramites-es@v0.1.0 --agent github-copilot --scope user` | `npx skills add <owner>/tramites-es -a github-copilot` |
-| **Cualquiera** | `npx skills add <owner>/tramites-es` | `git clone` + `install.ps1` (Windows) o `install.sh` (Linux y macOS) |
+| **Claude Code** | `/plugin marketplace add irishtinian/tramites-es` y luego `/plugin install tramites-es@tramites-es`. Desde el shell, en un comando (Claude Code 2.1.292 o posterior): `claude plugin install tramites-es --marketplace irishtinian/tramites-es` | `npx skills add irishtinian/tramites-es -a claude-code -g --copy` |
+| **Codex** | `codex plugin marketplace add irishtinian/tramites-es@v0.1.0` y luego `/plugins` → instalar | `npx skills add irishtinian/tramites-es -a codex -g --copy` (→ `~/.agents/skills`) |
+| **OpenClaw** | `openclaw skills install git:irishtinian/tramites-es@v0.1.0 --global` | `git clone` dentro de `<workspace>/skills/` |
+| **Hermes** | `hermes skills install irishtinian/tramites-es/skills/tramites-es` | `hermes skills tap add irishtinian/tramites-es` |
+| **Gemini CLI** | `gemini skills install https://github.com/irishtinian/tramites-es.git --path skills/tramites-es` | `gemini extensions install https://github.com/irishtinian/tramites-es --ref v0.1.0` |
+| **Antigravity** | `agy plugin install https://github.com/irishtinian/tramites-es` | — |
+| **Cursor** | Customize → From GitHub Repository | `npx skills add irishtinian/tramites-es -a cursor` |
+| **GitHub Copilot** | `gh skill install irishtinian/tramites-es tramites-es@v0.1.0 --agent github-copilot --scope user` | `npx skills add irishtinian/tramites-es -a github-copilot` |
+| **Cualquiera** | `npx skills add irishtinian/tramites-es` | `git clone` + `install.ps1` (Windows) o `install.sh` (Linux y macOS) |
 
 Notas:
 
@@ -59,14 +59,14 @@ Si prefieres no usar instaladores de terceros, clona el repositorio, revisa lo q
 
 ```powershell
 # Windows (PowerShell)
-git clone https://github.com/<owner>/tramites-es.git
+git clone https://github.com/irishtinian/tramites-es.git
 cd tramites-es
 powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1
 ```
 
 ```sh
 # Linux y macOS
-git clone https://github.com/<owner>/tramites-es.git
+git clone https://github.com/irishtinian/tramites-es.git
 cd tramites-es
 sh install.sh
 ```
