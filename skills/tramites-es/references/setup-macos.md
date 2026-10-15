@@ -166,6 +166,6 @@ Notas:
 
 **"No se ha enviado/seleccionado ningún certificado"**, error 4002 de Cl@ve o una página de error de la sede justo al entrar con certificado. Casi siempre falta un *origin*: la sede saltó a un subdominio que no recibe el certificado.
 - El agente revisa `hosts_con_error` y `url_final` en la salida de `sede.py`, y puede comprobar el host con `uv run scripts/sede.py tls-probe <host>` (no usa el certificado).
-- Si el dominio es oficial, propón añadirlo a `assets/sedes.yaml` y abrir un issue "sede rota". Si no es oficial, para y pregunta.
+- Si el dominio es oficial, propón añadirlo a `assets/_sedes-*.yaml` y abrir un issue "sede rota". Si no es oficial, para y pregunta.
 
 **Antivirus.** Algunos antivirus con "análisis de HTTPS" o "de conexiones cifradas" interfieren con el certificado de cliente o con las descargas de Playwright. Prueba a excluir las sedes oficiales de ese análisis (consulta la ayuda de tu antivirus). No desactives el antivirus entero.

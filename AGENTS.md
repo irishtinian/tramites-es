@@ -21,5 +21,5 @@ Lee y sigue `skills/tramites-es/SKILL.md`. Lo que puedes hacer con efectos (gene
 - `skills/tramites-es/SKILL.md`: punto de entrada del skill (permisos, protecciones y flujo).
 - `skills/tramites-es/references/`: guías por sede, plataforma y trámite (se cargan bajo demanda).
 - `skills/tramites-es/scripts/`: herramientas (entorno, buscar, cert, permisos, sede, justificante, calendario, ayudas).
-- `skills/tramites-es/assets/`: datos (sedes, municipios, huellas de plataformas, dominios oficiales).
+- `skills/tramites-es/assets/`: datos (sedes y trámites en `_sedes-*.yaml`, censo de municipios, calendario fiscal, dominios oficiales).
 - `tests/`: pruebas y sede simulada.

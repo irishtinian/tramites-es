@@ -56,7 +56,7 @@ El skill no decide por tu usuario. Él te da permisos para cada **acto con efect
 ## 6. Solo dominios oficiales
 
 - Una web falsa que pida el certificado sabe quién es tu usuario (nombre y NIF van en el certificado) y puede engañarle para firmar.
-- **Cómo se aplica:** `assets/dominios-oficiales.yaml`, `assets/sedes.yaml` y las sedes del censo municipal. Ante un dominio desconocido, comprueba que es oficial y pregunta.
+- **Cómo se aplica:** `assets/dominios-oficiales.yaml`, los `origins` de `assets/_sedes-*.yaml` y las sedes del censo municipal. Ante un dominio desconocido, comprueba que es oficial y pregunta.
 
 ## 7. Verificar el éxito
 

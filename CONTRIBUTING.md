@@ -23,7 +23,7 @@ Abre un issue **"sede rota"** con:
    - cómo se verifica el éxito;
    - problemas conocidos;
    - `verificado_el` y fuentes oficiales.
-3. Los dominios nuevos a los que se presenta el certificado deben ser de una Administración pública, con fuente. Van a `assets/sedes.yaml` o a `assets/dominios-oficiales.yaml`, y los revisan los CODEOWNERS.
+3. Los dominios nuevos a los que se presenta el certificado deben ser de una Administración pública, con fuente. Van como `origins` en `assets/_sedes-*.yaml` (`_sedes-estatal.yaml`, `_sedes-canarias.yaml` o `_sedes-plataformas.yaml`) o a `assets/dominios-oficiales.yaml`, y los revisan los CODEOWNERS.
 4. Fechas, plazos e importes: solo con fuente primaria (BOE, boletín autonómico, sede del organismo).
 
 ## Código
@@ -35,4 +35,4 @@ Abre un issue **"sede rota"** con:
 
 ## Revisión
 
-Todo PR que toque `SKILL.md`, `scripts/`, `assets/dominios-oficiales.yaml`, `assets/sedes.yaml` o la CI requiere revisión de CODEOWNERS. Es un repo que maneja certificados digitales: la revisión es estricta a propósito.
+Todo PR que toque `SKILL.md`, `scripts/`, `assets/dominios-oficiales.yaml`, `assets/_sedes-*.yaml`, `assets/municipios.csv` o la CI requiere revisión de CODEOWNERS. Es un repo que maneja certificados digitales: la revisión es estricta a propósito.

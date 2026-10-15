@@ -43,7 +43,7 @@ En Canarias no hay IVA: el autónomo liquida el **IGIC** en la ATC. El IRPF (130
 | Login | `https://sede.gobiernodecanarias.org/tributos/jsf/publico/validacion/valida.jsp` |
 | Métodos | Certificado o DNIe (vía AutoFirma) y Cl@ve |
 | Origins | `https://sede.gobiernodecanarias.org`, `https://www3.gobiernodecanarias.org` |
-| `sede.py` | `--sede atc` (ver `assets/sedes.yaml`) |
+| `sede.py` | `--sede atc` (ver `assets/_sedes-canarias.yaml`) |
 
 **Cómo entra el certificado.** La ATC **no** pide el certificado por TLS: ni en el *handshake* ni en `valida.jsp` (comprobado con `tls-probe` y `cert-probe` el 15-10-2026). Tras elegir certificado en el menú de validación (`validamenu.jsp`), el botón **Entrar** (`#btnValidar`) lanza **AutoFirma por *websocket*** para firmar el acceso.
 

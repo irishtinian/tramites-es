@@ -170,7 +170,7 @@ Notas:
 
 **"No se ha enviado/seleccionado ningún certificado"**, error 4002 de Cl@ve o una página de error de la sede justo al entrar con certificado. Casi siempre falta un *origin*: la sede saltó a un subdominio que no recibe el certificado.
 - El agente revisa `hosts_con_error` y `url_final` en la salida de `sede.py`.
-- Si el dominio es oficial, propón añadirlo a `assets/sedes.yaml` y abrir un issue "sede rota". Si no es oficial, para y pregunta.
+- Si el dominio es oficial, propón añadirlo a `assets/_sedes-*.yaml` y abrir un issue "sede rota". Si no es oficial, para y pregunta.
 - En Windows, `sede.py cert-probe` no detecta bien si una ruta pide certificado (lo avisa en su salida).
 
 **Antivirus.** Algunos antivirus con "análisis de HTTPS" o "de conexiones cifradas" interfieren con el certificado de cliente: la sede falla solo en la ventana del agente. Prueba a excluir las sedes oficiales de ese análisis (consulta la ayuda de tu antivirus). No desactives el antivirus entero. Si bloquea `uv` o Playwright, compruébalo antes: permítelo solo si lo instalaste desde la web oficial.

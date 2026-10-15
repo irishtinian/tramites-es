@@ -93,7 +93,7 @@ El resultado incluye textos de la página, que pueden llevar datos de la persona
 | Actividad (comunicación previa, licencia) | `{ORIGIN}/catalog/t/<UUID del tenant>` | `firmar`, `presentar` | Sin permiso, para en la ficha |
 
 - **Instancia general:** el mismo UUID funcionó en Arico y en Adeje. Puede ser común a muchos tenants, pero **compruébalo** en cada sede: si da error, búscala en `/dossier`.
-- **Trámites de actividad:** el UUID es propio de cada ayuntamiento. En Arico, la categoría «Actividad Económica» no mostró una licencia o declaración de apertura. Sí había una comunicación urbanística, que no es el mismo trámite. Ejemplos de Adeje en `assets/sedes.yaml`.
+- **Trámites de actividad:** el UUID es propio de cada ayuntamiento. En Arico, la categoría «Actividad Económica» no mostró una licencia o declaración de apertura. Sí había una comunicación urbanística, que no es el mismo trámite. Ejemplos de Adeje en `assets/_sedes-canarias.yaml`.
 - **Presentar:** «Iniciar tramitación electrónica» en la ficha, rellenar, adjuntar, firmar y presentar.
   - Prepara antes el texto (expone, solicita) y la lista de documentos, y confírmalos con tu usuario.
   - **Con los permisos `firmar` y `presentar`** (`sede.py --permitir firmar,presentar`), hazlo tú.
@@ -117,7 +117,7 @@ El resultado incluye textos de la página, que pueden llevar datos de la persona
    - el tenant **no siempre es el nombre del municipio**: Arico es `ayuntamientodearico`, Valverde es `aytovalverde`, La Matanza es `matanceros`.
 3. **Comprueba que existe:** si la página dice «Sede Electrónica Indeterminada», el tenant no es ese.
 4. **UUID de un trámite:** abre `{ORIGIN}/dossier` (o busca en la portada), entra en la ficha y toma el UUID de `/catalog/t/<UUID>`. **No guardes enlaces `?x=`**, que caducan.
-5. **Origins para `sede.py`:** el ORIGIN del tenant más las dos pasarelas Cl@ve. Si el ayuntamiento no está en `assets/sedes.yaml`, pasa `--url` y avisa a la persona antes de usar el certificado si el dominio no está en `assets/dominios-oficiales.yaml` ni en el censo («Solo sedes oficiales» en `SKILL.md`).
+5. **Origins para `sede.py`:** el ORIGIN del tenant más las dos pasarelas Cl@ve. Si el ayuntamiento no está en `assets/_sedes-*.yaml`, pasa `--url` y avisa a la persona antes de usar el certificado si el dominio no está en `assets/dominios-oficiales.yaml` ni en el censo («Solo sedes oficiales» en `SKILL.md`).
 6. **Tributos:** busca el recaudador del municipio (diputación, consorcio u oficina tributaria). Gestiona no los suele llevar.
 
 ## Trampas

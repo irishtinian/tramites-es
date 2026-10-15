@@ -301,7 +301,7 @@ def _yaml(path: Path) -> dict:
 
 
 def cargar_sedes() -> dict:
-    """assets/sedes.yaml + assets/_sedes-*.yaml (estatal, canarias, plataformas…)."""
+    """assets/_sedes-*.yaml (estatal, canarias, plataformas…) y, si existe, assets/sedes.yaml (sedes locales)."""
     sedes: dict = {}
     for p in [ASSETS / "sedes.yaml", *sorted(ASSETS.glob("_sedes-*.yaml"))]:
         sedes.update(_yaml(p).get("sedes", {}) or {})
@@ -341,7 +341,7 @@ def resolver(a):
     sedes = cargar_sedes()
     sede = sedes.get(a.sede, {}) if a.sede else {}
     if a.sede and not sede:
-        raise SystemExit(f"sede '{a.sede}' no está en assets/sedes.yaml (usa buscar.py o --url)")
+        raise SystemExit(f"sede '{a.sede}' no está en assets/_sedes-*.yaml (usa buscar.py o --url)")
     url = a.url or sede.get("login")
     if not url:
         raise SystemExit("falta --url o 'login' en la sede")

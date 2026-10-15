@@ -1,6 +1,6 @@
-# Fragmento de assets/sedes.yaml: sedes de Canarias (autonómicas, insulares y municipales de ejemplo).
-# Mismo esquema que sedes.yaml, más la clave `plataforma` (slug de references/plataforma-<slug>.md, o `propia`).
-# sede.py y buscar.py cargan juntos sedes.yaml y todos los assets/_sedes-*.yaml (no hace falta fusionar).
+# Sedes de Canarias (autonómicas, insulares y municipales de ejemplo).
+# Mismo esquema que el resto de assets/_sedes-*.yaml, más la clave `plataforma` (slug de references/plataforma-<slug>.md,
+# o `propia`). sede.py y buscar.py cargan juntos todos los assets/_sedes-*.yaml.
 # Sin datos personales. Fuente: mapeo en vivo del 15-10-2026 (solo lectura; con certificado solo para consultas)
 # y las guías citadas en cada sede.
 #

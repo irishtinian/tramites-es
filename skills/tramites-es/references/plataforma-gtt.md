@@ -113,7 +113,7 @@ La salida y las capturas locales pueden contener importes y referencias de la pe
    ```
    Si solo ves un spinner, es la carga lenta. Reintenta con una receta que espere 12-15 segundos.
 3. **Login:** sustituye el par en `certifica.gtt.es/OficinaVirtual/oficina.asp?servicio=<SERVICIO>&entidad=<CODIGO>`. Comprueba en la portada que el botón «Certificado digital» lleva a esa URL.
-4. **Origins:** `https://<host>` y `https://certifica.gtt.es`. Si la entidad no está en `assets/sedes.yaml`, confirma con la persona que el enlace sale de la web oficial antes de usar el certificado.
+4. **Origins:** `https://<host>` y `https://certifica.gtt.es`. Si la entidad no está en `assets/_sedes-*.yaml`, confirma con la persona que el enlace sale de la web oficial antes de usar el certificado.
 5. **Menú:** cambia según la entidad. Usa `sede.py probe` para ver qué opciones tiene.
 
 ## Trampas

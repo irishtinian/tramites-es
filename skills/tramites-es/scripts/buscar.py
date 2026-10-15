@@ -8,7 +8,7 @@
   uv run scripts/buscar.py "Granadilla de Abona"          (municipio → sede, plataforma, recaudador)
   uv run scripts/buscar.py --municipio "Adeje"
 
-Fuentes: assets/sedes.yaml (sedes y trámites), assets/municipios.csv (censo de ayuntamientos)
+Fuentes: assets/_sedes-*.yaml (sedes y trámites), assets/municipios.csv (censo de ayuntamientos)
 y los nombres de fichero de references/. No usa red.
 """
 from __future__ import annotations
@@ -36,7 +36,7 @@ def palabras(s: str) -> set[str]:
 
 
 def cargar_sedes() -> dict:
-    """assets/sedes.yaml + assets/_sedes-*.yaml (estatal, canarias, plataformas…)."""
+    """assets/_sedes-*.yaml (estatal, canarias, plataformas…) y, si existe, assets/sedes.yaml (sedes locales)."""
     import yaml
     sedes: dict = {}
     for p in [ASSETS / "sedes.yaml", *sorted(ASSETS.glob("_sedes-*.yaml"))]:

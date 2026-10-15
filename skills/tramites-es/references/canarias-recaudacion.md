@@ -33,7 +33,7 @@ Riesgo: **leer**. Consultar recibos es de solo lectura. Pagar (`pagar`), domicil
 
 ## Tenerife, El Hierro, parte de La Palma y Tuineje: Consorcio de Tributos de la Isla de Tenerife (CTT)
 
-- **Sede (STA):** `https://sede.tributostenerife.es`. Recibos con certificado: `https://sede.tributostenerife.es/sta/CarpetaPrivate/Certificate?APP_CODE=STA&PAGE_CODE=RECIBOS`, verificado con certificado el 15-10-2026. Carta de pago en voluntaria sin acceso: `PAGE_CODE=ACCESO_DEUDA`. En `assets/sedes.yaml`: `--sede consorcio-tenerife`.
+- **Sede (STA):** `https://sede.tributostenerife.es`. Recibos con certificado: `https://sede.tributostenerife.es/sta/CarpetaPrivate/Certificate?APP_CODE=STA&PAGE_CODE=RECIBOS`, verificado con certificado el 15-10-2026. Carta de pago en voluntaria sin acceso: `PAGE_CODE=ACCESO_DEUDA`. En `assets/_sedes-canarias.yaml`: `--sede consorcio-tenerife`.
 - **Miembros** (41 entidades según su web):
   - 28 de los 31 ayuntamientos de Tenerife: todos **salvo Santa Cruz de Tenerife, Adeje y La Guancha**;
   - los 3 de El Hierro (Valverde, La Frontera, El Pinar);

@@ -1,6 +1,6 @@
-# Fragmento de assets/sedes.yaml: sedes ESTATALES (AEAT, Seguridad Social, DEHú, Cl@ve, DGT,
-# Carpeta Ciudadana, Justicia, Catastro). Mismo esquema que sedes.yaml.
-# sede.py y buscar.py cargan juntos sedes.yaml y todos los assets/_sedes-*.yaml (no hace falta fusionar).
+# Sedes ESTATALES (AEAT, Seguridad Social, DEHú, Cl@ve, DGT, Carpeta Ciudadana, Justicia, Catastro, FNMT…).
+# Mismo esquema en todos los assets/_sedes-*.yaml: sede.py y buscar.py los cargan juntos
+# (y también assets/sedes.yaml si existe, para sedes locales que añadas tú).
 # Sin datos personales. Fuente: mapeo en vivo del 15-10-2026 (fases 1 y 2 y ronda 3; con certificado de
 # persona física solo para consultas; nada firmado, presentado, pagado ni abierto) y las guías citadas.
 #

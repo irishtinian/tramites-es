@@ -110,7 +110,7 @@ Son nombres observados en 4 instalaciones, **no una garantía**: compruébalos e
 2. **Ojo con las dos capas:** algunas sedes tienen un catálogo editorial y ejecutan en otro host. Santa Cruz de Tenerife tiene fichas en `sede.santacruzdetenerife.es/sede/tramite/t<ID>` y ejecuta en `ovc.santacruzdetenerife.es`. Arona tiene fichas en `sede.arona.org` y ejecuta en `sta.arona.org`.
 3. **Averigua los `PAGE_CODE`** de esa instalación en su frontal o menú, sin certificado, con la receta `sta_pagecodes.py` de abajo. Si `OVC_HOME` no existe, prueba con la `sede_url` del censo o con `FRONTAL_OVC` / `PTS2_HOME`.
 4. **Trámites:** busca en `CatalogBrowse` y copia los dos `dboid*` de la ficha de **esa** instalación.
-5. **Origins para `sede.py`:** el ORIGIN (más las pasarelas Cl@ve si usas `Clave2Request`). Si la instalación no está en `assets/sedes.yaml` y su dominio no está en `assets/dominios-oficiales.yaml` ni en el censo, pregunta a la persona antes de usar el certificado («Solo sedes oficiales» en `SKILL.md`).
+5. **Origins para `sede.py`:** el ORIGIN (más las pasarelas Cl@ve si usas `Clave2Request`). Si la instalación no está en `assets/_sedes-*.yaml` y su dominio no está en `assets/dominios-oficiales.yaml` ni en el censo, pregunta a la persona antes de usar el certificado («Solo sedes oficiales» en `SKILL.md`).
 6. **Tributos:** puede que los recibos no estén en el ayuntamiento sino en su recaudador (en Tenerife, casi siempre el Consorcio): `canarias-recaudacion.md`.
 
 Receta de solo lectura para el paso 3 (no probada en vivo tal cual):
@@ -145,7 +145,7 @@ uv run scripts/sede.py ejecutar sta_pagecodes.py --url "https://<ORIGIN>/sta/Car
 | Santa Cruz de Tenerife | `https://ovc.santacruzdetenerife.es` | `Certificate?…&PAGE_CODE=HOME` | Certificado aceptado; para en la confirmación de contacto |
 | Arona | `https://sta.arona.org` | `Certificate?…&PAGE_CODE=OVC_POSICIONGLOBAL` | Certificado aceptado; para en la confirmación de contacto |
 
-Los trámites concretos de cada una (con sus `dboid*` y `PAGE_CODE`) están en `assets/sedes.yaml`.
+Los trámites concretos de cada una (con sus `dboid*` y `PAGE_CODE`) están en `assets/_sedes-canarias.yaml`.
 
 ## Fuentes
 

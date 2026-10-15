@@ -13,4 +13,5 @@ hosts:
   - www.tributostenerife.es       # Consorcio de Tributos de Tenerife
   - sede.tributostenerife.es
 # Plataformas municipales: el dominio de cada ayuntamiento se valida contra assets/municipios.csv
-# (columna sede_url) y la huella de plataforma de assets/huellas.yaml antes de presentar el certificado.
+# (columna sede_url; solo filas con confianza alta o media y plataforma identificada) antes de presentar
+# el certificado. Las huellas para reconocer cada plataforma están en references/plataformas-municipales.md.

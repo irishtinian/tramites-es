@@ -1,5 +1,5 @@
-# Fragmento para assets/sedes.yaml: municipios de ejemplo de las recetas de plataforma + REG/SIR.
-# Mismo esquema que sedes.yaml, más la clave `plataforma` (slug de references/plataforma-<slug>.md).
+# Municipios de ejemplo de las recetas de plataforma + REG/SIR.
+# Mismo esquema que el resto de assets/_sedes-*.yaml, más la clave `plataforma` (slug de references/plataforma-<slug>.md).
 # Mapeo público SIN certificado del 2026-10-15: lo de dentro de la sesión está pendiente de verificación.
 # origins: solo dominios de Administraciones públicas, con la evidencia en el comentario.
 #   Ningún host de esta lista pide certificado en el handshake (tls-probe/cert-probe).

@@ -4,7 +4,7 @@
 
 `tramites-es` es un *skill* abierto (licencia MIT) que enseña a cualquier agente de IA (Claude Code, Codex, OpenClaw, Gemini CLI, Cursor, Copilot…) a moverse por las sedes electrónicas españolas en nombre de un **autónomo**: vigilar notificaciones, sacar certificados, consultar deudas y recibos, preparar y presentar trámites, pagar, pedir citas previas y saber qué plataforma usa cada ayuntamiento. Todo **en tu ordenador** y con **tu** certificado.
 
-> ⚠️ **Estado: beta (v0.2.0).** Las guías salen de recorrer las sedes reales con un certificado de verdad. Las sedes cambian sin avisar: si algo no cuadra, abre un issue "sede rota".
+> ⚠️ **Estado: beta (v0.2.0).** Probado con un certificado real sobre todo en las sedes estatales clave (AEAT, Seguridad Social, DEHú, Carpeta Ciudadana, DGT) y en Canarias (Consorcio de Tributos de Tenerife y varios ayuntamientos de Tenerife). El resto (ATC y Gobierno de Canarias, cuyo acceso pasa por AutoFirma, y las plataformas de Madrid, Barcelona, València, Zaragoza, AOC, Sedipualb@…) se ha mapeado en sus webs oficiales sin certificado. Cada guía y cada trámite indica hasta dónde se comprobó (`estado` y `verificado_el`). Las sedes cambian sin avisar: si algo no cuadra, abre un issue "sede rota".
 
 ### Funcionará mejor o peor según tu agente
 
