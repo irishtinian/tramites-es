@@ -133,3 +133,5 @@ Write-Host ''
 Write-Host 'Hecho. Reinicia tu agente para que cargue el skill.'
 Write-Host 'Despues, pidele: "comprueba el entorno de tramites-es" (ejecutara scripts\entorno.py).'
 Write-Host ('El certificado lo configuras tu en tu terminal: lee skills\{0}\references\setup-windows.md.' -f $Skill)
+Write-Host 'Que puede hacer tu agente en tu nombre (firmar, presentar, pagar, citas...) lo decides tu:'
+Write-Host '  uv run scripts\permisos.py fijar todo    (o solo algunos: fijar generar,cita). Sin permisos, te preguntara.'
