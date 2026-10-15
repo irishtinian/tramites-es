@@ -4,7 +4,7 @@ description: "Trámites de autónomos con la Administración española usando su
 license: MIT
 compatibility: "Python 3.11+ (uv recomendado), Google Chrome y Playwright. Linux, Windows o macOS. Certificado digital del usuario (.p12/.pfx o almacén del sistema). Necesita red."
 metadata:
-  version: "0.2.0-dev"
+  version: "0.2.0"
   repo: "tramites-es"
 ---
 

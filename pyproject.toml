@@ -7,7 +7,7 @@
 
 [project]
 name = "tramites-es"
-version = "0.1.0.dev0"
+version = "0.2.0"
 description = "Skill abierto para que agentes de IA ayuden a autónomos con sedes electrónicas españolas."
 requires-python = ">=3.11"
 dependencies = []

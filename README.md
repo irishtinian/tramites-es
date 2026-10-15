@@ -4,7 +4,10 @@
 
 `tramites-es` es un *skill* abierto (licencia MIT) que enseña a cualquier agente de IA (Claude Code, Codex, OpenClaw, Gemini CLI, Cursor, Copilot…) a moverse por las sedes electrónicas españolas en nombre de un **autónomo**: vigilar notificaciones, sacar certificados, consultar deudas y recibos, preparar y presentar trámites, pagar, pedir citas previas y saber qué plataforma usa cada ayuntamiento. Todo **en tu ordenador** y con **tu** certificado.
 
-> ⚠️ **Estado: en desarrollo (v0.2.0-dev). No publicado todavía.** Las guías se están verificando sede a sede.
+> ⚠️ **Estado: beta (v0.2.0).**
+> - **Las consultas están verificadas en vivo** con un certificado real (AEAT, Seguridad Social, DEHú, Carpeta Ciudadana, DGT, ATC y varias plataformas municipales).
+> - **Los actos con efectos** (presentar, pagar, abrir notificaciones, pedir citas) están documentados, pero casi todos siguen **sin probar de punta a punta**: las guías los marcan como "pendiente de verificar en vivo". La renovación del certificado de la FNMT sí se ha completado.
+> - Las sedes cambian sin avisar. Si algo no cuadra, abre un issue "sede rota".
 
 ## Qué hace
 
@@ -53,24 +56,24 @@ Consultar no tiene efectos. Lo demás son **actos**, y cada uno es un permiso qu
 
 ## Instalación
 
-> Fija una versión (`v0.1.0`) siempre que el instalador lo permita: así sabes exactamente qué instalas.
+> Fija una versión (`v0.2.0`) siempre que el instalador lo permita: así sabes exactamente qué instalas.
 
 | Agente | Recomendado | Alternativa |
 |---|---|---|
 | **Claude Code** | `/plugin marketplace add irishtinian/tramites-es` y luego `/plugin install tramites-es@tramites-es`. Desde el shell, en un comando (Claude Code 2.1.292 o posterior): `claude plugin install tramites-es --marketplace irishtinian/tramites-es` | `npx skills add irishtinian/tramites-es -a claude-code -g --copy` |
-| **Codex** | `codex plugin marketplace add irishtinian/tramites-es@v0.1.0` y luego `/plugins` → instalar | `npx skills add irishtinian/tramites-es -a codex -g --copy` (→ `~/.agents/skills`) |
-| **OpenClaw** | `openclaw skills install git:irishtinian/tramites-es@v0.1.0 --global` | `git clone` dentro de `<workspace>/skills/` |
+| **Codex** | `codex plugin marketplace add irishtinian/tramites-es@v0.2.0` y luego `/plugins` → instalar | `npx skills add irishtinian/tramites-es -a codex -g --copy` (→ `~/.agents/skills`) |
+| **OpenClaw** | `openclaw skills install git:irishtinian/tramites-es@v0.2.0 --global` | `git clone` dentro de `<workspace>/skills/` |
 | **Hermes** | `hermes skills install irishtinian/tramites-es/skills/tramites-es` | `hermes skills tap add irishtinian/tramites-es` |
-| **Gemini CLI** | `gemini skills install https://github.com/irishtinian/tramites-es.git --path skills/tramites-es` | `gemini extensions install https://github.com/irishtinian/tramites-es --ref v0.1.0` |
+| **Gemini CLI** | `gemini skills install https://github.com/irishtinian/tramites-es.git --path skills/tramites-es` | `gemini extensions install https://github.com/irishtinian/tramites-es --ref v0.2.0` |
 | **Antigravity** | `agy plugin install https://github.com/irishtinian/tramites-es` | — |
 | **Cursor** | Customize → From GitHub Repository | `npx skills add irishtinian/tramites-es -a cursor` |
-| **GitHub Copilot** | `gh skill install irishtinian/tramites-es tramites-es@v0.1.0 --agent github-copilot --scope user` | `npx skills add irishtinian/tramites-es -a github-copilot` |
+| **GitHub Copilot** | `gh skill install irishtinian/tramites-es tramites-es@v0.2.0 --agent github-copilot --scope user` | `npx skills add irishtinian/tramites-es -a github-copilot` |
 | **Cualquiera** | `npx skills add irishtinian/tramites-es` | `git clone` + `install.ps1` (Windows) o `install.sh` (Linux y macOS) |
 
 Notas:
 
 - `npx skills` usa enlaces simbólicos por defecto: en Windows añade `--copy`. Además envía telemetría anónima, que se desactiva con la variable `DISABLE_TELEMETRY=1`.
-- Pendiente de comprobar con el repositorio ya publicado: OpenClaw (repo con varias carpetas), Antigravity y Cursor (falta el manifiesto `.cursor-plugin/`).
+- Sin probar todavía: OpenClaw (repo con varias carpetas), Antigravity y Cursor (falta el manifiesto `.cursor-plugin/`). Si te funciona o falla, cuéntalo en un issue.
 
 ### Instalación manual: `install.ps1` / `install.sh`
 
@@ -78,14 +81,14 @@ Si prefieres no usar instaladores de terceros, clona el repositorio, revisa lo q
 
 ```powershell
 # Windows (PowerShell)
-git clone https://github.com/irishtinian/tramites-es.git
+git clone --branch v0.2.0 https://github.com/irishtinian/tramites-es.git
 cd tramites-es
 powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1
 ```
 
 ```sh
 # Linux y macOS
-git clone https://github.com/irishtinian/tramites-es.git
+git clone --branch v0.2.0 https://github.com/irishtinian/tramites-es.git
 cd tramites-es
 sh install.sh
 ```
@@ -96,7 +99,7 @@ Los dos hacen lo mismo:
 - Te enseñan qué ficheros van a copiar y adónde, y te piden confirmación antes de tocar nada.
 - No descargan nada ni piden permisos de administrador. Si ya había una versión instalada, la sustituyen.
 
-Para actualizar: `git pull` y vuelve a ejecutar el instalador. Para desinstalar: borra las carpetas `tramites-es` de esos destinos.
+Para actualizar: `git fetch --tags` y `git checkout <versión nueva>` (o `git checkout main && git pull` para lo último sin publicar), y vuelve a ejecutar el instalador. Para desinstalar: borra las carpetas `tramites-es` de esos destinos.
 
 ### Después de instalar
 

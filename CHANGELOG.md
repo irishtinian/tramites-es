@@ -1,6 +1,8 @@
 # Cambios
 
-## [0.2.0-dev] — sin publicar
+## [0.2.0] — 2026-10-15
+
+Primera versión pública (beta).
 
 ### Los permisos los decide la persona usuaria
 
@@ -17,7 +19,7 @@
 - `cert.py` avisa cuando faltan 60 días o menos para la caducidad, que es cuando la FNMT abre la renovación.
 - `SKILL.md`: las contraseñas y los datos de tarjeta los teclea siempre la persona.
 
-## [0.1.0-dev] — sin publicar
+## [0.1.0-dev] — no publicada (incluida en la 0.2.0)
 
 - Estructura del skill `tramites-es` (un único skill autocontenido) y manifiestos para Claude Code, Codex y Gemini.
 - Reglas duras y guía de seguridad (sustituidas en la 0.2 por el modelo de permisos).
