@@ -21,7 +21,7 @@ Municipios: estimaciones de nuestra investigación de octubre de 2026 (sondeo de
 | AOC (Seu-e, e-TRAM, VÀLid) | `aoc` | ~800–1.000 con algún servicio; ~383 sedes Seu-e | VÀLid → certificado/DNIe | Deducida, sin verificar | Verificada sin certificado | `plataforma-aoc.md` |
 | Sedipualb@ | `sedipualba` | ~400 (900 entidades) | Certificado directo o Cl@ve (iframe) | AutoFirma / SEFYCU | Verificada sin certificado | `plataforma-sedipualba.md` |
 | GSede / MOAD | `gsede-moad` | ~80–100 | Certificado directo o Cl@ve | AutoFirma | Verificada sin certificado | `plataforma-gsede-moad.md` |
-| Aytos | `aytos` | ~65–80 | Cl@ve → certificado (el acceso "firmando" es de la persona) | AutoFirma trifásica | Verificada sin certificado | `plataforma-aytos.md` |
+| Aytos | `aytos` | ~65–80 | Cl@ve → certificado (el acceso "firmando" necesita el permiso `firmar`) | AutoFirma trifásica | Verificada sin certificado | `plataforma-aytos.md` |
 | eXperta / PAEMUR | `experta-paemur` | ~60–100 | Certificado o Cl@ve | AutoFirma | Parcial (un ejemplo degradado) | `plataforma-experta-paemur.md` |
 | eAdmin / GestDoc | `eadmin-gestdoc` | ~20–30 | Cl@ve → certificado | AutoFirma | Verificada sin certificado | `plataforma-eadmin-gestdoc.md` |
 | OpenSIAC (gtt) | `opensiac` | ~35–60 | Cl@ve → certificado | Pendiente | Parcial | `plataforma-opensiac.md` |
@@ -66,8 +66,9 @@ Una huella solo en el HTML (no en la URL) puede ser un enlace a otra plataforma:
 
 - **Los códigos son locales.** IDs de trámite, entidad o asunto de un municipio no valen en otro. Sácalos del catálogo vigente.
 - **Cl@ve:** el agente solo pulsa "Acceso DNIe / Certificado electrónico". El certificado lo pide `https://pasarela-ident.clave.gob.es`, que debe estar en los origins.
-- **CAPTCHA:** para y que lo resuelva la persona.
-- **Notificaciones:** solo listar. Abrir es comparecer.
+- **CAPTCHA:** lo resuelve la persona y tú sigues.
+- **Notificaciones:** listar es libre. Abrir es comparecer (acto `comparecer`).
+- **Actos:** firmar, presentar, pagar y cambiar datos los haces según los permisos de tu usuario (`SKILL.md`). Con el permiso, `sede.py` pasa `afirma://` a AutoFirma; sin él, lo bloquea.
 - **Éxito:** número de registro o CSV con `scripts/justificante.py` y el asiento en el listado oficial de la sede.
 
 ## Si no hay receta

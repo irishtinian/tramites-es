@@ -13,7 +13,7 @@ fuentes:
 
 # Plataforma Sedipualb@ (Diputación de Albacete)
 
-Riesgo: **Leer** (catálogo, carpeta, listados) y **Preparar** (instancias, comunicaciones). Firmar, presentar, pagar y abrir notificaciones lo hace la persona.
+Riesgo: **Leer** (catálogo, carpeta, listados) y **Preparar** (instancias, comunicaciones). Firmar, presentar, pagar y abrir notificaciones son **actos** (`firmar`, `presentar`, `pagar`, `comparecer`): los haces según los permisos que te dé tu usuario (`sede.py --permitir …`).
 
 ## Qué es y dónde se usa
 
@@ -45,7 +45,7 @@ Registros:  https://{TENANT}.sedipualba.es/carpetaciudadana/buscar_expedientes.a
 - Opciones vistas en el iframe:
   - **Certificado directo.** Es la que usa el agente.
   - Certificado mediante Cl@ve. En la pasarela, solo "DNIe / Certificado electrónico".
-  - Identificación con firma electrónica (AutoFirma 1.9+): es una firma, la hace la persona.
+  - Identificación con firma electrónica (AutoFirma 1.9+): es una firma (acto `firmar`). Usa antes el certificado directo.
   - Correo y modalidades Cl@ve PIN/Móvil/Permanente: son de la persona; el agente no las usa.
 - Certificados admitidos según la sede: FNMT, DNIe, ACCV, Camerfirma y Firmaprofesional.
 - Origins:
@@ -59,13 +59,13 @@ Registros:  https://{TENANT}.sedipualba.es/carpetaciudadana/buscar_expedientes.a
 
 ## Trámites típicos del autónomo
 
-| Trámite | Entrada | Dónde para el agente | Qué hace la persona |
+| Trámite | Entrada | Sin permiso, paras en | Actos (con permiso los haces tú) |
 |---|---|---|---|
-| Instancia general | `.../carpetaciudadana/tramite.aspx?idtramite={IDTRAMITE}` | En la ficha, con el texto y los adjuntos preparados | "Tramitar", identificarse, adjuntar, firmar y enviar |
-| Actividad, obras, urbanismo | Catálogo → actividades / obras / urbanismo | Localiza la modalidad exacta y prepara la documentación | Igual |
-| Tasas, IAE, recibos, certificado de estar al corriente | Catálogo → tesorería; suele saltar a la oficina tributaria | Identifica el organismo y su web | Paga o pide el certificado |
-| Mis trámites y registros presentados | Carpeta → expedientes / registros | Lista asientos y estados | — |
-| Notificaciones | Carpeta (ecosistema Notific@) | **Solo lista** | Abre la que quiera |
+| Instancia general | `.../carpetaciudadana/tramite.aspx?idtramite={IDTRAMITE}` | La ficha, con el texto y los adjuntos preparados | "Tramitar", identificarse, adjuntar, firmar y enviar: `presentar`, `firmar` |
+| Actividad, obras, urbanismo | Catálogo → actividades / obras / urbanismo | La modalidad exacta, con la documentación preparada | Igual |
+| Tasas, IAE, recibos, certificado de estar al corriente | Catálogo → tesorería; suele saltar a la oficina tributaria | El organismo y su web | Pagar: `pagar`; certificado: `generar` |
+| Mis trámites y registros presentados | Carpeta → expedientes / registros | — (listar es libre) | — |
+| Notificaciones | Carpeta (ecosistema Notific@) | El listado | Abrir: `comparecer` |
 
 - **Tributos fuera de Sedipualb@:**
   - **Palma:** IBI, IAE, IVTM y residuos los lleva la **ATIB** (Govern balear). Autoliquidaciones, tasas y multas, la oficina tributaria municipal en `palma.tributoslocales.es` (GTT, `plataforma-gtt.md`). El 15-oct-2026 esa oficina **no admitía certificado** ("accés amb certificat en breu disponible").
@@ -75,7 +75,7 @@ Registros:  https://{TENANT}.sedipualba.es/carpetaciudadana/buscar_expedientes.a
 ## Firma
 
 - **AutoFirma / SEFYCU**, deducido de la parte pública: la sede exige AutoFirma 1.9+ y publica el módulo `sede.dipualba.es/firma/documento.aspx`.
-- La firma la hace la persona. sede.py captura `afirma://` y bloquea firmar y enviar.
+- Firmar y enviar son los actos `firmar` y `presentar`. Con esos permisos, `sede.py` pasa `afirma://` a AutoFirma (`setup-autofirma.md`); sin ellos, captura `afirma://` y bloquea firmar y enviar.
 - Éxito esperado: el trámite en la carpeta, con asiento registral y justificante o acuse descargable. Verifica con `scripts/justificante.py` y en "registros" de la carpeta.
 
 ## Trampas

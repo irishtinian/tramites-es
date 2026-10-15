@@ -10,7 +10,7 @@ fuentes:
 
 # Plataforma eXperta / PAEMUR (Expert@ Ventanilla Virtual)
 
-Riesgo: **Leer** (catálogo, listados) y **Preparar** (instancias, actividad, certificados). Firmar, presentar, pagar y abrir notificaciones lo hace la persona.
+Riesgo: **Leer** (catálogo, listados) y **Preparar** (instancias, actividad, certificados). Firmar, presentar, pagar y abrir notificaciones son **actos** (`firmar`, `presentar`, `pagar`, `comparecer`): los haces según los permisos que te dé tu usuario (`sede.py --permitir …`).
 
 Estado **parcial**: la receta funciona en Mula; la entrada histórica de Las Palmas de Gran Canaria está degradada.
 
@@ -68,14 +68,14 @@ Login:     https://{HOST}/{BASE}/inicioWebc.do?opcion=cargar&redirige={BASE64_UR
 
 ## Trámites típicos del autónomo
 
-| Trámite | Entrada | Dónde para el agente | Qué hace la persona |
+| Trámite | Entrada | Sin permiso, paras en | Actos (con permiso los haces tú) |
 |---|---|---|---|
-| Instancia / registro general | Catálogo → categoría de registro (`10` en Mula) | En el asunto, con texto y adjuntos preparados | Se identifica, adjunta, firma y envía |
-| Licencia o declaración de actividad | Catálogo → `27` / `28` en Mula | Localiza el asunto y prepara la documentación | Igual |
-| Certificados municipales | Catálogo → `23` / `31` en Mula | Localiza el asunto | Lo solicita y firma |
-| Expedientes y comunicaciones | Ventanilla autenticada | Lista | — |
-| Notificaciones | Ventanilla autenticada | **Solo lista** | Abre la que quiera |
-| Pagos | Portada → pagos | Localiza el recibo o la liquidación | Paga |
+| Instancia / registro general | Catálogo → categoría de registro (`10` en Mula) | El asunto, con texto y adjuntos preparados | Identificarse, adjuntar, firmar y enviar: `firmar`, `presentar` |
+| Licencia o declaración de actividad | Catálogo → `27` / `28` en Mula | El asunto, con la documentación preparada | Igual |
+| Certificados municipales | Catálogo → `23` / `31` en Mula | El asunto | Solicitar y firmar: `generar`, `firmar` |
+| Expedientes y comunicaciones | Ventanilla autenticada | — (listar es libre) | — |
+| Notificaciones | Ventanilla autenticada | El listado | Abrir: `comparecer` |
+| Pagos | Portada → pagos | El recibo o la liquidación | Pagar: `pagar` |
 
 - La oficina tributaria puede ser externa. En la Región de Murcia muchos municipios tienen los tributos en la agencia tributaria regional (ATRM): ver Trampas.
 - Contenido de la ventanilla autenticada: **pendiente de verificación con certificado**.
@@ -83,7 +83,7 @@ Login:     https://{HOST}/{BASE}/inicioWebc.do?opcion=cargar&redirige={BASE64_UR
 ## Firma
 
 - **AutoFirma**: la sede enlaza su descarga. No se ejecutó ninguna firma.
-- La firma la hace la persona; sede.py captura `afirma://`.
+- Firmar es el acto `firmar`. Con ese permiso, `sede.py` pasa `afirma://` a AutoFirma (`setup-autofirma.md`); sin él, lo captura y lo bloquea.
 - Éxito esperado: asiento y justificante en la ventanilla, con el expediente y las comunicaciones en sus listados. Verifica con `scripts/justificante.py` y en el listado.
 
 ## Trampas

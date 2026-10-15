@@ -2,26 +2,40 @@
 # requires-python = ">=3.11"
 # dependencies = ["playwright==1.58.0", "pyyaml==6.0.3", "cryptography==44.0.2", "keyring==25.6.0"]
 # ///
-"""sede.py — navegador con certificado y BLOQUEOS para sedes electrónicas españolas.
+"""sede.py — navegador con certificado para sedes electrónicas españolas, con PERMISOS por acto.
 
 Abre Google Chrome (vía Playwright) presentando el certificado del titular SOLO a los
-origins oficiales de la sede, y con estas guardas siempre activas:
-  - afirma:// (AutoFirma) se captura y se registra; el agente nunca firma.
-  - Se bloquean clics/submits sobre elementos de firmar, enviar, presentar, pagar,
-    registrar, guardar, comparecer, dar de baja…  ("BLOQUEADO" = ese paso es de la persona).
-  - En páginas de notificaciones se bloquea abrir/consultar/descargar (abrir = notificado).
-  - Los confirm()/alert() se cancelan; "¿abandonar la página?" se acepta (salir no envía nada).
-  - Se abortan peticiones de red a pasarelas de pago y a rutas de presentación/pago/comparecencia.
-  - Linux: almacén NSS aislado (el navegador no ve otros certificados del usuario).
+origins oficiales de la sede. Los actos con efectos están agrupados en permisos:
+
+  generar        pedir certificados, informes o documentos (una URL de "solicitar" ya los emite)
+  firmar         firmar (AutoFirma, firma JS de la AEAT, MiniApplet)
+  presentar      enviar, presentar, registrar, tramitar, guardar borradores, adjuntar ficheros
+  pagar          pagar, cargo en cuenta, carta de pago, pasarelas de pago
+  comparecer     abrir/descargar notificaciones (abrir = notificado, empiezan los plazos)
+  cambiar_datos  domiciliar, dar de baja, anular, borrar, cambiar datos
+  cita           reservar o confirmar una cita previa
+
+Los permisos los decide la PERSONA usuaria, no este skill:
+  - en su fichero de permisos (scripts/permisos.py), por ejemplo `permitir: todo`, o
+  - el agente, con `--permitir firmar,presentar` cuando su usuario se lo ha autorizado.
+Lo que no está permitido se bloquea y sale como "BLOQUEADO (requiere permiso 'x')": el agente
+pregunta a su usuario y, si le autoriza, repite con --permitir.
+
+Siempre activo (protege al usuario sin pararle): certificado solo a dominios oficiales, almacén
+NSS aislado en Linux, "¿abandonar la página?" aceptado, redacción de datos personales en la salida.
 
 Comandos (salida JSON por stdout):
-  abrir      --sede ID | --url URL  [--titular ALIAS]      entra y resume la página
-  probe      --sede ID | --url URL  [--clic "texto"]...    inventario de campos y botones (sin valores)
-  ejecutar   receta.py --sede ID | --url URL [--titular ALIAS]
-             La receta recibe: pg, ctx, nav(url), probe(page), captura(nombre), bloqueos(),
-             afirma_vistos(), hosts(), redactar(texto), log(...), DIR.
+  abrir      --sede ID | --url URL  [--titular ALIAS] [--permitir …]
+  probe      --sede ID | --url URL  [--clic "texto"]...
+  ejecutar   receta.py --sede ID | --url URL [--titular ALIAS] [--permitir …]
+             La receta recibe: pg, nav(url), probe(page), captura(nombre), bloqueos(),
+             afirma_vistos(), hosts(), redactar(texto), log(...), DIR, PERMISOS.
   cert-probe URL...     ¿esa ruta pide certificado de cliente? (sin credenciales; usa curl)
   tls-probe  HOST...    ¿el servidor lo pide en el handshake inicial? (sin credenciales; usa openssl)
+
+AutoFirma (con permiso 'firmar'): las URI afirma:// se pasan al AutoFirma instalado en el equipo.
+Su diálogo de certificado lo atiende la persona; en Linux sin escritorio, `--autofirma-auto N`
+elige el certificado N (0 = el primero de su lista) con xdotool (experimental).
 
 Titular: alias configurado con cert.py (por defecto 'ninguno' = sin certificado).
 Las capturas y textos crudos se guardan en local (pueden contener datos personales) y nunca se envían.
@@ -36,6 +50,7 @@ import re
 import shutil
 import subprocess
 import sys
+import threading
 import time
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -61,38 +76,170 @@ def log(*a):
     print("[sede]", *a, file=sys.stderr, flush=True)
 
 
-# ------------------------------------------------------------------ guardas
-DENY_JS = r"""(firmar|firma y env|\benviar\b|\benv[ií]o\b|\bpresentar\b|\bpagar\b|\bpago\b|cargo en cuenta|a[ñn]adir a la cesta|domiciliar|\bregistrar\b|\bguardar\b|\bgrabar\b|comparecer|comparecencia|acceder a la notificaci|abrir (la )?notificaci|aceptar (la )?notificaci|rechazar (la )?notificaci|\bdar(se)? de baja\b|\banular\b|\beliminar\b|\bborrar\b|confirmar (el |la )?(pago|env[ií]o|presentaci|firma|solicitud|cambio|baja)|\btramitar\b|procesoFirma|w_FirmaAEAT|MiniGeneraFirma|firma[A-Za-z_]*\(|enviar[A-Za-z_]*\(|presentar[A-Za-z_]*\(|registrar[A-Za-z_]*\(|guardar[A-Za-z_]*\(|pagar[A-Za-z_]*\(|grabar[A-Za-z_]*\()"""
+# ------------------------------------------------------------------ permisos y actos
+ACTOS = ("generar", "firmar", "presentar", "pagar", "comparecer", "cambiar_datos", "cita")
+
+# Guarda de página: texto/atributos de botones y enlaces que ejecutan cada acto.
+JS_ACTO = {
+    "firmar": r"firmar|firma y env|procesoFirma|w_FirmaAEAT|MiniGeneraFirma|confirmar (el |la )?firma|firma[A-Za-z_]*\(",
+    "presentar": (r"\benviar\b|\benv[ií]o\b|\bpresentar\b|\bregistrar\b|\bguardar\b|\bgrabar\b|\btramitar\b|"
+                  r"confirmar (el |la )?(env[ií]o|presentaci|solicitud)|enviar[A-Za-z_]*\(|presentar[A-Za-z_]*\(|"
+                  r"registrar[A-Za-z_]*\(|guardar[A-Za-z_]*\(|grabar[A-Za-z_]*\("),
+    "pagar": r"\bpagar\b|\bpago\b|cargo en cuenta|a[ñn]adir a la cesta|confirmar (el |la )?pago|pagar[A-Za-z_]*\(",
+    "comparecer": (r"comparecer|comparecencia|acceder a la notificaci|abrir (la )?notificaci|"
+                   r"aceptar (la )?notificaci|rechazar (la )?notificaci"),
+    "cambiar_datos": r"domiciliar|\bdar(se)? de baja\b|\banular\b|\beliminar\b|\bborrar\b|confirmar (el |la )?(cambio|baja)",
+    "cita": r"reservar (la |una )?cita|confirmar (la )?cita|\breservar\b",
+}
+DENY_JS = "(" + "|".join(JS_ACTO.values()) + ")"   # todos los actos (sin permisos)
 NOTIF_JS = r"""(acceder|abrir|comparecer|aceptar|rechazar|descargar|consultar|leer|ver (el |la )?(documento|contenido|detalle|notificaci))"""
+# Páginas de cita previa: el botón final suele ser un "Confirmar" a secas (AEAT, DGT, ICP), que fuera
+# de ellas no es un acto. URL (sin casar "solicitar"/"solicitante") y botón, con sintaxis válida en JS y en Python.
+CITA_URL_JS = r"(cita[-_+ ]*previa|\bcitas?\b|icpplus|CITE_CONSULTA|TOCP-MUTE)"
+CITA_BOTON_JS = r"^\s*confirmar\b"
+
+# Guarda de red, por acto.
+RED_POST = {
+    "firmar": r"firma",
+    "presentar": r"presenta[rc]|presbasica|presdirecta|registrar|submit|/registr(ar|o/(alta|nuevo|crear))|enviar|/envio|guardar|grabar",
+    "pagar": r"/pago|pagar|cargo|nrc",
+    "comparecer": r"comparec|acuse",
+    "cambiar_datos": r"/baja",
+}
+# Navegaciones de documento que ejecutan el acto con solo abrirlas (caso real: Justicia
+# /redese/clave/solicitarCertificado emitió un certificado al abrirla, 15-oct-2026).
+RED_GET = {
+    "generar": r"solicitar|emitir|expedir|generar",
+    "firmar": r"firmar",
+    "presentar": r"presentar|registrar|tramitar|/catalog/tw/",   # /catalog/tw/ (Gestiona) puede crear un borrador
+    "pagar": r"pagar",
+    "comparecer": r"comparec",
+}
+RED_POST_RX = {k: re.compile(v, re.I) for k, v in RED_POST.items()}
+RED_GET_RX = {k: re.compile(v, re.I) for k, v in RED_GET.items()}
+PAGO_HOST = re.compile(r"(redsys|pasarelapago|pasarela-pago|pasarela_pago|paycomun|\btpv|ceca\.es|payment|pagos?\.)", re.I)
+NOTIF_RED = re.compile(r"(comparec|acuse|aceptaci|rechaz|/document|resguardo|leer|abrir|\bopen\b|voucher|full_detail|appearance)", re.I)  # \b: no casar /opensiac/
+NOTIF_PATH = re.compile(r"(notificaci|notification|enotif|buz[oó]n|SINGLE_NOTIF)", re.I)
+ACCION_POST = re.compile("(" + "|".join(RED_POST.values()) + ")", re.I)   # todos los actos
+ACCION_GET = re.compile("(" + "|".join(RED_GET.values()) + ")", re.I)
+
+# Recetas: lo que nunca pueden hacer (manipular las guardas, tocar secretos, salir del sandbox)…
+RECETA_SIEMPRE = (
+    r"xdotool|autofirma|unroute|remove_listener|__tGuard|__tReport|__tAfirma|add_init_script|expose_binding|"
+    r"client_certificates|passphrase|para_playwright|cert\.py|subprocess|os\.system|__import__|keyring|\.route\(|route_from|"
+    r"\.request\b|\bgetattr\b|\bsetattr\b|\bdelattr\b|eval\(|exec\(|"
+    # \b y (?<![\w.]): getAttribute (JS) y re.compile( son legítimos en las recetas de las guías
+    r"(?<![\w.])compile\(|globals|locals\(|vars\(|__\w+__|import\s|from\s+\w+\s+import|open\(")
+# …y lo que solo pueden hacer con el permiso del acto.
+RECETA_ACTO = {
+    "firmar": r"procesoFirma|w_FirmaAEAT|MiniGeneraFirma|firmar[A-Za-z_]*\(",
+    "presentar": r"set_input_files|\.submit\(|requestSubmit|\.onclick|onclick\(|enviar[A-Za-z_]*\(|presentar[A-Za-z_]*\(",
+    "pagar": r"\bpagar[A-Za-z_]*\(",
+}
+RECETA_SIEMPRE_RX = re.compile("(" + RECETA_SIEMPRE + ")", re.I)
+RECETA_PROHIBIDO = re.compile("(" + RECETA_SIEMPRE + "|" + "|".join(RECETA_ACTO.values()) + ")", re.I)  # sin permisos
+
+
+def receta_prohibida(src: str, permitidos: set[str]) -> str | None:
+    """Devuelve el motivo si la receta no puede ejecutarse con estos permisos."""
+    m = RECETA_SIEMPRE_RX.search(src)
+    if m:
+        return f"contiene '{m.group(0)}'"
+    for acto, rx in RECETA_ACTO.items():
+        if acto not in permitidos:
+            m = re.search(rx, src, re.I)
+            if m:
+                return f"contiene '{m.group(0)}' (requiere permiso '{acto}')"
+    return None
+
+
+# Builtins mínimos para las recetas: sin import, open, eval, exec, getattr…
+# Las recetas no son un sandbox frente a un agente malicioso (ver SECURITY.md). Sirven para que la vía
+# normal no pueda desactivar las guardas ni tocar secretos.
+_BUILTINS_RECETA = {n: __builtins__[n] if isinstance(__builtins__, dict) else getattr(__builtins__, n) for n in (
+    "print", "len", "range", "enumerate", "list", "dict", "set", "tuple", "str", "int", "float", "bool", "min", "max",
+    "sorted", "reversed", "any", "all", "zip", "isinstance", "round", "abs", "sum", "Exception", "ValueError",
+    "KeyError", "IndexError", "TimeoutError", "RuntimeError")}
+
+
+def _normalizar_permisos(v, origen: str) -> set[str]:
+    if v in (None, "", []):
+        return set()
+    if isinstance(v, str):
+        v = [x for x in re.split(r"[,\s]+", v) if x]
+    vals = [str(x).strip().lower() for x in v]
+    if "todo" in vals:
+        return set(ACTOS)
+    malos = [x for x in vals if x not in ACTOS]
+    if malos:
+        raise SystemExit(f"permisos desconocidos en {origen}: {malos}. Válidos: {', '.join(ACTOS)} o 'todo'")
+    return set(vals)
+
+
+def permisos_usuario() -> set[str]:
+    """Permisos que la persona dejó configurados para su agente (scripts/permisos.py)."""
+    try:
+        import permisos as _p
+        return _normalizar_permisos(_p.leer().get("permitir"), str(_p.FICHERO))
+    except SystemExit:
+        raise
+    except Exception:
+        return set()
+
+
+def permisos(a) -> set[str]:
+    return permisos_usuario() | _normalizar_permisos(getattr(a, "permitir", None), "--permitir")
+
+
+def construir_guard(permitidos: set[str]) -> str:
+    bloq = [[acto, rx] for acto, rx in JS_ACTO.items() if acto not in permitidos]
+    return (GUARD_JS.replace("%BLOQ%", json.dumps(bloq))
+            .replace("%NOTIF_ON%", "false" if "comparecer" in permitidos else "true")
+            .replace("%AF_BLOQ%", "false" if "firmar" in permitidos else "true")
+            .replace("%CITA_ON%", "false" if "cita" in permitidos else "true")
+            .replace("%CITA_URL%", CITA_URL_JS)
+            .replace("%CITA_BOTON%", CITA_BOTON_JS)
+            .replace("%NOTIF%", NOTIF_JS))
+
 
 GUARD_JS = r"""
 (() => {
   if (window.__tGuard) return; window.__tGuard = true;
-  const DENY = new RegExp(String.raw`%DENY%`, 'i');
+  const BLOQ = %BLOQ%.map(([c, r]) => [c, new RegExp(r, 'i')]);
+  const quien = (d) => { for (const [c, rx] of BLOQ) if (rx.test(d || '')) return c; return null; };
+  const NOTIF_ON = %NOTIF_ON%;
+  const AF_BLOQ = %AF_BLOQ%;
   const NOTIF = new RegExp(String.raw`%NOTIF%`, 'i');
+  const CITA_ON = %CITA_ON%;
+  const CITA_URL = new RegExp(String.raw`%CITA_URL%`, 'i');
+  const CITA_BOTON = new RegExp(String.raw`%CITA_BOTON%`, 'i');
+  const isCitaPage = () => CITA_URL.test(location.href) || /\bcitas?\b|cita previa/i.test(document.title || '');
   const SAFE_TEXT = /^(buscar|consultar|filtrar|mostrar|listar|ver listado|limpiar|nueva b[uú]squeda)$/i;
   const STRONG = /(firm|present|pag|compare|registr|guard|grab|baja|anul|elimin|borr|domicili)/i;
   const NOTIF_URL = /(notificaci|notification|enotif|buz[oó]n|SINGLE_NOTIF|\/dev\b)/i;  // Gestiona usa /enotifications
   const isNotifPage = () => /dehu\.redsara\.es/i.test(location.host) ||
       NOTIF_URL.test(location.href) || /notificaci|buz[oó]n/i.test(document.title || '');
   const isAuthAction = (a) => /(clave\.gob\.es|pasarela|saml|\/idp|login|auth|sso|IPCE\/Login)/i.test(a || '');
-  // Formularios de búsqueda/listado (p. ej. AEAT GNNO-JDIT/SvInteresadosQuery): enviarlos solo filtra un listado.
-  const isQueryAction = (a) => /(query|consulta|buscar|busqueda|listado|filtrar)/i.test(a || '') && !DENY.test(a || '');
-  // ...siempre que ningún campo del formulario pida acceder/comparecer/abrir/descargar (mismo servlet, otra acción).
+  // Formularios de búsqueda/listado (p. ej. AEAT GNNO-JDIT/SvInteresadosQuery): enviarlos solo filtra un listado…
+  const isQueryAction = (a) => /(query|consulta|buscar|busqueda|listado|filtrar)/i.test(a || '') && !quien(a || '');
+  // …siempre que ningún campo del formulario pida acceder/comparecer/abrir/descargar (mismo servlet, otra acción).
   const formPideAbrir = (f) => [...(f.elements || [])].some(e => /(acced|compare|abrir|leer|descarg|ver_?not|detalle)/i.test((e.value || '') + ' ' + (e.name || '')));
   const g = (el, a) => (el && el.getAttribute && el.getAttribute(a)) || '';
   const desc = (el) => [el.innerText || '', el.value || '', g(el, 'aria-label'), g(el, 'title'), el.id || '',
       g(el, 'name'), g(el, 'onclick'), g(el, 'formaction'), g(el, 'href')].join(' | ').replace(/\s+/g, ' ');
   const pureNavLink = (el) => el.tagName === 'A' && /^https?:/i.test(g(el, 'href')) && !g(el, 'onclick');
-  const verdict = (el) => {
+  const verdict = (el) => {   // -> [acto, descripción] o null
     if (!el || !el.getAttribute) return null;
     const d = desc(el); const txt = ((el.innerText || el.value || '') + '').trim();
-    if (isNotifPage() && NOTIF.test(txt + ' ' + g(el, 'onclick'))) return 'notificación: ' + d;
+    if (NOTIF_ON && isNotifPage() && NOTIF.test(txt + ' ' + g(el, 'onclick'))) return ['comparecer', 'notificación: ' + d];
+    if (CITA_ON && isCitaPage() && CITA_BOTON.test(txt)) return ['cita', 'cita previa: ' + d];
     if (pureNavLink(el) && !/(pagar|pago|notificaci)/i.test(d)) return null;
     if (SAFE_TEXT.test(txt) && !STRONG.test(txt + ' ' + (el.id || '') + ' ' + g(el, 'name'))) return null;
-    return DENY.test(d) ? d : null;
+    const c = quien(d);
+    return c ? [c, d] : null;
   };
-  const note = (why, d) => { try { const o = {why, d: String(d).slice(0, 200), url: location.origin + location.pathname};
+  const note = (ev, v) => { try { const o = {why: ev + " (requiere permiso '" + v[0] + "')", permiso: v[0],
+      d: String(v[1]).slice(0, 200), url: location.origin + location.pathname};
       if (window.__tReport) window.__tReport(o); } catch (e) {} };
   const pick = (e) => e.target && e.target.closest ? e.target.closest(
       'button,a,input[type=submit],input[type=button],input[type=image],[role=button],[onclick]') : null;
@@ -104,24 +251,30 @@ GUARD_JS = r"""
     }, true);
   }
   window.addEventListener('submit', (e) => {
-    const f = e.target; const v = verdict(e.submitter) || (f && DENY.test(g(f, 'action')) ? 'form ' + g(f, 'action') : null);
+    const f = e.target; const ca = f && quien(g(f, 'action'));
+    const v = verdict(e.submitter) || (ca ? [ca, 'form ' + g(f, 'action')] : null);
     if (v) { e.preventDefault(); e.stopImmediatePropagation(); note('submit', v); }
   }, true);
   const _submit = HTMLFormElement.prototype.submit;
   HTMLFormElement.prototype.submit = function () {
     const a = g(this, 'action');
-    if (DENY.test(a) || (isNotifPage() && !isAuthAction(a) && !(isQueryAction(a) && !formPideAbrir(this)))) { note('form.submit', a); return; }
+    const c = quien(a) || ((NOTIF_ON && isNotifPage() && !isAuthAction(a) && !(isQueryAction(a) && !formPideAbrir(this))) ? 'comparecer' : null);
+    if (c) { note('form.submit', [c, a]); return; }
     return _submit.call(this);
   };
   if (HTMLFormElement.prototype.requestSubmit) {
     const _rs = HTMLFormElement.prototype.requestSubmit;
     HTMLFormElement.prototype.requestSubmit = function (s) {
-      const v = verdict(s) || (DENY.test(g(this, 'action')) ? g(this, 'action') : null);
+      const ca = quien(g(this, 'action'));
+      const v = verdict(s) || (ca ? [ca, g(this, 'action')] : null);
       if (v) { note('requestSubmit', v); return; }
       return _rs.call(this, s);
     };
   }
-  const grab = (u) => { try { if (typeof u === 'string' && /^afirma:/i.test(u)) { note('afirma', u.slice(0, 120)); return true; } } catch (e) {} return false; };
+  // afirma:// — sin permiso 'firmar' se bloquea; con permiso se pasa al AutoFirma del equipo (Python).
+  const grab = (u) => { try { if (typeof u === 'string' && /^afirma:/i.test(u)) {
+      if (AF_BLOQ) note('afirma', ['firmar', u.slice(0, 120)]); else if (window.__tAfirma) window.__tAfirma(u);
+      return true; } } catch (e) {} return false; };
   const _open = window.open;
   window.open = function (u, ...r) { if (grab(u)) return null; return _open.call(window, u, ...r); };
   try {
@@ -136,30 +289,7 @@ GUARD_JS = r"""
   document.addEventListener('click', (e) => { const a = e.target && e.target.closest && e.target.closest('a[href^="afirma:"]');
     if (a) { grab(a.getAttribute('href')); e.preventDefault(); e.stopImmediatePropagation(); } }, true);
 })();
-""".replace("%DENY%", DENY_JS).replace("%NOTIF%", NOTIF_JS)
-
-PAGO_HOST = re.compile(r"(redsys|pasarelapago|pasarela-pago|pasarela_pago|paycomun|\btpv|ceca\.es|payment|pagos?\.)", re.I)
-ACCION_POST = re.compile(r"(firma|presenta[rc]|presbasica|presdirecta|registrar|submit|/registr(ar|o/(alta|nuevo|crear))|/pago|pagar|cargo|nrc|comparec|acuse|enviar|/envio|guardar|grabar|/baja)", re.I)
-NOTIF_RED = re.compile(r"(comparec|acuse|aceptaci|rechaz|/document|resguardo|leer|abrir|\bopen\b|voucher|full_detail|appearance)", re.I)  # \b: no casar /opensiac/
-NOTIF_PATH = re.compile(r"(notificaci|notification|enotif|buz[oó]n|SINGLE_NOTIF)", re.I)
-# URLs que ejecutan una acción con solo cargarlas (caso real: Justicia /redese/clave/solicitarCertificado
-# emitió un certificado al abrirla, 15-oct-2026). Se bloquean en cualquier navegación de documento.
-ACCION_GET = re.compile(r"(solicitar|emitir|expedir|generar|firmar|presentar|pagar|comparec|registrar|tramitar|/catalog/tw/)", re.I)
-# /catalog/tw/ = asistente de tramitación de Gestiona: entrar puede crear un borrador a nombre del titular.
-RECETA_PROHIBIDO = re.compile(
-    r"(xdotool|autofirma|set_input_files|unroute|remove_listener|__tGuard|__tReport|add_init_script|expose_binding|"
-    r"client_certificates|passphrase|para_playwright|cert\.py|\.submit\(|requestSubmit|\.onclick|onclick\(|procesoFirma|"
-    r"w_FirmaAEAT|MiniGeneraFirma|firmar[A-Za-z_]*\(|enviar[A-Za-z_]*\(|presentar[A-Za-z_]*\(|\bpagar[A-Za-z_]*\(|"
-    r"subprocess|os\.system|__import__|keyring|\.route\(|route_from|\.request\b|\bgetattr\b|\bsetattr\b|\bdelattr\b|eval\(|exec\(|"
-    # \b y (?<![\w.]): getAttribute (JS) y re.compile( son legítimos en las recetas de las guías
-    r"(?<![\w.])compile\(|globals|locals\(|vars\(|__\w+__|import\s|from\s+\w+\s+import|open\()", re.I)
-# Builtins mínimos para las recetas: sin import, open, eval, exec, getattr…
-# Las recetas no son un sandbox frente a un agente malicioso (ver SECURITY.md). Sirven para evitar errores
-# y para que la vía normal no pueda desactivar las guardas.
-_BUILTINS_RECETA = {n: __builtins__[n] if isinstance(__builtins__, dict) else getattr(__builtins__, n) for n in (
-    "print", "len", "range", "enumerate", "list", "dict", "set", "tuple", "str", "int", "float", "bool", "min", "max",
-    "sorted", "reversed", "any", "all", "zip", "isinstance", "round", "abs", "sum", "Exception", "ValueError",
-    "KeyError", "IndexError", "TimeoutError", "RuntimeError")}
+"""
 
 
 # ------------------------------------------------------------------ configuración
@@ -187,7 +317,7 @@ def dominios_oficiales() -> tuple[tuple[str, ...], set[str]]:
         with csv_path.open(encoding="utf-8") as f:
             for row in csv.DictReader(f):
                 # El censo lo genera un rastreador: solo cuentan las sedes identificadas con confianza
-                # alta o media y con plataforma conocida. Con "baja", el agente pregunta (regla 6).
+                # alta o media y con plataforma conocida. Con "baja", el agente pregunta.
                 if (row.get("confianza") or "").strip() not in ("alta", "media") or not (row.get("plataforma") or "").strip():
                     continue
                 h = urlsplit(row.get("sede_url") or "").hostname
@@ -232,12 +362,93 @@ def resolver(a):
     return (a.sede or urlsplit(url).hostname), sorted(set(origins)), url
 
 
+# ------------------------------------------------------------------ AutoFirma
+def _autofirma_cmd() -> list[str] | None:
+    if sys.platform == "win32":
+        for base in (os.environ.get("PROGRAMFILES", ""), os.environ.get("PROGRAMFILES(X86)", "")):
+            for rel in ("AutoFirma/AutoFirma/AutoFirma.exe", "Autofirma/Autofirma/Autofirma.exe"):
+                p = Path(base) / rel
+                if base and p.exists():
+                    return [str(p)]
+        return None
+    if sys.platform == "darwin":
+        return ["open"] if any(Path(f"/Applications/{n}.app").exists() for n in ("AutoFirma", "Autofirma")) else None
+    exe = shutil.which("autofirma") or shutil.which("AutoFirma")
+    return [exe] if exe else None
+
+
+def _ventanas_autofirma() -> list[str]:
+    """Ids X11 SOLO de ventanas de AutoFirma (clase Java). Filtrar por clase es obligatorio: un filtro por
+    título llegó a teclear en la terminal de su usuario porque su título contenía 'certificados'."""
+    out = []
+    try:
+        ids = subprocess.run(["xdotool", "search", "--onlyvisible", "--class", "."],
+                             capture_output=True, text=True, timeout=10).stdout.split()
+    except Exception:
+        return out
+    for w in ids[:80]:
+        try:
+            cls = subprocess.run(["xprop", "-id", w, "WM_CLASS"], capture_output=True, text=True, timeout=3).stdout.lower()
+            nombre = subprocess.run(["xdotool", "getwindowname", w], capture_output=True, text=True, timeout=3).stdout.lower()
+        except Exception:
+            continue
+        if re.search(r"terminal|chrome|firefox|code", cls):
+            continue
+        if re.search(r"autofirma|sun-awt", cls) or ("almac" in nombre and "nss" in nombre):
+            out.append(w)
+    return out
+
+
+def _autofirma_dialogo(indice: int, tmax: int = 60):
+    """Experimental (Linux X11 + xdotool): en el diálogo "Seleccione un certificado" de AutoFirma pulsa la
+    fila `indice` y "Aceptar". Geometría relativa observada en AutoFirma 1.9."""
+    vistos: set[str] = set()
+    for _ in range(tmax):
+        for w in _ventanas_autofirma():
+            if w in vistos:
+                continue
+            vistos.add(w)
+            try:
+                subprocess.run(["xdotool", "windowactivate", "--sync", w], timeout=5, capture_output=True)
+                time.sleep(0.6)
+                g = subprocess.run(["xdotool", "getwindowgeometry", "--shell", w], capture_output=True, text=True, timeout=5).stdout
+                mw, mh = re.search(r"WIDTH=(\d+)", g), re.search(r"HEIGHT=(\d+)", g)
+                if not (mw and mh):
+                    continue
+                W, H = int(mw.group(1)), int(mh.group(1))
+                subprocess.run(["xdotool", "mousemove", "--window", w, str(int(W * 0.5)), str(int(H * (0.44 + 0.22 * indice))), "click", "1"])
+                time.sleep(0.5)
+                subprocess.run(["xdotool", "mousemove", "--window", w, str(int(W * 0.87)), str(int(H * 0.89)), "click", "1"])
+                log(f"AutoFirma: certificado #{indice} + Aceptar")
+            except Exception as ex:
+                log("AutoFirma: diálogo no accionable:", type(ex).__name__)
+        time.sleep(1)
+
+
+def lanzar_autofirma(uri: str, s: "Sesion", auto: int | None):
+    cmd = _autofirma_cmd()
+    if not cmd:
+        s.afirma.append({"estado": "AutoFirma no instalado", "operacion": uri[:40]})
+        log("firma pedida pero AutoFirma no está instalado (references/setup-autofirma.md)")
+        return
+    try:
+        # Entorno real (HOME real): AutoFirma usa el almacén de certificados del sistema.
+        subprocess.Popen(cmd + [uri], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        s.afirma.append({"estado": "lanzado", "operacion": uri[:40]})
+        log("AutoFirma lanzado: hay que elegir el certificado en su diálogo")
+        if auto is not None and sys.platform.startswith("linux") and shutil.which("xdotool"):
+            threading.Thread(target=_autofirma_dialogo, args=(auto,), daemon=True).start()
+    except Exception as ex:
+        s.afirma.append({"estado": f"error {type(ex).__name__}"})
+
+
 # ------------------------------------------------------------------ navegador
 class Sesion:
     def __init__(self, nombre: str):
         self.dir = datos_dir() / re.sub(r"[^A-Za-z0-9_.-]", "_", nombre) / dt.datetime.now().strftime("%Y%m%d-%H%M%S")
         self.dir.mkdir(parents=True, exist_ok=True)
         self.bloqueos: list[dict] = []
+        self.afirma: list[dict] = []
         self.hosts: dict[str, dict] = {}
         self.n = 0
 
@@ -248,33 +459,55 @@ class Sesion:
             e["errores"].append(err[:120])
 
 
-def _guarda_red(s: Sesion):
+def acto_de_peticion(method: str, url: str, navegacion: bool, permitidos: set[str]) -> tuple[str, str] | None:
+    """(acto, motivo) si la petición ejecuta un acto NO permitido; None si puede seguir."""
+    u = urlsplit(url)
+    host, path = u.hostname or "", u.path or ""
+    if u.scheme not in ("http", "https"):
+        return None
+    if "pagar" not in permitidos and PAGO_HOST.search(host):
+        return "pagar", "pasarela de pago"
+    if method != "GET":
+        for acto, rx in RED_POST_RX.items():
+            if acto not in permitidos and rx.search(path):
+                return acto, f"{method} a ruta de acción"
+    if navegacion and not re.search(r"\.(s?html?|pdf)$", path, re.I):  # páginas informativas sí
+        q = path + "?" + (u.query or "")
+        for acto, rx in RED_GET_RX.items():
+            if acto not in permitidos and rx.search(q):
+                return acto, "URL que ejecuta una acción al abrirla"
+    if "comparecer" not in permitidos and (re.search(r"dehu\.redsara\.es", host) or NOTIF_PATH.search(path)) and NOTIF_RED.search(path):
+        return "comparecer", "endpoint de notificación"
+    return None
+
+
+def _guarda_red(s: Sesion, permitidos: set[str] | None = None):
+    permitidos = permitidos or set()
+
     def guard(route, req):
-        u = urlsplit(req.url)
-        host, path = u.hostname or "", u.path or ""
-        motivo = None
-        if u.scheme in ("http", "https"):
-            if PAGO_HOST.search(host):
-                motivo = "pasarela de pago"
-            elif req.method != "GET" and ACCION_POST.search(path):
-                motivo = f"{req.method} a ruta de acción"
-            elif (req.is_navigation_request() and ACCION_GET.search(path + "?" + (u.query or ""))
-                  and not re.search(r"\.(s?html?|pdf)$", path, re.I)):  # páginas informativas sí
-                motivo = "URL que ejecuta una acción al abrirla"
-            elif (re.search(r"dehu\.redsara\.es", host) or NOTIF_PATH.search(path)) and NOTIF_RED.search(path):
-                motivo = "endpoint de notificación"
-        if motivo:
-            s.bloqueos.append({"why": motivo, "d": f"{req.method} {host}{path[:120]}"})
-            log(f"BLOQUEADO ({motivo}): {req.method} {host}{path[:90]}")
+        r = acto_de_peticion(req.method, req.url, req.is_navigation_request(), permitidos)
+        if r:
+            acto, motivo = r
+            u = urlsplit(req.url)
+            s.bloqueos.append({"why": f"{motivo} (requiere permiso '{acto}')", "permiso": acto,
+                               "d": f"{req.method} {u.hostname}{(u.path or '')[:120]}"})
+            log(f"BLOQUEADO ({motivo}; requiere permiso '{acto}'): {req.method} {u.hostname}{(u.path or '')[:90]}")
             return route.abort("blockedbyclient")
         return route.continue_()
     return guard
 
 
-def _dialogos(pg):
+def _dialogos(pg, permitidos: set[str]):
+    bloq = [re.compile(rx, re.I) for acto, rx in JS_ACTO.items() if acto not in permitidos]
+    con_actos = bool(permitidos - {"generar"})
+
     def on(d):
         try:
             if d.type == "beforeunload":
+                d.accept()
+            elif d.type == "confirm" and con_actos and not any(rx.search(d.message or "") for rx in bloq):
+                # El agente pulsó un acto permitido y la sede pide confirmación: se acepta.
+                log(f"confirmación ACEPTADA (acto permitido): {d.message[:100]!r}")
                 d.accept()
             else:
                 log(f"diálogo {d.type} CANCELADO: {d.message[:100]!r}")
@@ -284,7 +517,9 @@ def _dialogos(pg):
     pg.on("dialog", on)
 
 
-def lanzar(p, s: Sesion, titular: str, origins: list[str], inseguro: bool = False):
+def lanzar(p, s: Sesion, titular: str, origins: list[str], inseguro: bool = False,
+           permitidos: set[str] | None = None, auto: int | None = None):
+    permitidos = permitidos or set()
     kw = {}
     if titular != "ninguno":
         import cert
@@ -309,11 +544,12 @@ def lanzar(p, s: Sesion, titular: str, origins: list[str], inseguro: bool = Fals
         s.bloqueos.append(o)
         log(f"BLOQUEADO en página ({o.get('why')}): {str(o.get('d'))[:90]}")
     ctx.expose_binding("__tReport", reportar)
-    ctx.add_init_script(GUARD_JS)
-    ctx.route("**/*", _guarda_red(s))
+    ctx.expose_binding("__tAfirma", lambda _src, uri: lanzar_autofirma(str(uri), s, auto))
+    ctx.add_init_script(construir_guard(permitidos))
+    ctx.route("**/*", _guarda_red(s, permitidos))
     ctx.on("response", lambda r: s.host(urlsplit(r.url).hostname or ""))
     ctx.on("requestfailed", lambda rq: s.host(urlsplit(rq.url).hostname or "", rq.failure or "failed"))
-    ctx.on("page", _dialogos)
+    ctx.on("page", lambda pg: _dialogos(pg, permitidos))
     return browser, ctx, ctx.new_page()
 
 
@@ -353,13 +589,15 @@ _IDENTIDAD: list[str] = []   # nombre, apellidos y NIF del titular (solo en memo
 def _sesion(a, cuerpo) -> int:
     from playwright.sync_api import sync_playwright
     nombre, origins, url = resolver(a)
+    permitidos = permisos(a)
     if a.titular != "ninguno":
         import cert
         _IDENTIDAD[:] = cert.para_redactar(a.titular)
     s = Sesion(nombre)
-    res = {"sede": nombre, "titular": a.titular, "origins_con_certificado": origins if a.titular != "ninguno" else []}
+    res = {"sede": nombre, "titular": a.titular, "permisos_activos": sorted(permitidos),
+           "origins_con_certificado": origins if a.titular != "ninguno" else []}
     with sync_playwright() as p:
-        browser, ctx, pg = lanzar(p, s, a.titular, origins, a.inseguro)
+        browser, ctx, pg = lanzar(p, s, a.titular, origins, a.inseguro, permitidos, getattr(a, "autofirma_auto", None))
 
         def captura(nombre_c, page=None):
             page = page or pg
@@ -380,8 +618,8 @@ def _sesion(a, cuerpo) -> int:
             return page
 
         h = dict(pg=pg, page=pg, ctx=ctx, nav=nav, probe=probe, captura=captura, redactar=redactar, log=log,
-                 bloqueos=lambda: list(s.bloqueos), afirma_vistos=lambda: [b["d"] for b in s.bloqueos if b.get("why") == "afirma"],
-                 hosts=lambda: s.hosts, DIR=str(s.dir), time=time, re=re, json=json)
+                 bloqueos=lambda: list(s.bloqueos), afirma_vistos=lambda: [b["d"] for b in s.bloqueos if b.get("permiso") == "firmar"],
+                 hosts=lambda: s.hosts, DIR=str(s.dir), PERMISOS=sorted(permitidos), time=time, re=re, json=json)
         try:
             nav(url)
             res.update(cuerpo(h) or {})
@@ -394,6 +632,13 @@ def _sesion(a, cuerpo) -> int:
         finally:
             res["url_final"] = re.sub(r"\?.*", "?…", pg.url) if not pg.is_closed() else None
             res["bloqueos"] = s.bloqueos
+            if s.bloqueos:
+                faltan = sorted({b.get("permiso") for b in s.bloqueos if b.get("permiso")})
+                res["permisos_que_faltan"] = faltan
+                res["como_seguir"] = ("Esos pasos requieren permiso de tu usuario. Si te lo da, repite con "
+                                      f"--permitir {','.join(faltan)} (o que lo deje fijado con scripts/permisos.py).")
+            if s.afirma:
+                res["autofirma"] = s.afirma
             res["hosts_con_error"] = {k: v["errores"] for k, v in s.hosts.items() if v["errores"]}
             res["capturas_locales"] = str(s.dir)
             try:
@@ -434,9 +679,9 @@ def cmd_probe(a) -> int:
 
 def cmd_ejecutar(a) -> int:
     src = Path(a.receta).read_text(encoding="utf-8")
-    m = RECETA_PROHIBIDO.search(src)
-    if m:
-        salida = json.dumps({"error": f"receta rechazada por las guardas: contiene '{m.group(0)}'"}, ensure_ascii=False)
+    motivo = receta_prohibida(src, permisos(a))
+    if motivo:
+        salida = json.dumps({"error": f"receta rechazada por las guardas: {motivo}"}, ensure_ascii=False)
         if getattr(a, "json", None):
             Path(a.json).write_text(salida, encoding="utf-8")
         print(salida)
@@ -447,7 +692,7 @@ def cmd_ejecutar(a) -> int:
         scope.pop("ctx", None)  # sin acceso directo al contexto (rutas, peticiones); para popups: pg.context.pages
         scope["__builtins__"] = _BUILTINS_RECETA
         exec(compile(src, a.receta, "exec"), scope)
-        # Defensa en profundidad (regla 8): el RESULTADO pasa siempre por redactar(), lo haga o no la receta.
+        # El RESULTADO pasa siempre por redactar(), lo haga o no la receta.
         bruto = json.dumps(scope.get("RESULTADO"), ensure_ascii=False, default=str)
         return {"resultado": json.loads(redactar(bruto))}
     return _sesion(a, cuerpo)
@@ -495,6 +740,9 @@ def main() -> int:
         sp.add_argument("--sede")
         sp.add_argument("--url")
         sp.add_argument("--titular", default="ninguno", help="alias de cert.py (por defecto: ninguno)")
+        sp.add_argument("--permitir", help=f"actos autorizados por tu usuario: {','.join(ACTOS)} o 'todo'")
+        sp.add_argument("--autofirma-auto", type=int, metavar="N",
+                        help="Linux sin escritorio (experimental): elige el certificado N en el diálogo de AutoFirma")
         sp.add_argument("--inseguro", action="store_true", help="ignorar errores TLS del servidor (explica por qué)")
         sp.add_argument("--json", help="escribe también el resultado JSON en este fichero (xvfb-run mezcla stderr y stdout)")
     comun(sub.add_parser("abrir"))

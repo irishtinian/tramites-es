@@ -118,7 +118,7 @@ def test_certificado_estar_al_corriente(buscar):
     assert set(_tramites(res)[:2]) == {"aeat-certificado-corriente", "tgss-certificado-corriente"}
     aeat = next(r for r in res if r.get("tramite") == "aeat-certificado-corriente")
     assert aeat["sede"] == "aeat"
-    assert aeat["riesgo"] == "persona"
+    assert aeat["riesgo"] == "actuar"
     assert aeat["guia"] == "references/tramite-certificado-corriente.md"
     assert aeat["verificado_el"]
 

@@ -13,7 +13,7 @@ fuentes:
 
 # Plataforma GSede / MOAD (OpenCms)
 
-Riesgo: **Leer** (catálogo, carpeta) y **Preparar** (solicitud general, actividad). Firmar, presentar, pagar y abrir notificaciones lo hace la persona.
+Riesgo: **Leer** (catálogo, carpeta) y **Preparar** (solicitud general, actividad). Firmar, presentar, pagar y abrir notificaciones son **actos** (`firmar`, `presentar`, `pagar`, `comparecer`): los haces según los permisos que te dé tu usuario (`sede.py --permitir …`).
 
 ## Qué es y dónde se usa
 
@@ -52,13 +52,13 @@ Login:   https://{HOST}/opencms/system/modules/gsede/elements/secciones/autentic
 
 ## Trámites típicos del autónomo
 
-| Trámite | Entrada | Dónde para el agente | Qué hace la persona |
+| Trámite | Entrada | Sin permiso, paras en | Actos (con permiso los haces tú) |
 |---|---|---|---|
-| Solicitud General (instancia) | Portada → "Solicitud General" (`ticket({procedure:'SGE_01'})` en Sevilla) | En la ficha generada, con texto y adjuntos preparados | Se identifica, adjunta, firma y envía |
-| Actividad, obras, terrazas | Portada → catálogo por materias (urbanismo, vía pública) | Localiza el procedimiento | Igual |
-| Impuestos, tasas y multas | Portada → área de impuestos (en Sevilla, `ImpuestosTasasMultas_1093`) | Identifica la oficina tributaria, que suele ser externa | Paga o pide certificados |
-| Notificaciones | Enlace a DEHú | **Solo lista** (`sede-dehu.md`) | Abre la que quiera |
-| Mis expedientes y registros | Carpeta de la sede autenticada | Lista | — |
+| Solicitud General (instancia) | Portada → "Solicitud General" (`ticket({procedure:'SGE_01'})` en Sevilla) | La ficha generada, con texto y adjuntos preparados | Identificarse, adjuntar, firmar y enviar: `firmar`, `presentar` |
+| Actividad, obras, terrazas | Portada → catálogo por materias (urbanismo, vía pública) | El procedimiento | Igual |
+| Impuestos, tasas y multas | Portada → área de impuestos (en Sevilla, `ImpuestosTasasMultas_1093`) | La oficina tributaria, que suele ser externa | Pagar: `pagar`; certificados: `generar` |
+| Notificaciones | Enlace a DEHú | El listado (`sede-dehu.md`) | Abrir: `comparecer` |
+| Mis expedientes y registros | Carpeta de la sede autenticada | — (listar es libre) | — |
 
 - **Sevilla** tiene tres frentes:
   - Tributos: Agencia Tributaria de Sevilla (ATSE), oficina virtual `https://www.sevilla.org/ovweb/`. Con certificado; Cl@ve no aparece.
@@ -71,7 +71,8 @@ Login:   https://{HOST}/opencms/system/modules/gsede/elements/secciones/autentic
 ## Firma
 
 - **AutoFirma.** La ayuda pública incluye "Tengo AutoFirma" y la resolución de errores al firmar. No se ejecutó ninguna firma.
-- La firma la hace la persona. La ayuda menciona la recuperación de trámites no finalizados: no reanudes un borrador sin su OK.
+- Firmar es el acto `firmar`. Con ese permiso, `sede.py` pasa `afirma://` a AutoFirma (`setup-autofirma.md`); sin él, lo captura y lo bloquea.
+- La ayuda menciona la recuperación de trámites no finalizados: no reanudes un borrador sin que tu usuario lo pida.
 - Éxito esperado: solicitud en la carpeta, asiento de registro y justificante. Verifica con `scripts/justificante.py` y en el listado de la carpeta.
 
 ## Trampas

@@ -10,9 +10,9 @@
 
 ## Checklist de seguridad
 
-- [ ] No debilita ninguna guarda de `scripts/sede.py` ni ninguna regla dura de `SKILL.md`. Si lo hace, explico abajo el caso exacto (URL sin parámetros, botón, qué pasa).
+- [ ] Ningún acto con efectos pasa sin el permiso de la persona: las guardas de `scripts/sede.py` siguen bloqueando lo no permitido y las recetas no pueden saltárselas. Si cambio una guarda, explico abajo el caso exacto (URL sin parámetros, botón, qué pasa).
+- [ ] Las protecciones de `SKILL.md` siguen igual: certificado solo en `cert.py`, solo dominios oficiales, datos enmascarados, sin Cl@ve PIN/Móvil/Permanente ni CAPTCHAs.
 - [ ] Los dominios nuevos son de una Administración pública y enlazo su fuente oficial. Ningún acortador, IP, `http://` ni dominio parecido a uno oficial.
-- [ ] El agente sigue sin poder firmar, presentar, pagar, comparecer ni abrir notificaciones: ese clic sigue siendo de la persona.
 - [ ] Sin red nueva salvo hacia sedes oficiales; sin descargas de código o binarios en tiempo de ejecución; sin `subprocess` de shell arbitrario.
 - [ ] El certificado y su contraseña solo los toca `scripts/cert.py`; nada de secretos en argv, logs ni capturas.
 - [ ] Dependencias con versión exacta (PEP 723 en los scripts, `pyproject.toml` para las pruebas).

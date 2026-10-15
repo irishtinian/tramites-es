@@ -29,7 +29,7 @@ TERRITORIOS = ("comun", "canarias", "ceuta", "melilla", "navarra", "bizkaia", "g
 ESTADOS = ("verificado", "regla", "no_verificado")
 DOMI_ESTADOS = ESTADOS + ("no_aplica",)
 TIPOS = ("presentacion", "pago", "solicitud", "cargo", "hito")
-MAX_ANTIGUEDAD = 60  # días (regla 9 de SKILL.md)
+MAX_ANTIGUEDAD = 60  # días («Fechas, plazos e importes» en SKILL.md)
 
 
 def salir(obj: dict, codigo: int = 0) -> None:

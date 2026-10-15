@@ -44,9 +44,9 @@ Los impuestos de la comunidad (IGIC, 400, 420, 425) **no** están aquí: van en 
 | Origins | `https://sede.gobiernodecanarias.org` (el portal del SCE está en `https://www.gobiernodecanarias.org`) |
 | `sede.py` | `--sede gobcan` o `--sede sce` |
 
-- **Secuencia con certificado:** «Certificado Digital / DNI-E» → **Validarme**. Ese botón ejecuta `firmar(formData)`, que abre AutoFirma para firmar el acceso. `sede.py` lo bloquea (**BLOQUEADO**) antes de AutoFirma: es lo esperado. **El acceso lo hace la persona.**
+- **Secuencia con certificado:** «Certificado Digital / DNI-E» → **Validarme**. Ese botón ejecuta `firmar(formData)`, que abre AutoFirma para firmar el acceso: es el acto `firmar`. Sin permiso, `sede.py` lo bloquea y entra la persona. Con permiso, `--permitir firmar` (más `--autofirma-auto N` en Linux sin escritorio) lanza AutoFirma, **pendiente de verificar en vivo**.
 - No hay certificado por TLS (ni en el *handshake* ni en `/sede/identificacion`; comprobado el 15-10-2026). El certificado se elige desde AutoFirma, **no** desde el navegador: el desplegable `#validCertificates` sale vacío con el certificado de `sede.py`.
-- **Nunca rellenes ni toques** los campos ocultos `certificadoSeleccionado`, `hiddenInfoCertificado` y `firma`, ni intentes sortear el bloqueo.
+- No rellenes a mano los campos ocultos `certificadoSeleccionado`, `hiddenInfoCertificado` y `firma`: los rellena el MiniApplet con la firma de AutoFirma.
 - La rama Cl@ve → «DNIe / Certificado electrónico» **no se ha probado** en esta sede. Si la pruebas, añade `https://pasarela-ident.clave.gob.es` a los origins y documenta el resultado (`sede-clave.md`). Cl@ve PIN, Móvil y Permanente, nunca.
 - **Cómo saber que entró:** no verificado en el mapeo. Pide a la persona que confirme que ve su nombre en el área personal.
 - La página de requisitos técnicos pide AutoFirma, Java y Acrobat Reader (`setup-autofirma.md`).
@@ -82,13 +82,13 @@ El Gobierno publica sus cortes en `https://sede.gobiernodecanarias.org/sede/la_s
   - tramitador genérico: `/sede/tramitador/creacion/tramites/<ID>`;
   - salto a una aplicación del departamento: `/sede/ticketsso/tramites/<ID>` o `/sede/ticketsso3/tramites/<ID>`;
   - aplicaciones de la ATC: `/tributos/…` (`sede-atc.md`).
-- **Dónde para el agente:** en la ficha. Entrar al tramitador **puede crear un borrador** («solicitudes pendientes de firmar o presentar»): no lo abras sin que la persona lo pida.
+- **Entrar al tramitador** **puede crear un borrador** («solicitudes pendientes de firmar o presentar»): ábrelo solo cuando tu usuario quiera presentar ese trámite.
 
-### Registro General Electrónico (riesgo: persona)
+### Registro General Electrónico (actos: `firmar`, `presentar`)
 
 - **Ficha:** `https://sede.gobiernodecanarias.org/sede/rge`. Tramitador: `https://sede.gobiernodecanarias.org/sede/tramitador/creacion/tramites/registro_electronico`.
 - Sirve para escritos a cualquier órgano de la comunidad. Hay documentos excepcionados cuya presentación no surte efecto, y los modelos 400, 420 y 425 **no** valen por aquí.
-- El agente redacta el texto del escrito y la lista de adjuntos. La persona entra (Validarme), rellena, firma y presenta.
+- Redacta el texto del escrito y la lista de adjuntos, y confírmalos con tu usuario. Con `--permitir firmar,presentar`, entra (Validarme), rellena, firma y presenta; sin esos permisos, se lo das para que lo haga él. **Pendiente de verificar en vivo.**
 - **Cómo verificar:** justificante con número de registro y el asiento en el área personal, «Consulta de documentos presentados».
 
 ### Área personal y notificaciones (riesgo: leer; pendientes)
@@ -99,16 +99,16 @@ El Gobierno publica sus cortes en `https://sede.gobiernodecanarias.org/sede/la_s
   - solicitudes pendientes, es decir, borradores: `/sede/area_personal/solicitudes_pendientes`;
   - consulta de expedientes: `/sede/area_personal/consulta_expedientes`;
   - buzón de notificaciones: `/sede/area_personal/buzon_notificaciones`.
-  Todo está tras Validarme: **no mapeado con sesión**. Si la persona entra y comparte pantalla, solo se lee.
-- **Notificaciones:** el Gobierno notifica por **DEHú** (convenio con la AGE) y por comparecencia en su sede. Para vigilar, usa primero `tramite-vigilar-notificaciones.md`. Información pública: `https://sede.gobiernodecanarias.org/sede/destacados_l/notificaciones_telematicas`. Solo **listar**, nunca abrir.
-- **Gestión de datos personales** (`/sede/area_personal/datos_personales`): cambiar datos es de la persona (regla 7 de `SKILL.md`).
+  Todo está tras Validarme (acto `firmar`): **no mapeado con sesión**.
+- **Notificaciones:** el Gobierno notifica por **DEHú** (convenio con la AGE) y por comparecencia en su sede. Para vigilar, usa primero `tramite-vigilar-notificaciones.md`. Información pública: `https://sede.gobiernodecanarias.org/sede/destacados_l/notificaciones_telematicas`. Listar es libre; abrir es el acto `comparecer` (empiezan los plazos).
+- **Gestión de datos personales** (`/sede/area_personal/datos_personales`): acto `cambiar_datos`.
 
-### Alta o modificación de terceros, SICAC 5538 (riesgo: persona)
+### Alta o modificación de terceros, SICAC 5538 (acto: `firmar` + `presentar`)
 
 - **Ficha:** `https://sede.gobiernodecanarias.org/sede/procedimientos_servicios/tramites/5538`. Tramitador: `/sede/tramitador/creacion/tramites/5538`. Respuesta inmediata.
-- Es el alta de la cuenta bancaria para **cobrar subvenciones** del Gobierno; muchas convocatorias la exigen. Contiene el IBAN: la persona introduce y firma sus datos. El agente solo le avisa de que hace falta.
+- Es el alta de la cuenta bancaria para **cobrar subvenciones** del Gobierno; muchas convocatorias la exigen. Contiene el IBAN: confirma con tu usuario la cuenta antes de presentarla.
 
-### Servicio Canario de Empleo (riesgo: persona)
+### Servicio Canario de Empleo (actos: `firmar` + `presentar`; renovar demanda: `cambiar_datos`)
 
 | Trámite | Ficha | Notas del 15-10-2026 |
 |---|---|---|
@@ -119,28 +119,28 @@ El Gobierno publica sus cortes en `https://sede.gobiernodecanarias.org/sede/la_s
 
 `…` = `https://sede.gobiernodecanarias.org/sede/procedimientos_servicios`.
 
-El agente lee la ficha, comprueba plazo y requisitos, y prepara la documentación. Solicitar o renovar lo hace la persona. Para buscar ayudas abiertas, usa también `ayudas.md`.
+Lee la ficha, comprueba plazo y requisitos y prepara la documentación. Solicitar (`firmar` + `presentar`) o renovar (`cambiar_datos`) lo haces si tu usuario te lo permite. Para buscar ayudas abiertas, usa también `ayudas.md`.
 
 ### Cabildo de Tenerife
 
-| Trámite | URL | Riesgo | Estado |
+| Trámite | URL | Riesgo o acto | Estado |
 |---|---|---|---|
-| Área personal (expedientes, notificaciones) | `https://sede.tenerife.es/es/personal/vista-general` | leer | Sesión no persistió |
-| Solicitud general (SIA 1246253) | `https://sede.tenerife.es/es/tramites/1246253-Solicitud-general` | persona | Ficha verificada |
-| Ayudas 2026 a proyectos industriales de pymes y autónomos (SIA 3246163) | `https://sede.tenerife.es/es/tramites/3246163-Subvenciones-para-la-creacion-de-nuevos-proyectos-industriales-pymes-y-autonomos-convocatoria-2026` | persona | Ficha verificada |
-| Vivienda vacacional, declaración responsable de inicio (SIA 1161501) | `https://sede.tenerife.es/es/tramites/1161501-Declaracion-responsable-de-inicio-de-la-actividad-de-vivienda-vacacional` | persona | El botón deriva a otra administración; destino no seguido |
-| Taxi, VTC, alquiler sin conductor | buscador `https://sede.tenerife.es/es/tramites` | persona | Ejemplos: SIA 3036014 (visado VTC), 3231056 (visado taxi), 3178266 (alquiler sin conductor) |
-| Pago de tasas y sanciones | `https://sede.tenerife.es/es/pago-tasas-sanciones` | persona | Solo inventariado |
-| Cambio de canal de notificación (SIA 2307462) | `https://sede.tenerife.es/es/tramites/2307462-Solicitud-de-cambio-de-canal-de-notificacion` | persona | Cambia datos: solo si la persona lo pide |
+| Área personal (expedientes, notificaciones) | `https://sede.tenerife.es/es/personal/vista-general` | leer; abrir notificaciones: `comparecer` | Sesión no persistió |
+| Solicitud general (SIA 1246253) | `https://sede.tenerife.es/es/tramites/1246253-Solicitud-general` | `firmar`, `presentar` | Ficha verificada |
+| Ayudas 2026 a proyectos industriales de pymes y autónomos (SIA 3246163) | `https://sede.tenerife.es/es/tramites/3246163-Subvenciones-para-la-creacion-de-nuevos-proyectos-industriales-pymes-y-autonomos-convocatoria-2026` | `firmar`, `presentar` | Ficha verificada |
+| Vivienda vacacional, declaración responsable de inicio (SIA 1161501) | `https://sede.tenerife.es/es/tramites/1161501-Declaracion-responsable-de-inicio-de-la-actividad-de-vivienda-vacacional` | `firmar`, `presentar` | El botón deriva a otra administración; destino no seguido |
+| Taxi, VTC, alquiler sin conductor | buscador `https://sede.tenerife.es/es/tramites` | `firmar`, `presentar` | Ejemplos: SIA 3036014 (visado VTC), 3231056 (visado taxi), 3178266 (alquiler sin conductor) |
+| Pago de tasas y sanciones | `https://sede.tenerife.es/es/pago-tasas-sanciones` | `pagar` | Solo inventariado |
+| Cambio de canal de notificación (SIA 2307462) | `https://sede.tenerife.es/es/tramites/2307462-Solicitud-de-cambio-de-canal-de-notificacion` | `cambiar_datos`, `firmar`, `presentar` | Solo si tu usuario lo pide |
 
-- Las fichas tienen la forma `/es/tramites/<SIA>-<slug>`. La tramitación está en `/es/tramitar/<SIA>-<versión>-<slug>`: `sede.py` bloquea abrir esa ruta directamente y es de la persona.
+- Las fichas tienen la forma `/es/tramites/<SIA>-<slug>`. La tramitación está en `/es/tramitar/<SIA>-<versión>-<slug>`: abrirla inicia el trámite (acto `presentar`).
 - Es una aplicación Angular: usa el buscador de la página, no llames a su API interna.
 
 ## Trampas
 
-- **BLOQUEADO en «Validarme»** es lo normal: el acceso al tramitador del Gobierno pasa por AutoFirma.
+- **BLOQUEADO en «Validarme»** = falta el permiso `firmar`: el acceso al tramitador del Gobierno pasa por AutoFirma.
 - **Borradores:** entrar en `/sede/tramitador/creacion/…` puede crear una solicitud pendiente. Si la persona retoma un borrador, puede haber que encadenar varios «Continuar».
-- **Firmar por partes:** en el tramitador se firma cada adjunto y la instancia por separado, y antes hay que pulsar «Guardar y validar». Todo eso lo hace la persona en AutoFirma.
+- **Firmar por partes:** en el tramitador se firma cada adjunto y la instancia por separado, y antes hay que pulsar «Guardar y validar». Con `--permitir firmar,presentar`, cada firma lanza AutoFirma. Pendiente de verificar en vivo de punta a punta.
 - **Representación:** si actúa una sociedad con su propio certificado, la persona debe revisar la casilla de «representa a un tercero» (en el historial del proyecto hubo que desmarcarla).
 - **Fichas fuera de plazo:** la ficha avisa antes de llegar al tramitador. Léela siempre.
 - **Revisa el resumen campo a campo** antes de que la persona firme: en el historial del proyecto se coló una errata en el email de una solicitud.

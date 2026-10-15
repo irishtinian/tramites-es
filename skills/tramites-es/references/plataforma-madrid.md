@@ -11,7 +11,7 @@ fuentes:
 
 # Sede propia del Ayuntamiento de Madrid
 
-Riesgo: **Leer** (catálogo, Mi Carpeta) y **Preparar** (registro, actividad, certificados). Firmar, presentar, pagar y abrir notificaciones lo hace la persona.
+Riesgo: **Leer** (catálogo, Mi Carpeta) y **Preparar** (registro, actividad, certificados). Firmar, presentar, pagar y abrir notificaciones son **actos** (`firmar`, `presentar`, `pagar`, `comparecer`): los haces según los permisos que te dé tu usuario (`sede.py --permitir …`).
 
 Estado **parcial**: el acceso público está mapeado hasta el selector de identidad; la firma no está confirmada.
 
@@ -50,13 +50,13 @@ Identidad:       https://cas.madrid.es/authenticationendpoint/login.do?...   (pa
 
 ## Trámites típicos del autónomo
 
-| Trámite | Entrada | Dónde para el agente | Qué hace la persona |
+| Trámite | Entrada | Sin permiso, paras en | Actos (con permiso los haces tú) |
 |---|---|---|---|
-| Registro / instancia, actividad económica, declaración responsable y licencias urbanísticas | Catálogo `https://sede.madrid.es/portal/site/tramites` → materia | En la ficha, con texto y adjuntos preparados | Se identifica, adjunta, firma y envía |
-| Certificado de estar al corriente de pago | Portal de la ATM → certificados y justificantes de pago | Localiza la ficha y prepara la solicitud | La presenta por registro electrónico con identificación y firma |
-| Aplazamientos y fraccionamientos | Portal de la ATM | Localiza la ficha | La solicita y firma |
-| Consulta de registros | Mi Carpeta | Lista asientos | — |
-| Notificaciones | Mi Carpeta | **Solo lista** | Abre la que quiera |
+| Registro / instancia, actividad económica, declaración responsable y licencias urbanísticas | Catálogo `https://sede.madrid.es/portal/site/tramites` → materia | La ficha, con texto y adjuntos preparados | Identificarse, adjuntar, firmar y enviar: `firmar`, `presentar` |
+| Certificado de estar al corriente de pago | Portal de la ATM → certificados y justificantes de pago | La ficha, con la solicitud preparada | Presentarla por registro electrónico con identificación y firma: `firmar`, `presentar` |
+| Aplazamientos y fraccionamientos | Portal de la ATM | La ficha | Solicitar y firmar: `firmar`, `presentar` |
+| Consulta de registros | Mi Carpeta | — (listar asientos es libre) | — |
+| Notificaciones | Mi Carpeta | El listado | Abrir: `comparecer` |
 
 - El certificado de la ATM **solo acredita que no hay deudas en vía de apremio**. Para concursos municipales no hace falta pedirlo: el Ayuntamiento lo comprueba de oficio.
 - **IAE:** las personas físicas están exentas; las altas y bajas censales van a la AEAT (`sede-aeat.md`).
@@ -66,7 +66,7 @@ Identidad:       https://cas.madrid.es/authenticationendpoint/login.do?...   (pa
 ## Firma
 
 - **No confirmada:** depende del tramitador y del procedimiento; no se abrió ninguno.
-- La firma la hace la persona; sede.py captura `afirma://` y bloquea firmar y enviar.
+- Firmar y enviar son los actos `firmar` y `presentar`. Con esos permisos, `sede.py` pasa `afirma://` a AutoFirma (`setup-autofirma.md`); sin ellos, captura `afirma://` y bloquea firmar y enviar.
 - Éxito esperado: registro presentado en Mi Carpeta (consulta de registros), con número de asiento y justificante descargable. Verifica con `scripts/justificante.py` y en ese listado.
 
 ## Trampas

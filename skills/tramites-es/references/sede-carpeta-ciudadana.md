@@ -122,8 +122,8 @@ RESULTADO = {"apis": apis}
 
 ## 4. Trampas y problemas conocidos
 
-- **`/carpeta/mcc/comunicar-cambio-domicilio`:** es un cambio de datos. Lo hace la persona.
-- **`GET /api/guardarEmail`:** algunas pantallas lo llaman solas al cargar. Lo hace la SPA. **El agente nunca lo invoca.**
+- **`/carpeta/mcc/comunicar-cambio-domicilio`:** acto `cambiar_datos`. Solo si tu usuario quiere comunicar su nuevo domicilio. **No mapeado.**
+- **`GET /api/guardarEmail`:** algunas pantallas lo llaman solas al cargar; lo hace la SPA. No lo llames tú directamente: para cambiar el correo, usa la pantalla (acto `cambiar_datos`).
 - **Chatbot "Ada":** la burbuja puede tapar botones. Si un clic falla, haz `probe` y busca el elemento.
 - **Banner de cookies** ("Aceptar todas" / "Configuración"): desde "Configuración", deja solo las necesarias.
 - **Errores que no afectan:** fallos de `estaticoscarpeta.carpetaciudadana.gob.es` (`ERR_FAILED`) y bloqueos CSP de analítica.

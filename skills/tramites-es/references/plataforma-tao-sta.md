@@ -17,7 +17,8 @@ STA («Servicios Telemáticos Avanzados», de TAO / T-Systems) es la plataforma 
 
 Con ella el agente puede:
 - **leer** recibos, anotaciones o registros de entrada, expedientes y el **listado** de notificaciones;
-- localizar la ficha de un trámite del catálogo y preparar lo que la persona presentará.
+- localizar la ficha de un trámite del catálogo y prepararlo;
+- con los permisos de su usuario, hacer los **actos**: firmar y presentar (`firmar`, `presentar`), pagar recibos (`pagar`), abrir notificaciones (`comparecer`) o confirmar datos (`cambiar_datos`).
 
 **Cómo reconocerla:** rutas `/sta/CarpetaPublic/…` o `/sta/CarpetaPrivate/…` con `APP_CODE=STA&PAGE_CODE=…`; en el HTML, `web_author="T-Systems / TAO"` o «STA. Servicios Telemáticos Avanzados». Las sedes nuevas («PTS2») usan `PAGE_CODE=PTS2_HOME`.
 
@@ -54,40 +55,45 @@ Los nombres de carpetas y parámetros son comunes. El host, los `PAGE_CODE` y lo
     --url "https://sede.tributostenerife.es/sta/CarpetaPrivate/Certificate?APP_CODE=STA&PAGE_CODE=RECIBOS"
   ```
 - **Cómo saber que entró:** cabecera **Mi Cuenta** y mensaje de bienvenida en la carpeta privada (`sesion_iniciada: true` en `sede.py abrir`). Comprueba que el titular es la persona antes de leer nada.
-- **Confirmación de datos de contacto.** En Santa Cruz de Tenerife y en Arona, el certificado se aceptó, pero el primer acceso llevó a `CONFIRMACION_DATOS_PERSONALES`. Esa pantalla pide confirmar teléfono y correo con el botón **GUARDAR**. `sede.py` lo bloquea y **el agente para ahí**: confirmar o cambiar datos es de la persona (regla 7 de `SKILL.md`). Que la persona lo haga en su navegador y vuelvas a intentarlo. No se ha comprobado si después la pantalla deja de salir.
+- **Confirmación de datos de contacto.** En Santa Cruz de Tenerife y en Arona, el certificado se aceptó, pero el primer acceso llevó a `CONFIRMACION_DATOS_PERSONALES`. Esa pantalla pide confirmar teléfono y correo con el botón **GUARDAR**: es el acto `cambiar_datos`.
+  - **Con ese permiso:** comprueba con tu usuario que el teléfono y el correo son los suyos y guarda (`sede.py --permitir cambiar_datos`).
+  - **Sin él:** `sede.py` lo bloquea. Pregúntale, o que lo confirme él en su navegador y vuelves a intentarlo.
+  - No se ha comprobado si después la pantalla deja de salir.
 
 ## Pantallas de la carpeta (`PAGE_CODE`)
 
-| Función | `PAGE_CODE` observados | Riesgo |
+| Función | `PAGE_CODE` observados | Riesgo o acto |
 |---|---|---|
-| Recibos (pendientes en voluntaria, en ejecutiva y pagados) | `RECIBOS`, `OVC_RECIBOS` | leer |
+| Recibos (pendientes en voluntaria, en ejecutiva y pagados) | `RECIBOS`, `OVC_RECIBOS` | leer; pagar: `pagar` |
 | Anotaciones o registros de entrada | `ANOTACIONES`, `OVC_ANOTACIONES`, `REGISTRO_ENTRADA` | leer |
 | Expedientes | `EXPEDIENTES_FULL`, `OVC_EXPEDIENTES_FULL` | leer |
-| Notificaciones | `SINGLE_NOTIF` | leer: **solo listar** |
+| Notificaciones | `SINGLE_NOTIF` | listar: leer; abrir: `comparecer` |
 | Posición global | `OVC_POSICIONGLOBAL` | leer |
-| Domiciliaciones | `OTRIBDOMI` | persona |
-| Autoliquidaciones | `CREARLIQ`, `OVC_CREARLIQ` | persona |
-| Certificados tributarios | `SOLDOC_COR` | persona |
-| Carta de pago sin acceso (pública) | `ACCESO_DEUDA` | persona |
+| Domiciliaciones | `OTRIBDOMI` | `cambiar_datos` |
+| Autoliquidaciones | `CREARLIQ`, `OVC_CREARLIQ` | `presentar`, `pagar` |
+| Certificados tributarios | `SOLDOC_COR` | `generar` |
+| Carta de pago sin acceso (pública) | `ACCESO_DEUDA` | `pagar` |
 | Verificación de documentos (pública) | `VALDOCS` | leer, con posible CAPTCHA |
 
 Son nombres observados en 4 instalaciones, **no una garantía**: compruébalos en cada una (ver «Cómo adaptarla»).
 
-- **Recibos:** muestran las pestañas pendientes en voluntaria, en ejecutiva y pagados. Hay botones «Pagar ahora», «Añadir a la cesta» y «Generar carta de pago»: son de la persona.
+- **Recibos:** muestran las pestañas pendientes en voluntaria, en ejecutiva y pagados. Los botones «Pagar ahora», «Añadir a la cesta» y «Generar carta de pago» son el acto `pagar`: con ese permiso, confirma con tu usuario recibo e importe antes de pagar; sin él, dile cuáles tiene pendientes y dónde pagarlos. El pago con el agente está **pendiente de verificar en vivo**.
   - Sin recibos, la pestaña dice «No tiene recibos pendientes.» (Granadilla, 15-10-2026).
   - Columnas en el Consorcio: Tributo / Referencia, Ejercicio, Num. recibo, Institución, Periodo (Voluntaria/Ejecutiva), Importe principal, Carta Pago. **No hay fecha límite de pago**: para el plazo de voluntaria, remite al calendario del contribuyente del recaudador (en el CTT, `https://www.tributostenerife.es`) y dilo como "a confirmar".
   - Granadilla avisa de que agua y alcantarillado **no** están en su carpeta, y remite al Consorcio para lo demás: consulta siempre los dos.
-- **Notificaciones:** abrir una notificación es comparecer (regla 2). `sede.py` bloquea abrir, consultar o descargar en esas páginas.
+- **Notificaciones:** abrir una notificación es comparecer (acto `comparecer`, empiezan los plazos). Sin ese permiso, `sede.py` bloquea abrir, consultar o descargar en esas páginas.
 
-## Trámites del catálogo (riesgo: persona)
+## Trámites del catálogo (actos: `firmar`, `presentar`)
 
 - **Buscar:** `{ORIGIN}/sta/Relec/CatalogBrowse` tiene un buscador (`#palabraClave`) y un filtro de canal. Cada resultado enlaza a `CatalogDetail` con sus dos `dboid*`.
   ```bash
   uv run scripts/sede.py probe --url "https://<ORIGIN>/sta/Relec/CatalogBrowse"
   ```
-- **Ficha:** muestra requisitos y el botón **Tramitar**. **El agente para en la ficha.** Prepara el texto, los datos y la lista de adjuntos.
-- **Qué hace la persona:** entra, rellena, adjunta, firma y envía.
-- **Adjuntos y firma:** el formulario abre una ventana de adjuntos (`openUploader`, campo `#fichero`, «Pulse para adjuntar»). Llama a `procesoFirma()` y `firmar()` (AutoFirma) y después aparece **Continuar**. `sede.py` bloquea todo eso. Firmar cada adjunto y la solicitud, y enviar, es de la persona.
+- **Ficha:** muestra requisitos y el botón **Tramitar**. Prepara el texto, los datos y la lista de adjuntos.
+- **Tramitar, adjuntar y enviar** son el acto `presentar`; firmar cada adjunto y la solicitud, `firmar`.
+  - **Con esos permisos** (`sede.py --permitir firmar,presentar`): rellena, adjunta, confirma el contenido con tu usuario y envía. Cada firma lanza AutoFirma (`setup-autofirma.md`). **Pendiente de verificar en vivo** de punta a punta.
+  - **Sin ellos:** para en la ficha y dale a tu usuario el texto, los adjuntos y el enlace.
+- **Adjuntos y firma:** el formulario abre una ventana de adjuntos (`openUploader`, campo `#fichero`, «Pulse para adjuntar»). Llama a `procesoFirma()` y `firmar()` (AutoFirma) y después aparece **Continuar**.
 - **Cómo verificar:**
   - justificante con número de anotación (en el historial del proyecto, con forma AAAA + 6 dígitos) y CSV;
   - y, sobre todo, la entrada nueva en la pantalla de anotaciones o registro de entrada.
@@ -104,7 +110,7 @@ Son nombres observados en 4 instalaciones, **no una garantía**: compruébalos e
 2. **Ojo con las dos capas:** algunas sedes tienen un catálogo editorial y ejecutan en otro host. Santa Cruz de Tenerife tiene fichas en `sede.santacruzdetenerife.es/sede/tramite/t<ID>` y ejecuta en `ovc.santacruzdetenerife.es`. Arona tiene fichas en `sede.arona.org` y ejecuta en `sta.arona.org`.
 3. **Averigua los `PAGE_CODE`** de esa instalación en su frontal o menú, sin certificado, con la receta `sta_pagecodes.py` de abajo. Si `OVC_HOME` no existe, prueba con la `sede_url` del censo o con `FRONTAL_OVC` / `PTS2_HOME`.
 4. **Trámites:** busca en `CatalogBrowse` y copia los dos `dboid*` de la ficha de **esa** instalación.
-5. **Origins para `sede.py`:** el ORIGIN (más las pasarelas Cl@ve si usas `Clave2Request`). Si la instalación no está en `assets/sedes.yaml` y su dominio no está en `assets/dominios-oficiales.yaml` ni en el censo, pregunta a la persona antes de usar el certificado (regla 6).
+5. **Origins para `sede.py`:** el ORIGIN (más las pasarelas Cl@ve si usas `Clave2Request`). Si la instalación no está en `assets/sedes.yaml` y su dominio no está en `assets/dominios-oficiales.yaml` ni en el censo, pregunta a la persona antes de usar el certificado («Solo sedes oficiales» en `SKILL.md`).
 6. **Tributos:** puede que los recibos no estén en el ayuntamiento sino en su recaudador (en Tenerife, casi siempre el Consorcio): `canarias-recaudacion.md`.
 
 Receta de solo lectura para el paso 3 (no probada en vivo tal cual):
@@ -123,10 +129,10 @@ uv run scripts/sede.py ejecutar sta_pagecodes.py --url "https://<ORIGIN>/sta/Car
 ## Trampas
 
 - **`PAGE_CODE` y `dboid*` locales.** Lo que vale en una sede no vale en otra.
-- **Confirmación de datos de contacto** (`CONFIRMACION_DATOS_PERSONALES`, botón GUARDAR): para y que lo haga la persona.
+- **Confirmación de datos de contacto** (`CONFIRMACION_DATOS_PERSONALES`, botón GUARDAR): acto `cambiar_datos` (ver «Acceso»).
 - **Enlaces de plantilla ajenos:** el frontal de Granadilla conserva enlaces de demostración a `dipcas.es` (Diputación de Castellón). No los sigas: usa su `Relec/CatalogBrowse`.
 - **Enlaces antiguos** `CarpetaPublic/doEvent?APP_CODE=STA&DETALLE=<id>&PAGE_CODE=CATALOGO`: `DETALLE` también es local.
-- **CAPTCHA** en la validación o cotejo de documentos: para (regla 4).
+- **CAPTCHA** en la validación o cotejo de documentos: lo resuelve la persona y tú sigues («Fuera del alcance» en `SKILL.md`).
 - **Interfaz antigua:** navegación por POST, ventanas emergentes, botones duplicados invisibles (ancho 0) y campos ocultos. Guarda solo enlaces públicos estables, nunca los que llevan sesión.
 - **No hay evento de descarga** en los justificantes.
 

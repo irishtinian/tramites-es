@@ -19,7 +19,7 @@ Muchas oficinas virtuales de **tributos locales** (de ayuntamientos y de servici
 
 Con ella el agente puede:
 - **leer** los recibos pendientes, próximos y pagados y las solicitudes presentadas;
-- explicar a la persona cómo pagar, domiciliar o pedir un certificado, que hace ella.
+- con los permisos de su usuario, hacer los **actos**: pagar (`pagar`), domiciliar (`cambiar_datos`) o pedir un certificado (`generar`). Sin ellos, explicarle cómo hacerlo.
 
 No es la sede del ayuntamiento: es su oficina tributaria. La instancia general y las licencias suelen estar en otra plataforma (`plataforma-gestiona.md`, `plataforma-tao-sta.md`…).
 
@@ -44,13 +44,13 @@ Certificado:   https://certifica.gtt.es/OficinaVirtual/oficina.asp?servicio={SER
 
 Rutas funcionales de la portada (Adeje, verificadas sin certificado). Pueden variar por entidad:
 
-| Ruta | Qué es | Riesgo |
+| Ruta | Qué es | Riesgo o acto |
 |---|---|---|
 | `{ORIGIN}/{CODIGO}/{SERVICIO}/consultar-recibo` | Detalle de un recibo domiciliado | leer |
 | `…/csv` | Verificar un documento por CSV | leer (puede tener CAPTCHA) |
 | `…/calendario-fiscal` | Calendario de cobros | leer |
-| `…/plusvalia` | Plusvalía | persona si presenta |
-| `…/pagar`, `…/tasas`, `…/obtener-documento` | Pagar impuestos y tasas u obtener el documento de pago | persona |
+| `…/plusvalia` | Plusvalía | `presentar` si presenta |
+| `…/pagar`, `…/tasas`, `…/obtener-documento` | Pagar impuestos y tasas u obtener el documento de pago | `pagar` |
 | `…/recibos/pendientes` | **Recibos privados** (pendientes, próximos y pagados) | leer, con sesión |
 
 Con sesión aparecen además, según la entidad: domiciliaciones, fraccionamientos y plan personalizado de pago, bienes, solicitudes presentadas y aportación de documentos, notificaciones, apoderamientos y «Obtener certificado» (de no deuda). Sin sesión salen como «Opción bloqueada. Inicia sesión…».
@@ -66,7 +66,7 @@ Con sesión aparecen además, según la entidad: domiciliaciones, fraccionamient
 | `sede.py` | `--sede adeje-tributos` |
 
 - Otras entidades ofrecen DNIe y Cl@ve en el modal «Identifícate». La rama Cl@ve **no está mapeada**: si la usas, solo «DNIe / Certificado electrónico» (`sede-clave.md`). Algunas ofrecen NIF + contraseña («clave segura de usuario»): **nunca** la uses en nombre de la persona.
-- **Dominio del proveedor:** `certifica.gtt.es` y `*.tributoslocales.es` son de la empresa que presta el servicio, no de la Administración. Úsalos solo cuando los enlace la web oficial de la entidad (ayuntamiento, diputación o cabildo). Si no estás seguro, pregunta a la persona (regla 6).
+- **Dominio del proveedor:** `certifica.gtt.es` y `*.tributoslocales.es` son de la empresa que presta el servicio, no de la Administración. Úsalos solo cuando los enlace la web oficial de la entidad (ayuntamiento, diputación o cabildo). Si no estás seguro, pregunta a la persona («Solo sedes oficiales» en `SKILL.md`).
 - **Cómo saber que entró:** saludo autenticado en la portada y opciones antes bloqueadas ya disponibles (verificado en Adeje; la identidad no se copió).
 
 La aplicación **tarda unos 12 segundos en cargar** (antes solo hay un spinner). `sede.py abrir` espera menos: usa una receta. Ejemplo de solo lectura para Adeje. El acceso y el listado están verificados el 15-10-2026; la receta en sí no se ha ejecutado tal cual.
@@ -84,22 +84,21 @@ RESULTADO = {"url": pg.url.split("?")[0], "titulo": pg.title(), "probe": probe(p
 uv run scripts/sede.py ejecutar gtt_recibos.py --sede adeje-tributos --titular <ALIAS>
 ```
 
-La salida y las capturas locales pueden contener importes y referencias de la persona: no los copies fuera de la conversación y enmascara en los informes (regla 8).
+La salida y las capturas locales pueden contener importes y referencias de la persona: no los copies fuera de la conversación y enmascara en los informes («Datos personales enmascarados» en `SKILL.md`).
 
 ## Trámites
 
 - **Recibos privados** (riesgo: leer).
-  - Agente: lista pendientes, próximos y pagados y avisa de plazos.
-  - Persona: paga o domicilia.
-  - Verificar: el recibo pasa a «pagados» tras el pago, que hace la persona.
+  - Lista pendientes, próximos y pagados y avisa de plazos.
+  - Verificar un pago: el recibo pasa a «pagados».
 - **Solicitudes presentadas** (riesgo: leer). Opción «Solicitudes y seguimiento». **No mapeada con sesión.**
-- **Pagar u obtener documento de pago** (riesgo: persona).
-  - Agente: explica dónde está y qué datos pide. `sede.py` bloquea abrir `…/pagar`: dale el enlace a la persona.
-  - Persona: introduce los datos y paga.
+- **Pagar u obtener documento de pago** (acto `pagar`).
+  - Con el permiso: confirma con tu usuario recibo, importe y medio de pago, y paga (`sede.py --permitir pagar`). **Pendiente de verificar en vivo.**
+  - Sin él: `sede.py` bloquea abrir `…/pagar`. Explica dónde está y qué datos pide, y dale el enlace.
   - Verificar: justificante y estado «pagado».
-- **Domiciliación** (riesgo: persona). Contiene el IBAN, así que solo la hace la persona.
-- **Certificado de no deuda** (riesgo: persona). Solo en algunas entidades; **no mapeado**.
-- **Alta en notificaciones** (riesgo: persona). Aparece como invitación en la portada, con datos de contacto y aceptación de condiciones. No la aceptes.
+- **Domiciliación** (acto `cambiar_datos`). Lleva el IBAN: confirma con tu usuario la cuenta exacta y no la copies a ningún otro sitio.
+- **Certificado de no deuda** (acto `generar`). Solo en algunas entidades; **no mapeado**.
+- **Alta en notificaciones** (acto `cambiar_datos`). Aparece como invitación en la portada, con datos de contacto y aceptación de condiciones. Acéptala solo si tu usuario quiere recibir ahí las notificaciones: desde entonces le llegarán por esa vía.
 
 ## Cómo adaptarla a tu ayuntamiento
 
@@ -121,8 +120,8 @@ La salida y las capturas locales pueden contener importes y referencias de la pe
 
 - **Carga lenta:** no concluyas que la página está vacía mientras haya spinner. `curl` y WebFetch solo ven el título.
 - **Banner de cookies** modal que tapa los botones: elige **Rechazar** (o la opción más restrictiva) antes de seguir.
-- **Invitación a notificaciones** en la portada: no la aceptes. Incluye condiciones y datos de contacto (regla 7).
-- **CAPTCHA de imagen** en la verificación por CSV y en el formulario de contacto (visto en el código, no en pantalla). Si aparece, para (regla 4).
+- **Invitación a notificaciones** en la portada: acto `cambiar_datos` (ver «Trámites»). Si solo estás consultando, ciérrala sin aceptar.
+- **CAPTCHA de imagen** en la verificación por CSV y en el formulario de contacto (visto en el código, no en pantalla). Si aparece, lo resuelve la persona y tú sigues.
 - **Pagos públicos:** algunas entidades piden el NIF del titular y una referencia del recibo. Úsalos solo con los datos de la propia persona.
 - **Versión antigua** (`…/homenoauth/pag3`): otra interfaz, sin receta.
 

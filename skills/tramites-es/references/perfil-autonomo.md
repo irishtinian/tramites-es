@@ -20,7 +20,7 @@ fuentes:
 
 Antes de dar plazos o preparar un modelo, el agente necesita el **perfil fiscal** de la persona: territorio, regímenes y qué obligaciones periódicas tiene. **Casi todo se puede leer** en las sedes con su certificado. Pregunta solo lo que no puedas leer.
 
-Riesgo: **Leer.** No cambies datos censales, de cotización ni de contacto (regla 7 de `SKILL.md`). Si ves algo incoherente, explícaselo: la corrección (036, 400, Import@ss) la hace la persona.
+Riesgo: **Leer.** Montar el perfil no cambia nada. Si ves algo incoherente, explícaselo a tu usuario; corregirlo (036, 400, Import@ss) es otro trámite, con los actos `cambiar_datos`, `firmar` y `presentar`.
 
 Alcance: **persona física** con actividad. Si el titular es una sociedad (Impuesto sobre Sociedades), esta guía no vale: con certificado de representante, actúa solo para esa sociedad y avisa de que sus modelos son otros.
 
@@ -29,7 +29,7 @@ Alcance: **persona física** con actividad. Si el titular es una sociedad (Impue
 1. **AEAT, "Mis datos censales"** (o el certificado de situación censal): domicilio fiscal, actividades y epígrafes, locales, régimen de IVA, método de IRPF, alta en el ROI o en el REDEME. Es el reflejo del último **036**. Ruta: `sede-aeat.md`.
 2. **AEAT, "Declaraciones presentadas"** del último año: qué modelos presentó de verdad. Es la mejor prueba de sus obligaciones reales (y de las que se dejó).
 3. **Seguridad Social, Import@ss** (`sede-tgss-importass.md`): acreditación o informe de situación del alta en autónomos, "Base de cotización y rendimientos", recibos y mutua.
-4. **Solo en Canarias, ATC** (`sede-atc.md`): certificados de "declaraciones censales presentadas", "actividades y locales" y "situación tributaria" (gratis, con CSV), y los 420 presentados. El acceso con certificado a la ATC puede pasar por AutoFirma: si aparece, lo hace la persona.
+4. **Solo en Canarias, ATC** (`sede-atc.md`): certificados de "declaraciones censales presentadas", "actividades y locales" y "situación tributaria" (gratis, con CSV), y los 420 presentados. El acceso con certificado a la ATC pasa por AutoFirma: necesita el permiso `firmar` (`sede-atc.md`); sin él, pide a la persona esos certificados en PDF.
 5. **Pregunta lo que falte** (§6).
 
 Los nombres exactos de los apartados pueden cambiar: si no coinciden con la pantalla, confía en la pantalla y avisa.
@@ -146,7 +146,7 @@ Compruébalas al leer el perfil y antes de preparar cualquier modelo. Avisa a la
 
 ## 8. Resultado: el perfil
 
-Devuelve el perfil a la persona para que lo confirme. **Sin NIF, nombres, direcciones ni IBAN.** No lo guardes en notas ni memorias sin su permiso (regla 8).
+Devuelve el perfil a la persona para que lo confirme. **Sin NIF, nombres, direcciones ni IBAN.** No lo guardes en notas ni memorias sin su permiso («Datos personales enmascarados» en `SKILL.md`).
 
 ```yaml
 leido_el: AAAA-MM-DD

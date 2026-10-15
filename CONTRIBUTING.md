@@ -28,8 +28,8 @@ Abre un issue **"sede rota"** con:
 
 ## Código
 
-- Python 3.11+, PEP 723 con versiones fijadas, sin prompts interactivos (salvo `cert.py configurar`, que es para la persona) y salida JSON por stdout.
-- No debilites las guardas de `scripts/sede.py` ni las reglas duras de `SKILL.md`. Si crees que una guarda da un falso positivo, explícalo con el caso exacto en el PR.
+- Python 3.11+, PEP 723 con versiones fijadas, sin prompts interactivos (salvo `cert.py configurar` y `permisos.py fijar`, que son para la persona) y salida JSON por stdout.
+- Las guardas de `scripts/sede.py` bloquean los actos que la persona no ha permitido: no hagas que uno pase sin su permiso, y no toques las protecciones de `SKILL.md` (certificado, dominios oficiales, datos personales, Cl@ve, CAPTCHAs). Si crees que una guarda da un falso positivo, explícalo con el caso exacto en el PR.
 - Sin red salvo hacia sedes oficiales. Sin `subprocess` de shell arbitrario. Sin secretos en argv ni en logs. Sin Unicode invisible.
 - `pytest` y la validación de contenido deben pasar: `uv run --group test pytest` (o `python -m pytest` con las versiones de `pyproject.toml`) y `python .github/scripts/content_guard.py`.
 

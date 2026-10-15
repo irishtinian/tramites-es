@@ -4,7 +4,7 @@
 # Este fichero vive en .github/, así que también se protege a sí mismo.
 # Las guías (references/) y el calendario no están aquí a propósito: los revisa cualquier mantenedor con la CI en verde.
 
-# Reglas duras y guardas del skill
+# Permisos, protecciones y guardas del skill
 /skills/**/SKILL.md                          @irishtinian
 /skills/**/scripts/                          @irishtinian
 

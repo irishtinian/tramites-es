@@ -11,9 +11,13 @@ fuentes:
 estado_mapeo: "Playbook transversal. Validación del 15-10-2026: listado AEAT y contador DEHú de Carpeta Ciudadana verificados de punta a punta; DEHú directo sigue con error=1000; TGSS y buzones municipales sin mapear con certificado; DGT DEV verificada solo hasta el acceso."
 ---
 
-# Vigilar notificaciones sin abrirlas
+# Vigilar notificaciones (y abrirlas si tu usuario lo permite)
 
-**Riesgo: Leer.** El agente **lista** remitente, asunto, fecha de puesta a disposición y estado. **Abrir, aceptar, rechazar, descargar o "ver el detalle" es comparecer**: la persona queda notificada y empiezan a correr los plazos. Eso es siempre `riesgo: persona` (regla dura 2). `sede.py` bloquea esos clics en las páginas de notificaciones; si ves "BLOQUEADO", has llegado al límite.
+**Listar no tiene efectos:** remitente, asunto, fecha de puesta a disposición y estado.
+
+**Abrir, aceptar, rechazar, descargar o "ver el detalle" es comparecer** (acto `comparecer`): la persona queda notificada y empiezan a correr los plazos.
+- **Con ese permiso** de tu usuario, puedes abrirlas (`sede.py --permitir comparecer`; ver §2.1).
+- **Sin él**, `sede.py` bloquea esos clics en las páginas de notificaciones y devuelve "BLOQUEADO (requiere permiso 'comparecer')". Lista, avisa de los plazos y pregúntale.
 
 ## 1. Qué buzones mirar
 
@@ -34,9 +38,9 @@ Pregúntalo o dedúcelo del perfil (`perfil-autonomo.md`):
 
 ## 2. Cómo listar en cada buzón
 
-Usa solo `abrir`, `probe` (sin `--clic` sobre filas) o las recetas de las guías. Nunca hagas clic en una fila, en el identificador ni en "Acciones".
+Para listar, usa `abrir`, `probe` (sin `--clic` sobre filas) o las recetas de las guías, sin hacer clic en una fila, en el identificador ni en "Acciones": eso ya es abrir (§2.1).
 
-- **DEHú (contador, recomendado):** receta `mcc_notificaciones.py` de `sede-carpeta-ciudadana.md` §3.2. Da `numNotificaciones` y `numComunicaciones` pendientes en DEHú sin entrar en DEHú. Si es 0, no hace falta más. Si es > 0, el detalle lo ve la persona en DEHú (o tú, si DEHú ya acepta el login).
+- **DEHú (contador, recomendado):** receta `mcc_notificaciones.py` de `sede-carpeta-ciudadana.md` §3.2. Da `numNotificaciones` y `numComunicaciones` pendientes en DEHú sin entrar en DEHú. Si es 0, no hace falta más. Si es > 0, mira el listado de DEHú.
 - **DEHú (listado):**
   1. Receta `dehu_listado.py` de `sede-dehu.md` §3.1 (login + pestaña de pendientes, con el texto del shadow DOM). Si acaba en `/es/public`, mira la cadena de navegaciones: el `error=` solo aparece un instante.
   2. La pestaña de pendientes ya muestra los dos contadores (pendientes y realizadas). Solo si hay realizadas que mirar, `?realized=true` en **otra** ejecución (tres cargas seguidas dieron `ECONNRESET`).
@@ -51,12 +55,20 @@ Usa solo `abrir`, `probe` (sin `--clic` sobre filas) o las recetas de las guías
 - **DGT DEV:** `abrir` sobre `https://auth-sedeweb.dgt.gob.es/WEB_NTRA_CONSULTA/listadoNotificacionesIdiomaPostback.faces?idioma=es`. `ErrorBuzon.faces` significa "no tiene DEV".
 - **Ayuntamientos:** rutas observadas en la fase pública, **ninguna verificada con certificado**:
   - Gestiona (`*.sedelectronica.es`): `https://<municipio>.sedelectronica.es/enotifications`.
-  - TAO/STA: área privada con `PAGE_CODE=SINGLE_NOTIF`. En algunos municipios el primer acceso exige confirmar teléfono o email con "GUARDAR". Eso es un cambio de datos: para.
+  - TAO/STA: área privada con `PAGE_CODE=SINGLE_NOTIF`. En algunos municipios el primer acceso exige confirmar teléfono o email con "GUARDAR": acto `cambiar_datos` (`plataforma-tao-sta.md`).
   - OpenSIAC: `…/opensiac/carpetaciudadana/buzonnotificaciones_enter.action`.
   - AOC (Cataluña): e-NOTUM.
   - GSede/MOAD: enlaza a DEHú.
-  - **Gestiona:** su ruta está en inglés (`enotifications`). `sede.py` la reconoce como página de notificaciones (patrón `enotif`). Aun así, no pulses nada dentro del buzón.
-- **No aceptes** invitaciones a "suscribirse a notificaciones" ni a cambiar el canal (p. ej. en GTT o en el Cabildo). Es un cambio de datos.
+  - **Gestiona:** su ruta está en inglés (`enotifications`). `sede.py` la reconoce como página de notificaciones (patrón `enotif`).
+- **Invitaciones a "suscribirse a notificaciones" o a cambiar el canal** (p. ej. en GTT o en el Cabildo): son el acto `cambiar_datos`. Acéptalas solo si tu usuario quiere recibirlas por esa vía.
+
+### 2.1 Abrir una notificación (permiso `comparecer`)
+
+1. **Confirma con tu usuario cuál** abrir y, en DEHú, si quiere **aceptarla o rechazarla** (rechazar también cuenta como notificada).
+2. Avísale: desde ese momento corre el plazo del acto (alegar, recurrir, pagar…).
+3. Ábrela con `sede.py … --permitir comparecer`. DEHú pide reautenticarse por Cl@ve: usa la rama de certificado.
+4. Descarga el documento y el acuse, y resúmele qué le piden, el plazo y la fecha exacta en que empezó a contar.
+5. Abrir con el agente de punta a punta está **pendiente de verificar en vivo** en todos los buzones: si algo no coincide con la guía, para y cuéntaselo.
 
 ## 3. Calcular el plazo de 10 días
 
@@ -75,9 +87,9 @@ Base legal: arts. 43.2, 41.5 y 30 de la Ley 39/2015.
 - Ejemplo: puesta a disposición el 5-oct-2026 → último día para abrirla, el 15-oct-2026. Desde el 16-oct se tiene por notificada.
 - **Si la sede muestra la fecha**, manda la sede. DEHú da la "Fecha caducidad"; úsala tal cual.
 - Si la fecha calculada y la de la sede no coinciden, di las dos y quédate con la **más temprana**.
-- **Después** (al abrirla o al vencer los 10 días) empieza el plazo del propio acto: alegar, recurrir, pagar, aportar documentos. Ese plazo se lee **dentro** de la notificación, así que solo la persona lo verá al abrirla. No lo inventes.
+- **Después** (al abrirla o al vencer los 10 días) empieza el plazo del propio acto: alegar, recurrir, pagar, aportar documentos. Ese plazo se lee **dentro** de la notificación, así que solo se ve al abrirla. No lo inventes.
 - **Estado "Expirada", "Rechazada" o vencida:** el plazo del acto **ya corre**. Avísalo como **urgente**.
-- **Las comunicaciones** (AEAT: tipo "Comunicación"; DEHú: pestaña "Comunicaciones") no son notificaciones y no tienen este plazo. Dilo, pero no las abras tampoco.
+- **Las comunicaciones** (AEAT: tipo "Comunicación"; DEHú: pestaña "Comunicaciones") no son notificaciones y no tienen este plazo. Dilo. Para `sede.py`, abrirlas también es `comparecer`.
 - **Sin fecha de puesta a disposición** en el listado, no calcules nada. Di "no sé cuándo vence; ábrela tú pronto o mira la fecha en la sede".
 
 ## 4. Qué decirle a la persona
@@ -89,8 +101,9 @@ Plantilla (sin datos que no hagan falta; enmascara NIF y referencias):
 > 2. …
 >
 > No las he abierto: abrirlas hace que empiecen a correr los plazos para responder.
-> - **Para leerla:** entra en `<enlace del buzón>` con tu certificado, busca la fila y pulsa `<botón exacto: p. ej. "Aceptar" en "Acciones" de DEHú>`.
-> - Cuando la abras, si quieres, te ayudo a entender qué te piden y qué plazo tienes.
+> - **Si quieres que la abra yo**, dime cuál (y, en DEHú, si la acepto o la rechazo). *(Solo si tienes el permiso `comparecer`.)*
+> - **Si prefieres abrirla tú:** entra en `<enlace del buzón>` con tu certificado, busca la fila y pulsa `<botón exacto: p. ej. "Aceptar" en "Acciones" de DEHú>`.
+> - Cuando esté abierta, te ayudo a entender qué te piden y qué plazo tienes.
 
 Añade, según el caso:
 
@@ -100,9 +113,9 @@ Añade, según el caso:
 
 ## 5. Después
 
-- **Datos de la persona:** no guardes el listado en notas ni memorias sin su permiso (regla dura 8).
+- **Datos de la persona:** no guardes el listado en notas ni memorias sin su permiso («Datos personales enmascarados» en `SKILL.md`).
   - Si quiere seguimiento, guarda solo organismo, fecha de puesta a disposición y fecha límite.
-- **Si la persona abre una notificación y pide ayuda:** puede pasarte el PDF. Léelo y explícaselo; el trámite de respuesta sigue sus propias reglas (firma y presentación de la persona).
+- **Con la notificación abierta** (por ti o porque te pasa el PDF): léela y explícasela. Responder es otro trámite, con sus actos (`firmar`, `presentar`, `pagar`) según los permisos.
 - **Frecuencia razonable:** una revisión por buzón cada pocos días. Los plazos son de 10 días naturales y hay WAF.
 - **Correos que avisan de una notificación:** no sigas sus enlaces. Entra por la URL oficial. DEHú ofrece un validador público de correos (`sede-dehu.md` §3.2).
 
@@ -110,9 +123,9 @@ Añade, según el caso:
 
 - **`sede.py` y las páginas de notificaciones:**
   - Las detecta por "notificaci", "notification", "enotif", "buzón", `SINGLE_NOTIF` o `/dev` en la URL, por "notificaci"/"buzón" en el título, y en DEHú por el host.
-  - En esas páginas bloquea "acceder", "abrir", "comparecer", "aceptar", "rechazar", "descargar", "consultar", "leer" y "ver el documento o detalle".
+  - Sin el permiso `comparecer`, en esas páginas bloquea "acceder", "abrir", "comparecer", "aceptar", "rechazar", "descargar", "consultar", "leer" y "ver el documento o detalle".
   - La búsqueda de la AEAT, que antes era un falso positivo, ya está permitida: deja pasar el `form.submit` a acciones de consulta (`…Query`).
-- **La misma notificación puede estar en dos buzones** (AEAT y DEHú). Cuéntala una vez y no la abras en ninguno.
+- **La misma notificación puede estar en dos buzones** (AEAT y DEHú). Cuéntala una vez; si la abres, basta con uno: queda notificada en todos.
 - **Tokens de DEHú** en `localStorage`: no los leas ni los registres.
 
 ## 7. Fuentes

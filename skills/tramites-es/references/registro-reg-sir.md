@@ -69,15 +69,18 @@ Origins:
 
 Límites del manual oficial: hasta **5 documentos**, **10 MB por fichero** y **15 MB en total**. Revalídalos si la aplicación cambia.
 
-Si la persona lo pide y la sesión es la de sede.py con su certificado, el agente puede escribir los textos en los campos. **Adjuntar ficheros, firmar y enviar no**: sede.py no permite subir archivos desde una receta y bloquea firmar y enviar.
+Escribir los textos en los campos no tiene efectos. **Adjuntar, firmar y enviar** son los actos `presentar` y `firmar`: sin ellos, `sede.py` no deja subir archivos desde una receta y bloquea firmar y enviar.
 
-## Qué hace la persona
+## Presentar
 
-1. Se identifica: Cl@ve → "DNIe / Certificado electrónico", con su certificado.
-2. Revisa el destino, el asunto, el expone y el solicita.
-3. Adjunta los ficheros.
-4. Firma y envía.
-5. Descarga el recibo y lo guarda.
+1. Identificarse: Cl@ve → "DNIe / Certificado electrónico", con el certificado.
+2. Revisar el destino, el asunto, el expone y el solicita **con tu usuario**.
+3. Adjuntar los ficheros.
+4. Firmar y enviar.
+5. Descargar el recibo y guardarlo.
+
+- **Con `--permitir presentar,firmar`:** lo haces tú, en una sola receta. **Pendiente de verificar en vivo** de punta a punta.
+- **Sin esos permisos:** le das el borrador y los adjuntos, y lo hace tu usuario.
 
 Las alertas por correo o SMS son opcionales: no las actives sin que la persona lo pida.
 
@@ -99,7 +102,7 @@ Las alertas por correo o SMS son opcionales: no las actives sin que la persona l
 ## Firma
 
 - La firma final no se ejecutó en el mapeo. Fuentes secundarias indican **AutoFirma o Cl@ve Firma**: **pendiente de verificación con certificado**.
-- Cualquier firma la hace la persona; sede.py captura `afirma://`.
+- Firmar es el acto `firmar`. Con ese permiso, `sede.py` pasa `afirma://` a AutoFirma (`setup-autofirma.md`); sin él, lo captura y lo bloquea. Cl@ve Firma queda fuera del alcance: la hace la persona.
 
 ## Trampas
 

@@ -13,7 +13,7 @@ fuentes:
 
 # Plataforma OpenSIAC (gtt, GADD)
 
-Riesgo: **Leer** (catálogo, solicitudes, expedientes) y **Preparar** (instancia, actividad). Firmar, presentar, pagar y abrir notificaciones lo hace la persona.
+Riesgo: **Leer** (catálogo, solicitudes, expedientes) y **Preparar** (instancia, actividad). Firmar, presentar, pagar y abrir notificaciones son **actos** (`firmar`, `presentar`, `pagar`, `comparecer`): los haces según los permisos que te dé tu usuario (`sede.py --permitir …`).
 
 Estado **parcial**: el mecanismo de firma no está confirmado. El falso positivo del buzón está corregido en `sede.py` desde el 15-10-2026, pero queda pendiente de verificar en vivo.
 
@@ -59,13 +59,13 @@ Documentos:     https://{HOST}/opensiac/carpetaciudadana/repositoriodocumentos.a
 
 ## Trámites típicos del autónomo
 
-| Trámite | Entrada | Dónde para el agente | Qué hace la persona |
+| Trámite | Entrada | Sin permiso, paras en | Actos (con permiso los haces tú) |
 |---|---|---|---|
-| Instancia general | Ficha `tramitesinfo.action?tramitesInfoForm.id={TRAMITE_ID}` | En la ficha, con texto y adjuntos preparados | Se identifica, adjunta, firma y envía |
-| Actividad, licencias, urbanismo, certificados | Catálogo `tramites_enter.action` | Localiza la ficha y prepara la documentación | Igual |
-| Mis solicitudes, expedientes, documentos | Carpeta autenticada (rutas de arriba) | Lista | — |
-| Notificaciones | `buzonnotificaciones_enter.action` | **Solo lista** (abrir está bloqueado) | Abre cada notificación ella misma |
-| Tasas, IAE, recibos | Recaudador | Identifica quién cobra | Paga o pide el certificado |
+| Instancia general | Ficha `tramitesinfo.action?tramitesInfoForm.id={TRAMITE_ID}` | La ficha, con texto y adjuntos preparados | Identificarse, adjuntar, firmar y enviar: `firmar`, `presentar` |
+| Actividad, licencias, urbanismo, certificados | Catálogo `tramites_enter.action` | La ficha, con la documentación preparada | Igual |
+| Mis solicitudes, expedientes, documentos | Carpeta autenticada (rutas de arriba) | — (listar es libre) | — |
+| Notificaciones | `buzonnotificaciones_enter.action` | El listado | Abrir: `comparecer` |
+| Tasas, IAE, recibos | Recaudador | Decir quién cobra | Pagar: `pagar`; certificado: `generar` |
 
 - **Paterna:** tasas, IAE y recibos en `https://paterna.tributoslocales.es` (GTT, `plataforma-gtt.md`).
 - **Sabadell:** reparto mixto. El ORGT de la Diputació de Barcelona gestiona y cobra IVTM e IAE; el Ajuntament gestiona IBI, residuos, vados y terrazas, y el ORGT los cobra. Detalle en `https://web.sabadell.cat/relacioTributs`.
@@ -74,12 +74,12 @@ Documentos:     https://{HOST}/opensiac/carpetaciudadana/repositoriodocumentos.a
 ## Firma
 
 - **Pendiente.** La sede enlaza un portafirmas, pero la parte pública no confirma AutoFirma ni otro cliente. No lo supongas.
-- La firma la hace la persona; sede.py captura `afirma://` y bloquea firmar y enviar.
+- Firmar y enviar son los actos `firmar` y `presentar`. Con esos permisos, `sede.py` pasa `afirma://` a AutoFirma (`setup-autofirma.md`); sin ellos, captura `afirma://` y bloquea firmar y enviar.
 - Éxito esperado: la presentación aparece en **Mis solicitudes** con asiento y justificante, y después en Expedientes y Documentos. Verifica con `scripts/justificante.py` y en el listado.
 
 ## Trampas
 
-- **Buzón y guarda de `sede.py`** (corregido el 15-10-2026). Antes, la guarda bloqueaba toda ruta del buzón porque `/opensiac/` contiene "open". Ahora "open" solo cuenta como palabra suelta. Si aun así ves BLOQUEADO al listar, no lo esquives: avisa con un issue "sede rota" y deja que la persona abra el buzón.
+- **Buzón y guarda de `sede.py`** (corregido el 15-10-2026). Antes, la guarda bloqueaba toda ruta del buzón porque `/opensiac/` contiene "open". Ahora "open" solo cuenta como palabra suelta. Si aun así ves BLOQUEADO al listar sin haber pulsado ninguna notificación, no lo esquives: avisa con un issue "sede rota" y cuéntaselo a tu usuario.
 - La ruta `certlogin` no implica certificado directo.
 - No se observaron CAPTCHA, WAF ni iframes.
 

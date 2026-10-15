@@ -47,7 +47,9 @@ En Canarias no hay IVA: el autónomo liquida el **IGIC** en la ATC. El IRPF (130
 
 **Cómo entra el certificado.** La ATC **no** pide el certificado por TLS: ni en el *handshake* ni en `valida.jsp` (comprobado con `tls-probe` y `cert-probe` el 15-10-2026). Tras elegir certificado en el menú de validación (`validamenu.jsp`), el botón **Entrar** (`#btnValidar`) lanza **AutoFirma por *websocket*** para firmar el acceso.
 
-- `sede.py` captura AutoFirma: verás **BLOQUEADO**. Es lo esperado. **El acceso a la zona privada de la ATC lo hace la persona** en su navegador y en el diálogo de AutoFirma (`setup-autofirma.md`).
+- **El acceso a la zona privada de la ATC es una firma** (acto `firmar`).
+  - Sin permiso: `sede.py` muestra **BLOQUEADO** y la persona entra en su navegador con AutoFirma.
+  - Con permiso: `--permitir firmar` (y `--autofirma-auto N` en Linux sin escritorio). AutoFirma tiene que tener el certificado en el almacén del sistema (`setup-autofirma.md`). Este acceso con el agente está **pendiente de verificar en vivo**.
 - La rama Cl@ve con «DNIe / Certificado electrónico» (`sede-clave.md`) **no se ha probado en la ATC**. Si la pruebas, añade `https://pasarela-ident.clave.gob.es` a los origins, no uses nunca Cl@ve PIN, Móvil ni Permanente y documenta el resultado.
 - **Cómo saber que entró:** no verificado en el mapeo. Pide a la persona que confirme que ve su nombre o NIF en la cabecera antes de seguir.
 
@@ -58,7 +60,7 @@ Peculiaridades técnicas:
 
 ## Trámites
 
-### Certificado de estar al corriente y otros certificados (riesgo: preparar)
+### Certificado de estar al corriente y otros certificados (actos: `firmar` para entrar, `generar`)
 
 - **URL pública del catálogo:** `https://sede.gobiernodecanarias.org/tributos/jsf/publico/certificados/certificados_individuales.jsp`. Tipos: estar al corriente, situación tributaria, actividades y locales, declaraciones presentadas y declaraciones censales. Son gratuitos.
 - **El «estar al corriente» depende de la finalidad.** Hay certificados distintos para subvenciones, contratación pública, transporte y contratistas. Pregunta a la persona **para qué lo necesita** antes de nada: en el historial del proyecto, elegir el tipo equivocado obligó a repetirlo.
@@ -66,46 +68,49 @@ Peculiaridades técnicas:
   ```bash
   uv run scripts/sede.py abrir --sede atc --url "https://sede.gobiernodecanarias.org/tributos/jsf/publico/certificados/certificados_individuales.jsp"
   ```
-- **Dónde para el agente:** en el botón de acceso (AutoFirma). Prepara la elección: «certificado de estar al corriente, finalidad X».
-- **Qué hace la persona:** entra con su certificado, elige la finalidad y emite el certificado.
+- **Con `--permitir firmar,generar`:** entra con AutoFirma, elige la finalidad acordada y emite el certificado. **Pendiente de verificar en vivo.**
+- **Sin esos permisos:** para en el botón de acceso y prepara la elección («certificado de estar al corriente, finalidad X»). Tu usuario entra, elige la finalidad y lo emite.
 - **Cómo verificar** (según la investigación del proyecto; **no recorrido en el mapeo**): la emisión es inmediata, en PDF con CSV, y queda en un histórico «Mis certificados». Comprueba el PDF con `scripts/justificante.py`: titular, finalidad, fecha y CSV.
 - El cotejo de CSV (`https://sede.gobiernodecanarias.org/tributos/jsf/publico/consultacsv/formulario.jsp`) **tiene CAPTCHA** (comprobado el 15-10-2026): si hace falta cotejar, lo hace la persona.
 
-### Modelo 420: autoliquidación trimestral (riesgo: persona)
+### Modelo 420: autoliquidación trimestral (actos: `firmar`, `presentar`, y `pagar` si sale a ingresar)
 
 - **Ficha:** `https://www3.gobiernodecanarias.org/tributos/atc/w/modelo-420`. Telemático obligatorio, con excepciones (ficha y BOC 2024/064).
 - **No hay formulario web.** Se usa el **programa de ayuda** de la ATC (Windows, Linux, macOS o paquete multiplataforma). Versión publicada el 15-10-2026: 9.30e26. Comprueba siempre la vigente en la ficha.
 - Flujo oficial:
-  1. Descargar el programa desde la ficha e instalarlo. **Lo hace la persona**: el agente no descarga ni ejecuta instaladores.
+  1. Descargar el programa desde la ficha e instalarlo, **solo desde la ficha oficial**. Instalar software en el equipo de tu usuario requiere su OK y, a menudo, su contraseña de administrador, que escribe él.
   2. Cumplimentar la declaración en el programa.
   3. Elegir «presentación telemática» y guardar el fichero **`.dec`**.
   4. El programa puede abrir la sede con el fichero ya elegido. Si no, se carga en `https://sede.gobiernodecanarias.org/tributos/jsf/seguro/presentacion/carga.jsp?modelo=420&fichero=`.
   5. Acceso con AutoFirma, firma y presentación.
   6. Pago, si sale a ingresar (ver «Pago»).
-- **Qué hace el agente:**
+- **Preparar (sin efectos):**
   - Comprueba antes el régimen de IGIC (REPEP: no hay 420) y el plazo (`calendario-fiscal.md`).
-  - Prepara las cifras desde los libros de la persona, con un resumen casilla a casilla para que ella las teclee o revise en el programa.
-  - Le da el enlace de la ficha y le dice qué botón pulsar en cada paso.
-- **Dónde para el agente:** antes del programa de ayuda. **No generes un `.dec` a mano**: el formato no está publicado. `sede.py` tampoco sube ficheros (las recetas no pueden usar `set_input_files`).
-- **Qué hace la persona:** rellena el programa, genera el `.dec`, lo carga, firma con AutoFirma, presenta y paga o domicilia.
+  - Prepara las cifras desde los libros de tu usuario, con un resumen casilla a casilla para teclearlas o revisarlas en el programa.
+- **El `.dec` sale del programa de ayuda.** **No generes un `.dec` a mano**: el formato no está publicado. El programa es de escritorio: lo maneja tu usuario, o tú si tienes forma de usar su escritorio.
+- **Cargar, firmar y presentar** (`carga.jsp`) son los actos `presentar` + `firmar`; subir el `.dec` desde una receta (`set_input_files`) solo se permite con `presentar`.
+  - **Con esos permisos** (`--permitir firmar,presentar[,pagar]`): confirma con tu usuario el resultado (a ingresar, a devolver o cero) antes de firmar, sube el `.dec`, firma con AutoFirma y presenta. **Pendiente de verificar en vivo.**
+  - **Sin ellos:** dale el enlace de la ficha y el botón de cada paso.
 - **Cómo verificar:** justificante de presentación y, mejor, la declaración en «Consultas > declaraciones presentadas» de la sede (ruta del mapeo; no recorrida con sesión). Antes de repetir una presentación que falló, comprueba ese listado para no duplicar.
 - **No** se presenta por el Registro General Electrónico: la ATC lo tiene por no presentado.
 
-### Modelo 425: resumen anual (riesgo: persona)
+### Modelo 425: resumen anual (actos: `firmar`, `presentar`)
 
 - **Ficha:** `https://www3.gobiernodecanarias.org/tributos/atc/w/modelo-425`. Carga: `https://sede.gobiernodecanarias.org/tributos/jsf/seguro/presentacion/carga.jsp?modelo=425&fichero=`.
 - Mismo flujo que el 420, con su propio programa de ayuda (versión publicada el 15-10-2026: 6.31e25). **No genera pago.**
 - **Lo presentan también los del REPEP**, solo con las casillas informativas.
-- Para el agente: prepara el resumen anual (suma de los 420 del año, si los hay) y para ahí. La persona genera el `.dec`, firma y presenta.
+- Prepara el resumen anual (suma de los 420 del año, si los hay). Generar el `.dec`, firmar y presentar: igual que el 420 y con los mismos permisos.
 
-### Modelo 400: declaración censal (riesgo: persona)
+### Modelo 400: declaración censal (actos: `cambiar_datos`, `firmar`, `presentar`)
 
 - **Ficha:** `https://www3.gobiernodecanarias.org/tributos/atc/w/modelo-400`.
 - **Es un formulario web**, no un programa de ayuda: `https://sede.gobiernodecanarias.org/tributos/ov/publico/presentacion/modelo400/formulario.jsp` (apartados, «Validar», «Presentar»).
-- Cambia datos censales y regímenes (por ejemplo, el REPEP): **solo si la persona lo pide** (regla 7 de `SKILL.md`). El agente puede abrir el formulario y explicar los apartados. **Validar y Presentar los pulsa la persona.**
+- Cambia datos censales y regímenes (por ejemplo, el REPEP): hazlo **solo si tu usuario lo pide**.
+  - Puedes abrir el formulario y explicar los apartados sin ningún permiso.
+  - «Validar» y «Presentar» son `cambiar_datos` + `firmar` + `presentar`. Con esos permisos, confirma con tu usuario cada apartado y presenta; sin ellos, se los pulsa él. **Pendiente de verificar en vivo.**
 - Presentarlo por el Registro General Electrónico equivale a no presentarlo.
 
-### Pago y deudas (riesgo: persona)
+### Pago y deudas (acto: `pagar`)
 
 - **Acceso:** `https://sede.gobiernodecanarias.org/tributos/ov/seguro/liquidacion/sinliquidacion.jsp?permiso=true`. Solo se inventarió; no se llegó a ninguna pantalla de pago.
 - Formas de pago publicadas por la ATC:
@@ -114,24 +119,24 @@ Peculiaridades técnicas:
   - pago en una entidad colaboradora, también después de presentar.
   La lista de entidades está en `https://www3.gobiernodecanarias.org/tributos/atc/entidades-colaboradoras`, publicada como imagen.
 - **Domiciliación del 420:** solo hasta el día 15 del plazo (`calendario-fiscal.md`).
-- El agente nunca inicia un pago: `sede.py` bloquea pasarelas y botones de pago.
+- Pagar es el acto `pagar`. Sin ese permiso, `sede.py` bloquea pasarelas y botones de pago y le das a tu usuario el enlace. Antes de pagar, confirma importe y cuenta salvo delegación expresa.
 
-### Notificaciones (riesgo: leer; listar, nunca abrir)
+### Notificaciones (listar: leer · abrir: acto `comparecer`)
 
 - **La ATC publica sus notificaciones en DEHú.** Para vigilarlas usa `tramite-vigilar-notificaciones.md` y `sede-dehu.md`.
 - La sede de la ATC tiene además «Mis notificaciones», de solo consulta. Información pública: `https://sede.gobiernodecanarias.org/tributos/jsf/publico/sede/la_sede/menu_mis_notificaciones.jsp`. El listado está tras el acceso con AutoFirma: **pendiente**, no mapeado con sesión.
-- Abrir una notificación cuenta como notificación practicada. Solo se **listan** (regla 2 de `SKILL.md`).
+- Abrir una notificación cuenta como notificación practicada y **empiezan los plazos**. Es el acto `comparecer`: con permiso de tu usuario, ábrela y dile qué contiene y desde cuándo corre el plazo; sin permiso, lístala.
 - Algunos sujetos están obligados a la notificación electrónica de la ATC (Orden de 27-12-2013). La lista exacta no está verificada aquí: si la persona pregunta, remítela a la página de notificaciones de la ATC.
 
 ### Otros (riesgo: leer; pendientes)
 
-- **Declaraciones presentadas y datos censales en la ATC:** útiles para el perfil (`perfil-autonomo.md`). Están en la zona privada (AutoFirma). Alternativa sin sesión del agente: que la persona emita el certificado de «declaraciones presentadas» o «declaraciones censales» y te pase el PDF.
+- **Declaraciones presentadas y datos censales en la ATC:** útiles para el perfil (`perfil-autonomo.md`). Están en la zona privada (AutoFirma). Con el permiso `firmar` entras tú. Sin él, alternativa: que la persona emita el certificado de «declaraciones presentadas» o «declaraciones censales» y te pase el PDF.
 
 ## Trampas
 
 - **303 no.** En Canarias es IGIC (420/425) en la ATC. El 130, 111, 115 y la Renta siguen en la AEAT.
 - **REPEP:** no presenta 420, sí presenta 425. Comprueba el régimen antes de preparar nada.
-- **BLOQUEADO al pulsar Entrar** en `valida.jsp` es lo normal: el acceso con certificado pasa por AutoFirma y es de la persona.
+- **BLOQUEADO al pulsar Entrar** en `valida.jsp` significa que falta el permiso `firmar`: el acceso con certificado pasa por AutoFirma.
 - **AutoFirma desfasada:** la página de requisitos técnicos de la ATC aloja una versión antigua (1.6.5). Instala la oficial vigente (`setup-autofirma.md`). La página de requisitos de la sede del Gobierno de Canarias pide además Java y Acrobat Reader.
 - **Programas de ayuda:** cambian de versión. Descárgalos siempre desde la ficha oficial, nunca de terceros.
 - **Registro General Electrónico:** no vale para 400, 420 ni 425.

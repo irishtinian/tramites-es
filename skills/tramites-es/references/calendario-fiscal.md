@@ -29,7 +29,7 @@ fuentes:
 
 **La única fuente de fechas es `assets/calendario.yaml`.** Esta guía y `scripts/calendario.py` derivan de él. Si una fecha de aquí no coincide con el YAML, manda el YAML: avisa y abre un issue.
 
-Riesgo: **Leer.** Un calendario no presenta nada. Cuando des una fecha a la persona, di siempre el **modelo**, el **organismo**, la **fecha límite de domiciliación** (si existe), la **fuente** y la fecha `verificado_el`. Si han pasado más de 60 días desde esa fecha, dilo y recomienda comprobarla en la fuente (regla 9 de `SKILL.md`).
+Riesgo: **Leer.** Un calendario no presenta nada. Cuando des una fecha a la persona, di siempre el **modelo**, el **organismo**, la **fecha límite de domiciliación** (si existe), la **fuente** y la fecha `verificado_el`. Si han pasado más de 60 días desde esa fecha, dilo y recomienda comprobarla en la fuente («Fechas, plazos e importes» en `SKILL.md`).
 
 ## Uso del script
 

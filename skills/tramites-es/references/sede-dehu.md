@@ -14,9 +14,9 @@ estado_mapeo: "Mapeo en vivo 15-10-2026 (fases 1 y 2 y ronda 3). Validación v02
 
 DEHú es el buzón común de notificaciones de la Administración del Estado y de muchos otros organismos. La Seguridad Social, por ejemplo, también notifica aquí.
 
-El agente **solo lista**: organismo, concepto, fecha de puesta a disposición y fecha de caducidad.
+Listar (organismo, concepto, fecha de puesta a disposición y fecha de caducidad) no tiene efectos.
 
-**Abrir, aceptar, rechazar o descargar una notificación es comparecer.** La persona queda notificada y empiezan a correr los plazos. Eso lo hace siempre ella. Procedimiento y cálculo de plazos: `tramite-vigilar-notificaciones.md`.
+**Abrir, aceptar, rechazar o descargar una notificación es comparecer** (acto `comparecer`): la persona queda notificada y empiezan a correr los plazos. Con ese permiso de tu usuario puedes hacerlo (`sede.py --permitir comparecer`); sin él, lista y dile qué tiene pendiente. Procedimiento y cálculo de plazos: `tramite-vigilar-notificaciones.md`.
 
 ## 2. Acceso
 
@@ -118,8 +118,8 @@ xvfb-run -a uv run scripts/sede.py ejecutar dehu_listado.py --sede dehu --titula
   3. `captura` y `redactar(inner_text)`.
   4. Repite con la de realizadas si hace falta.
   - Pide **ventanas de fechas de 30 días o menos**: los rangos largos dan error (`…date-range-to-long-error`).
-- **Dónde para el agente:** en la tabla. **No pulses nada en la columna "Acciones"** ni el identificador.
-- **La persona:** para leer una notificación entra ella en DEHú, pestaña "Pendientes", y en "Acciones" elige aceptar o rechazar. Cl@ve le pedirá autenticarse de nuevo para firmar la comparecencia.
+- **Sin el permiso `comparecer`:** el agente para en la tabla, sin pulsar nada en la columna "Acciones" ni en el identificador. Para leer una notificación entra la persona en DEHú, pestaña "Pendientes", y en "Acciones" elige aceptar o rechazar.
+- **Con el permiso `comparecer`:** confirma con tu usuario qué notificación abrir (aceptar no es lo mismo que rechazar) y avísale de que desde ese momento corren los plazos. DEHú pide reautenticarse por Cl@ve para firmar la comparecencia (`appearance-login-form`): usa la rama de certificado. Abrir de punta a punta con el agente: **pendiente de verificar en vivo**.
 - **Éxito:** tabla con filas, o vacía, en la pestaña pedida.
 - **Pendiente frente a realizada:**
   - Pendiente = no comparecida, con "Fecha caducidad".
@@ -131,22 +131,21 @@ xvfb-run -a uv run scripts/sede.py ejecutar dehu_listado.py --sede dehu --titula
 
 ## 4. Trampas y problemas conocidos
 
-- **Lo que solo hace la persona** (endpoints de comparecencia o con efectos):
+- **Endpoints de comparecencia o con efectos** (acto `comparecer`):
   - `/api/v1/notifications/<ref>` y su `/metadata`;
   - `…/appearance-login-form/<ACCEPTING|REJECTING>` (reautenticación);
   - `POST …/voucher` (acuse);
   - `/api/v1/realized_notifications/<ref>/{full_detail,document,voucher,annexe…}`;
   - `…/change-level-clave-login-form`;
   - `PUT /api/v1/notification_center/…/mark-as-read`, que cambia el estado.
-  - `sede.py` bloquea en `dehu.redsara.es` los clics de abrir, aceptar, rechazar o descargar, y las rutas de red con `/document`, `acuse` o `comparec`.
-  - Desde la v0.1, la lista de red también incluye `voucher`, `full_detail` y `appearance` (`NOTIF_RED`). Aun así, no pulses nada en "Acciones".
+  - Sin el permiso `comparecer`, `sede.py` bloquea en `dehu.redsara.es` los clics de abrir, aceptar, rechazar o descargar, y las rutas de red con `/document`, `acuse`, `comparec`, `voucher`, `full_detail` y `appearance` (`NOTIF_RED`). Si listas sin ese permiso, no pulses nada en "Acciones".
 - **No llames a la API con `fetch`:**
   - Usa la SPA y lee la tabla. Hay un WAF F5 delante: las ráfagas dan "Request Rejected" o 403.
   - Si aparece, para y deja el control a la persona.
   - La SPA también avisa de un **máximo de operaciones diarias**.
 - **Tokens:** `access_token` y `refresh_token` viven en `localStorage`. **Nunca** los leas, imprimas ni guardes.
 - **Shadow DOM:** toda la interfaz son web components `dnt-*`. Usa selectores que atraviesen el shadow DOM, como `dnt-button.access-btn button`.
-- **Una notificación puede estar en varios sitios:** la de la AEAT, por ejemplo, también se ve en la sede de la AEAT. No la abras en ninguno.
+- **Una notificación puede estar en varios sitios:** la de la AEAT, por ejemplo, también se ve en la sede de la AEAT. Abrirla en cualquiera de ellos es comparecer.
 - **Grandes destinatarios (LEMA):** el servicio web oficial es para personas jurídicas con volumen y exige alta. **No es para la v0.1.**
 
 ## 5. Fuentes

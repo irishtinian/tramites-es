@@ -18,7 +18,7 @@ Al autónomo le sirve para pedir dos certificados que exigen contratos, licencia
 
 Carpeta Justicia (expedientes judiciales) existe, pero hoy no deja entrar con certificado (ver 3.4).
 
-**Riesgo general: Persona.** Estos certificados los pide y los descarga la persona. El agente informa, prepara los datos y comprueba el estado.
+**Riesgo general: actuar.** Pedir estos certificados es un acto (`presentar` en antecedentes; `generar` en delitos sexuales, porque abrir la URL ya lo emite). Con el permiso de tu usuario lo haces tú; sin él, informas, preparas los datos, le das el enlace y compruebas el estado.
 
 ## 2. Acceso
 
@@ -35,7 +35,7 @@ uv run scripts/sede.py ejecutar clave_login.py --sede justicia --titular yo
 
 ## 3. Trámites
 
-### 3.1 Certificado de antecedentes penales (`justicia-antecedentes-penales`) · Persona · parcial
+### 3.1 Certificado de antecedentes penales (`justicia-antecedentes-penales`) · Actuar (`presentar`) · parcial
 
 - **URL:** `https://sede.mjusticia.gob.es/certape/clave/InicioSede?lang=es_es&idtramite=1288778883620&idpagina=1215197884559`.
   - Variante de inhabilitación: añadir `esInhabilitacion=true`.
@@ -45,12 +45,12 @@ uv run scripts/sede.py ejecutar clave_login.py --sede justicia --titular yo
   - **pago (NRC)**;
   - finalidad (`select#cboFinalidad`: Trabajo, Licencia, Concurso público, Interés particular…);
   - apostilla y la casilla "reflejar país y finalidad".
-- **Qué hace el agente:** entra, lee el formulario con `probe` y prepara con la persona la finalidad y si necesita apostilla.
-- **Dónde para:** antes de "Siguiente" (`#btnSubmit`). No se pulsó en el mapeo.
-- **La persona:** rellena el teléfono y el pago, si se lo piden, pulsa **"Siguiente"** y luego confirma.
+- **Qué hace el agente:** entra, lee el formulario con `probe` y acuerda con su usuario la finalidad y si necesita apostilla.
+- **Enviar** ("Siguiente", `#btnSubmit`, y luego "Confirmar") es el acto `presentar`; si la sede pide el pago con NRC, también `pagar`. Con esos permisos, rellena teléfono y finalidad, confirma los datos con tu usuario y envía (`sede.py --permitir presentar`). Sin ellos, para antes de "Siguiente" y le dices qué rellenar y qué pulsar.
+- En el mapeo no se pulsó "Siguiente": el paso "Confirmar" está **pendiente de verificar en vivo**.
 - **Éxito:** consulta el estado y descarga en `https://sede.mjusticia.gob.es/certape/clave/FormularioConsulta?lang=es_es&idtramite=1288778883620&idpagina=1215197884559` (`justicia-antecedentes-consulta`, **pendiente**: no recorrido). El certificado lleva CSV.
 
-### 3.2 Certificado de delitos de naturaleza sexual (`justicia-delitos-sexuales`) · Persona
+### 3.2 Certificado de delitos de naturaleza sexual (`justicia-delitos-sexuales`) · Actuar (`generar`)
 
 > ⚠️ **TRAMPA (comprobada el 15-10-2026): abrir la URL de entrada con sesión EMITE el certificado.**
 >
@@ -58,23 +58,22 @@ uv run scripts/sede.py ejecutar clave_login.py --sede justicia --titular yo
 >   - `https://sede.mjusticia.gob.es/redese/clave/solicitarCertificado?…` es el enlace "Acceder" de la ficha oficial.
 >   - Si se abre con sesión iniciada, la sede responde directamente "Solicitud procesada con éxito. El certificado se ha generado correctamente", con los botones "Descargar certificado" (`#butDescargarCertificado`) y "Apostillar".
 >   - No hay formulario ni confirmación: **el GET es la solicitud**, y queda registrada a nombre del titular.
-> - **Regla:** el agente **nunca** abre `/redese/clave/solicitarCertificado` ni `/redese/clave/solicitarCertificadoMenores`.
->   - `sede.py` las bloquea: corta cualquier navegación cuya URL contenga `solicitar`, `emitir`, `expedir`, `generar`… y la registra como "URL que ejecuta una acción al abrirla".
->   - Si ves ese bloqueo, **no lo esquives**.
-> - **Lo emite la persona.**
+> - **Abrir `/redese/clave/solicitarCertificado` o `/redese/clave/solicitarCertificadoMenores` es el acto `generar`.**
+>   - Sin ese permiso, `sede.py` corta cualquier navegación cuya URL contenga `solicitar`, `emitir`, `expedir`, `generar`… y la registra como "URL que ejecuta una acción al abrirla". Pide el permiso a tu usuario; no lo esquives cambiando la URL.
+>   - Con el permiso (`sede.py --permitir generar`), ábrela solo cuando tu usuario quiera ese certificado, una vez: cada apertura queda registrada como una solicitud a su nombre.
 
-- **Qué hace el agente:**
+- **Con el permiso `generar`:** entra por Cl@ve, abre la URL "Acceder" de la ficha, comprueba el texto "Solicitud procesada con éxito" y descarga el PDF con "Descargar certificado" (`#butDescargarCertificado`). "Apostillar" solo si tu usuario lo necesita para el extranjero. El recorrido completo con el agente está **pendiente de verificar en vivo**.
+- **Sin el permiso:**
   - Explica qué es el certificado y para qué lo piden.
-  - Le da el enlace a la ficha: `https://sede.mjusticia.gob.es/es/tramites/certificado-registro-central`.
-  - Le advierte de que, nada más pulsar "Acceder" e identificarse, el certificado se genera sin más pasos.
-- **La persona:** desde la ficha pulsa "Acceder", entra con su certificado y pulsa **"Descargar certificado"**. "Apostillar" solo si lo necesita para el extranjero.
+  - Da el enlace a la ficha: `https://sede.mjusticia.gob.es/es/tramites/certificado-registro-central`.
+  - Advierte de que, nada más pulsar "Acceder" e identificarse, el certificado se genera sin más pasos. La persona pulsa "Acceder", entra con su certificado y pulsa **"Descargar certificado"**.
 - **Éxito:** el texto "Solicitud procesada con éxito" y un PDF con CSV. Pásalo por `scripts/justificante.py`.
 - **Consulta posterior:** `https://sede.mjusticia.gob.es/redese/clave/FormularioConsulta?lang=es_es&idtramite=1288778560459&idpagina=1215197884559` (`justicia-delitos-sexuales-consulta`, **pendiente**: no recorrido; no lo abras sin comprobar antes con `probe` que no emite nada).
 
-### 3.3 Verificar un certificado por CSV · Persona
+### 3.3 Verificar un certificado por CSV · Leer (con CAPTCHA)
 
 - **URL:** `https://sede.mjusticia.gob.es/sedecsvbroker/FormularioVerificacion.action?lang=es_es&idtramite=1288778883620&idpagina=1215197884559`.
-- Según la investigación previa, tiene **reCAPTCHA**. Lo hace la persona (regla dura 4).
+- Según la investigación previa, tiene **reCAPTCHA**: lo resuelve la persona y tú sigues («Fuera del alcance» en `SKILL.md`).
 
 ### 3.4 Carpeta Justicia (`justicia-carpeta`) · Leer · pendiente (no disponible)
 
@@ -101,7 +100,7 @@ uv run scripts/sede.py ejecutar clave_login.py --sede justicia --titular yo
 
 - **URLs que ejecutan al abrirse:** `solicitarCertificado` y `solicitarCertificadoMenores` (3.2). Antes de abrir una URL de Justicia que no esté en esta guía, haz `probe` sin sesión o pregunta.
 - **"¿Cómo va lo mío?"** (`https://sede.mjusticia.gob.es/tramites/como`): tiene reCAPTCHA y no hay vía con certificado. Lo hace la persona.
-- **"Ingresos CDCJ"** (`/pasarela-de-pago-cdcj`), junto al acceso a Carpeta Justicia: es un pago. No lo toques.
+- **"Ingresos CDCJ"** (`/pasarela-de-pago-cdcj`), junto al acceso a Carpeta Justicia: es un pago (acto `pagar`). No lo abras salvo que tu usuario quiera pagar eso.
 - **Sin certificado** existen el formulario en papel `790` y la verificación por CSV. Las dos las hace la persona.
 - **"Redirigiendo al proveedor de identidades…":** a veces se queda ahí. Espera y, si no avanza, para.
 - **`sede.justicia.gob.es`** no resuelve en DNS: el host bueno es `sede.mjusticia.gob.es`.

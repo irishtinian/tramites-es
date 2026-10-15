@@ -5,7 +5,8 @@
 #   Ningún host de esta lista pide certificado en el handshake (tls-probe/cert-probe).
 #   pasarela-ident.clave.gob.es lo pide por ruta en la rama "DNIe / Certificado" de Cl@ve;
 #   en el resto, dónde se pide queda pendiente de verificación con certificado.
-# riesgo: leer | preparar | persona  (persona = firma, presenta, paga, abre notificaciones o cambia datos)
+# riesgo: leer | preparar | actuar  (actuar = acto con efectos: firma, presenta, paga, abre notificaciones,
+#         cambia datos o pide cita; el agente lo hace según los permisos que le dé su usuario)
 # estado: verificado_sin_certificado | parcial | pendiente_con_certificado | bloqueado_por_sede
 # Los IDs de trámite son LOCALES de cada municipio: no se copian a otro.
 # verificado_el va entre comillas: sin ellas YAML lo lee como fecha y buscar.py no puede serializarlo a JSON.
@@ -214,7 +215,7 @@ sedes:
     plataforma: aytos
     login: "https://sede.aytobadajoz.es/sede/miCarpeta.do?ent_id=1&idioma=1"
     origins:
-      - "https://sede.aytobadajoz.es"            # sin mTLS; #firmar (AutoFirma) es de la persona
+      - "https://sede.aytobadajoz.es"            # sin mTLS; #firmar (AutoFirma) necesita el permiso firmar
       - "https://pasarela-ident.clave.gob.es"    # ruta del agente: #btnClave -> DNIe / Certificado
     guia: references/plataforma-aytos.md
     verificado_el: "2026-10-15"
@@ -344,7 +345,7 @@ sedes:
         riesgo: preparar
         url: "https://sede.aytoleon.es/eAdmin/Registrar.do?action=comenzar&tipoReg=2"
         guia: references/plataforma-eadmin-gestdoc.md
-        estado: verificado_sin_certificado        # sede.py bloquea Registrar.do: el enlace lo abre la persona
+        estado: verificado_sin_certificado        # Registrar.do = acto presentar; sin ese permiso, sede.py lo bloquea
       - id: leon-catalogo
         nombre: "Catálogo: actividad y urbanismo (León)"
         alias: ["actividad", "licencia de actividad"]
@@ -525,7 +526,7 @@ sedes:
       - id: barcelona-residus-comercials
         nombre: "Alta en el preu públic de residus comercials, autoliquidación y pago (Barcelona)"
         alias: ["basura comercial", "residuos comerciales"]
-        riesgo: persona
+        riesgo: actuar
         url: "https://seuelectronica.ajuntament.barcelona.cat/oficinavirtual/ca/tramit/20100000131"
         guia: references/plataforma-barcelona.md
         estado: verificado_sin_certificado
@@ -593,7 +594,7 @@ sedes:
       - id: valencia-domicilio-tributario
         nombre: "Cambio de domicilio tributario, HA.GE.45 (València)"
         alias: ["domicilio tributario", "cambiar domicilio"]
-        riesgo: persona
+        riesgo: actuar
         url: "https://sede.valencia.es/sede/registro/procedimiento/HA.GE.45"
         guia: references/plataforma-valencia.md
         estado: verificado_sin_certificado

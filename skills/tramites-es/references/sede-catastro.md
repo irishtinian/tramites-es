@@ -70,9 +70,9 @@ RESULTADO = {"probe": probe(pg)}
 uv run scripts/sede.py ejecutar catastro_form.py --sede catastro --titular yo   # entra por Dest=17 y luego va al formulario
 ```
 
-- **Qué hace el agente:** acuerda con la persona la finalidad exacta y el ámbito (comunidad, provincia, municipio, tipo de bien), y rellena el formulario.
-- **Dónde para:** antes de **DATOS**. Ese botón genera el listado y la certificación y deja registrado el acceso con la finalidad declarada.
-  - Lo pulsa la persona, o el agente con su OK explícito para esa finalidad. `sede.py` no lo bloquea.
+- **Pasos:** acuerda con tu usuario la finalidad exacta y el ámbito (comunidad, provincia, municipio, tipo de bien), y rellena el formulario.
+- **DATOS** genera el listado y la certificación y deja registrado el acceso con la finalidad declarada: es el acto `generar`.
+  - Púlsalo solo con ese permiso y la finalidad confirmada. Ojo: `sede.py` **no** lo bloquea (el botón no casa con sus patrones), así que el permiso lo compruebas tú.
   - Como no se pulsó en el mapeo, la salida está **sin verificar**.
 - **Salida esperada** (según la guía oficial de la certificación catastral):
   - PDF sellado con un **CSV de 16 caracteres** en el margen y código de barras.

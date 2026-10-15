@@ -15,7 +15,7 @@ fuentes:
 
 # Sede propia del Ajuntament de Barcelona
 
-Riesgo: **Leer** (buscador, fichas, espacio personal) y **Preparar** (comunicados, solicitudes, certificados). Firmar, presentar, pagar y abrir notificaciones lo hace la persona.
+Riesgo: **Leer** (buscador, fichas, espacio personal) y **Preparar** (comunicados, solicitudes, certificados). Firmar, presentar, pagar y abrir notificaciones son **actos** (`firmar`, `presentar`, `pagar`, `comparecer`): los haces según los permisos que te dé tu usuario (`sede.py --permitir …`).
 
 Estado **parcial**: el acceso público está mapeado hasta VÀLid; no se llegó a ningún tramitador y la firma no está confirmada.
 
@@ -57,16 +57,16 @@ Espacio profesional: https://seuelectronica2.ajuntament.barcelona.cat/APPS/ptbca
 
 ## Trámites típicos del autónomo
 
-| Trámite | `TRAMIT_ID` | Dónde para el agente | Qué hace la persona |
+| Trámite | `TRAMIT_ID` | Sin permiso, paras en | Actos (con permiso los haces tú) |
 |---|---|---|---|
-| Comunicat d'activitat (tramitación de expedientes de actividades) | `20220001567` | En la ficha, con documentación preparada | Se identifica, adjunta, firma y envía |
+| Comunicat d'activitat (tramitación de expedientes de actividades) | `20220001567` | La ficha, con documentación preparada | Identificarse, adjuntar, firmar y enviar: `firmar`, `presentar` |
 | Llicència municipal d'activitats | `20220001573` | Ídem | Ídem |
 | Llicència de terrassa (solicitud y modificación) | `20150001188` | Ídem | Ídem |
-| Alta en el preu públic de residus comercials | `20100000131` | Localiza la ficha y explica el orden | Hace la autoliquidación y **paga** antes de comunicar la actividad |
-| Certificat negatiu de deute | `20200001444` | Ídem | Lo solicita y firma |
-| Fraccionament de pagament | `20250001752` | Ídem | Lo solicita y firma |
-| Factura electrònica | `20140001157` | Ídem | La presenta |
-| Notificació electrònica | `20180001305` | **Solo lista** en el espacio personal | Abre la que quiera |
+| Alta en el preu públic de residus comercials | `20100000131` | La ficha, con el orden explicado | Autoliquidar y **pagar** antes de comunicar la actividad: `presentar`, `pagar` |
+| Certificat negatiu de deute | `20200001444` | Ídem | Solicitar y firmar: `generar`, `firmar` |
+| Fraccionament de pagament | `20250001752` | Ídem | Solicitar y firmar: `presentar`, `firmar` |
+| Factura electrònica | `20140001157` | Ídem | Presentarla: `presentar` |
+| Notificació electrònica | `20180001305` | El listado del espacio personal | Abrir: `comparecer` |
 
 - Orden para abrir un negocio, según la sede: alta en residus comercials (autoliquidación pagada) → comunicat d'activitat → terrassa, si aplica.
 - **IAE:** las personas físicas están exentas; el alta censal va a la AEAT (`sede-aeat.md`).
@@ -76,7 +76,7 @@ Espacio profesional: https://seuelectronica2.ajuntament.barcelona.cat/APPS/ptbca
 ## Firma
 
 - **Pendiente de confirmar** por trámite. VÀLid admite firma no criptográfica tras identificarse y firma con certificado, pero no se llegó al tramitador.
-- La firma la hace la persona; sede.py captura `afirma://` y bloquea firmar, enviar y pagar.
+- Firmar, enviar y pagar son los actos `firmar`, `presentar` y `pagar`. Con esos permisos, `sede.py` pasa `afirma://` a AutoFirma (`setup-autofirma.md`); sin ellos, captura `afirma://` y bloquea firmar, enviar y pagar.
 - Éxito esperado: solicitud y estado en **El meu espai** o en la carpeta profesional, con asiento y justificante. Verifica con `scripts/justificante.py` y en ese listado.
 
 ## Trampas

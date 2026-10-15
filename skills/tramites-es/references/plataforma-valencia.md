@@ -13,7 +13,7 @@ fuentes:
 
 # Sede propia del Ajuntament de València
 
-Riesgo: **Leer** (catálogo, carpeta) y **Preparar** (comunicaciones, solicitudes, certificados). Firmar, presentar, pagar, domiciliar, cambiar datos y abrir notificaciones lo hace la persona.
+Riesgo: **Leer** (catálogo, carpeta) y **Preparar** (comunicaciones, solicitudes, certificados). Firmar, presentar, pagar, domiciliar, cambiar datos y abrir notificaciones son **actos** (`firmar`, `presentar`, `pagar`, `cambiar_datos`, `comparecer`): los haces según los permisos que te dé tu usuario (`sede.py --permitir …`).
 
 Estado **parcial**: el acceso está mapeado hasta la elección de identidad; no se abrió ningún formulario y la firma no está confirmada.
 
@@ -52,20 +52,20 @@ Identificación: https://sede.valencia.es/sede/authClave.xhtml/carpeta
 
 ## Trámites típicos del autónomo
 
-| Trámite | Código | Dónde para el agente | Qué hace la persona |
+| Trámite | Código | Sin permiso, paras en | Actos (con permiso los haces tú) |
 |---|---|---|---|
-| Comunicación de actividad inocua | `LA.AS.10` | En la ficha, con documentación preparada | Se identifica, adjunta, firma y envía |
+| Comunicación de actividad inocua | `LA.AS.10` | La ficha, con documentación preparada | Identificarse, adjuntar, firmar y enviar: `firmar`, `presentar` |
 | Declaración responsable de apertura sin obras | `LA.AS.60` | Ídem | Ídem |
 | Declaración responsable de comercio minorista | `LA.AS.70` | Ídem | Ídem |
 | Despacho profesional en vivienda | `LA.AS.80` | Ídem | Ídem |
 | Terraza | `VP.OC.15` | Ídem | Ídem |
-| Certificados de situación tributaria (estar al corriente) | `HA.GT.30` | Ídem | Lo solicita y firma |
-| Fraccionamientos y aplazamientos | `HA.GT.10` | Ídem | Lo solicita y firma |
+| Certificados de situación tributaria (estar al corriente) | `HA.GT.30` | Ídem | Solicitar y firmar: `generar`, `firmar` |
+| Fraccionamientos y aplazamientos | `HA.GT.10` | Ídem | Solicitar y firmar: `presentar`, `firmar` |
 | Bonificación del IAE por inicio de actividad | `HA.AE.15` | Ídem | Ídem |
-| Tasa de basura: domiciliación / no sujeción / bonificaciones | `HA.TA.20` / `HA.TA.25` / `HA.TA.15` | Explica y prepara | Domiciliar es cambiar datos bancarios: **solo la persona** |
-| Domicilio tributario | `HA.GE.45` | Solo explica | Cambiar datos: **solo la persona** |
-| Certificado de padrón | `PA.CE.10` | Ídem que los certificados | Lo solicita |
-| Instancias, expedientes, cuenta tributaria, padrón, notificaciones | Carpeta | Lista. Notificaciones: **solo lista** | Abre la que quiera |
+| Tasa de basura: domiciliación / no sujeción / bonificaciones | `HA.TA.20` / `HA.TA.25` / `HA.TA.15` | La explicación y la solicitud preparada | Domiciliar (datos bancarios): `cambiar_datos`, `firmar`, `presentar`; confirma la cuenta con tu usuario |
+| Domicilio tributario | `HA.GE.45` | La explicación | Cambiarlo: `cambiar_datos`, `firmar`, `presentar` |
+| Certificado de padrón | `PA.CE.10` | Ídem que los certificados | Solicitarlo: `generar` |
+| Instancias, expedientes, cuenta tributaria, padrón, notificaciones | Carpeta | — (listar es libre) | Abrir notificaciones: `comparecer` |
 
 - La cuenta tributaria ("El meu compte tributari") está en `https://sede.valencia.es/sede/servicios/redirectExterno/3` y redirige a la identificación.
 - **Tasa de basura:** la nueva tasa municipal se calcula por consumo de agua y es distinta de la TAMER de la EMTRE.
@@ -76,7 +76,7 @@ Identificación: https://sede.valencia.es/sede/authClave.xhtml/carpeta
 ## Firma
 
 - **No confirmada:** no se abrió ningún formulario de trámite.
-- La firma la hace la persona; sede.py captura `afirma://` y bloquea firmar y enviar.
+- Firmar y enviar son los actos `firmar` y `presentar`. Con esos permisos, `sede.py` pasa `afirma://` a AutoFirma (`setup-autofirma.md`); sin ellos, captura `afirma://` y bloquea firmar y enviar.
 - Éxito esperado: asiento y justificante; la instancia aparece en la carpeta. Verifica con `scripts/justificante.py` y en el listado.
 
 ## Trampas

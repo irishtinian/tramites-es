@@ -14,7 +14,7 @@ fuentes:
 
 # Plataforma AOC (Seu-e, e-TRAM, VÀLid, MyGov, e-NOTUM) — Cataluña
 
-Riesgo: **Leer** (catálogo, seguimiento, listado de notificaciones) y **Preparar** (instancias y comunicaciones). Firmar, presentar, pagar y abrir notificaciones lo hace la persona.
+Riesgo: **Leer** (catálogo, seguimiento, listado de notificaciones) y **Preparar** (instancias y comunicaciones). Firmar, presentar, pagar y abrir notificaciones son **actos** (`firmar`, `presentar`, `pagar`, `comparecer`): los haces según los permisos que te dé tu usuario (`sede.py --permitir …`).
 
 ## Qué es y dónde se usa
 
@@ -71,13 +71,13 @@ Mi espacio: https://seu-e.cat/mygov/{ENS}
 
 ## Trámites típicos del autónomo
 
-| Trámite | Entrada | Dónde para el agente | Qué hace la persona |
+| Trámite | Entrada | Sin permiso, paras en | Actos (con permiso los haces tú) |
 |---|---|---|---|
-| Instància genèrica (instancia general) | Ficha `.../tramits/tramit/{TRAMIT_ID}` (ver tabla de ejemplo) | En la ficha, con el texto y los adjuntos preparados. Si sede.py bloquea "Tramitar", ese clic es de la persona | Pulsa "Tramitar", se identifica, revisa, adjunta, firma y envía |
-| Comunicación o declaración de actividad, licencias | Catálogo → categoría de indústria/comerç o urbanisme | Localiza la ficha y prepara la documentación | Igual que la instancia |
-| Tasas, tributos, recibos | Catálogo → categoría de recaptació | Localiza la ficha o el recaudador externo | Paga o pide el certificado |
-| Seguimiento de trámites | `https://seu-e.cat/mygov/{ENS}` → "Consulta els teus tràmits" | Lista estado y fechas | — |
-| Notificaciones | e-NOTUM, desde MyGov | **Solo lista** remitente, asunto y fechas | Abre la notificación ella, si quiere |
+| Instància genèrica (instancia general) | Ficha `.../tramits/tramit/{TRAMIT_ID}` (ver tabla de ejemplo) | La ficha, con el texto y los adjuntos preparados ("Tramitar" bloqueado) | "Tramitar", identificarse, revisar, adjuntar, firmar y enviar: `presentar`, `firmar` |
+| Comunicación o declaración de actividad, licencias | Catálogo → categoría de indústria/comerç o urbanisme | La ficha, con la documentación preparada | Igual que la instancia |
+| Tasas, tributos, recibos | Catálogo → categoría de recaptació | La ficha o el recaudador externo | Pagar: `pagar`; certificado: `generar` |
+| Seguimiento de trámites | `https://seu-e.cat/mygov/{ENS}` → "Consulta els teus tràmits" | — (listar estado y fechas es libre) | — |
+| Notificaciones | e-NOTUM, desde MyGov | El listado (remitente, asunto y fechas) | Abrir: `comparecer` |
 
 - Los recibos y certificados tributarios dependen del organismo: muchos municipios catalanes los tienen en el ORGT de la Diputació de Barcelona u otro recaudador. Usa `buscar.py` (columna `recaudador`) o pide a la persona un recibo.
 - Desde el 16-dic-2024 e-NOTUM está integrado con DEHú, pero **sin la Generalitat ni su sector público**. Las notificaciones municipales pueden verse en los dos sitios.
@@ -86,7 +86,7 @@ Mi espacio: https://seu-e.cat/mygov/{ENS}
 ## Firma
 
 - **Deducida, no verificada:** e-TRAM combina la identificación VÀLid con la firma del formulario y los documentos según el trámite. VÀLid admite firma no criptográfica tras identificarse y firma con certificado.
-- Cualquier firma (VÀLid, AutoFirma, idCAT Mòbil) la hace la persona. sede.py captura `afirma://` y bloquea los botones de firmar y enviar.
+- Firmar (VÀLid con certificado, AutoFirma) y enviar son los actos `firmar` y `presentar`. Con esos permisos, `sede.py` pasa `afirma://` a AutoFirma (`setup-autofirma.md`); sin ellos, captura `afirma://` y bloquea los botones de firmar y enviar. La firma con idCAT Mòbil (SMS) queda fuera del alcance: la hace la persona.
 - Éxito esperado: asiento o justificante de registro en el trámite y aparición posterior en MyGov. Confírmalo con `scripts/justificante.py` y en el listado de MyGov, no con la pantalla de "correcto".
 
 ## Trampas

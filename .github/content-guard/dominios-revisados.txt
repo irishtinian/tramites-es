@@ -68,3 +68,6 @@ portalciudadano.ayto-alcorcon.es
 sede.mula.regiondemurcia.es
 www.zaragoza.es
 tributos.zaragoza.es
+
+# Cita previa sin certificado (Ministerio del Interior; enlazada desde www.dnielectronico.es)
+www.citapreviadnie.es

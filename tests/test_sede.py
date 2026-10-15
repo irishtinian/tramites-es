@@ -138,10 +138,10 @@ class Ruta:
         self.decision = "sigue"
 
 
-def _decidir(sede, url: str, method: str = "GET", navegacion: bool = True):
+def _decidir(sede, url: str, method: str = "GET", navegacion: bool = True, permitidos=None):
     sesion = SimpleNamespace(bloqueos=[])
     ruta = Ruta()
-    sede._guarda_red(sesion)(ruta, Peticion(url, method, navegacion))
+    sede._guarda_red(sesion, permitidos)(ruta, Peticion(url, method, navegacion))
     return ruta.decision, sesion.bloqueos
 
 
@@ -182,6 +182,109 @@ def test_guarda_de_red(sede, url, method, navegacion, esperado):
     assert bool(bloqueos) == (esperado == "bloqueada")
     for b in bloqueos:
         assert "?" not in b["d"]  # el registro no guarda la query (puede llevar identificadores)
+        assert b["permiso"] in sede.ACTOS and f"requiere permiso '{b['permiso']}'" in b["why"]
+
+
+# ------------------------------------------------------------------ permisos: qué acto es cada petición
+CASOS_ACTO = [
+    # (url, método, navegación, acto que exige)
+    ("https://sede.mjusticia.gob.es/redese/clave/solicitarCertificado", "GET", True, "generar"),
+    ("https://ayto-ficticio.sedelectronica.es/catalog/tw/0f0f0f0f-0000-4000-8000-000000000000", "GET", True, "presentar"),
+    ("https://dehu.redsara.es/es/notifications/123/open", "GET", False, "comparecer"),
+    ("https://www1.agenciatributaria.gob.es/wlpl/MODELO-X/presentar", "POST", False, "presentar"),
+    ("https://sede.ayto-ficticio.example/firmaDocumento", "POST", False, "firmar"),
+    ("https://sis.redsys.es/sis/realizarPago", "GET", True, "pagar"),
+    ("https://sede.ayto-ficticio.example/tributos/baja", "POST", False, "cambiar_datos"),
+]
+
+
+@pytest.mark.parametrize("url, method, navegacion, acto", CASOS_ACTO)
+def test_acto_de_peticion_sin_permisos(sede, url, method, navegacion, acto):
+    r = sede.acto_de_peticion(method, url, navegacion, set())
+    assert r is not None and r[0] == acto
+
+
+@pytest.mark.parametrize("url, method, navegacion, acto", CASOS_ACTO)
+def test_acto_de_peticion_con_su_permiso_sigue(sede, url, method, navegacion, acto):
+    assert sede.acto_de_peticion(method, url, navegacion, {acto}) is None
+    decision, bloqueos = _decidir(sede, url, method, navegacion, permitidos={acto})
+    assert decision == "sigue" and not bloqueos
+
+
+def test_un_permiso_no_abre_otros_actos(sede):
+    # Con 'firmar' no se puede presentar ni pagar.
+    r = sede.acto_de_peticion("POST", "https://www1.agenciatributaria.gob.es/wlpl/MODELO-X/presentar", False, {"firmar"})
+    assert r is not None and r[0] == "presentar"
+    r = sede.acto_de_peticion("GET", "https://sis.redsys.es/sis/realizarPago", True, {"firmar", "presentar"})
+    assert r is not None and r[0] == "pagar"
+
+
+def test_todo_permite_todos_los_actos(sede):
+    todos = sede._normalizar_permisos("todo", "prueba")
+    assert todos == set(sede.ACTOS)
+    for url, method, navegacion, _acto in CASOS_ACTO:
+        assert sede.acto_de_peticion(method, url, navegacion, todos) is None
+
+
+@pytest.mark.parametrize("valor, esperado", [
+    (None, set()), ("", set()), ([], set()),
+    ("firmar,presentar", {"firmar", "presentar"}),
+    ("firmar presentar", {"firmar", "presentar"}),
+    (["Pagar", " cita "], {"pagar", "cita"}),
+    (["todo"], {"generar", "firmar", "presentar", "pagar", "comparecer", "cambiar_datos", "cita"}),
+])
+def test_normalizar_permisos(sede, valor, esperado):
+    assert sede._normalizar_permisos(valor, "prueba") == esperado
+
+
+def test_normalizar_permisos_rechaza_desconocidos(sede):
+    with pytest.raises(SystemExit, match="permisos desconocidos"):
+        sede._normalizar_permisos("firmar,volar", "prueba")
+
+
+def test_permisos_suma_fichero_y_argumento(sede, permisos):
+    permisos.FICHERO.write_text("permitir: [cita]\n", encoding="utf-8")
+    assert sede.permisos(SimpleNamespace(permitir="firmar")) == {"cita", "firmar"}
+    assert sede.permisos(SimpleNamespace(permitir=None)) == {"cita"}
+    permisos.FICHERO.unlink()
+    assert sede.permisos(SimpleNamespace()) == set()
+
+
+def test_permisos_del_fichero_invalidos_paran(sede, permisos):
+    permisos.FICHERO.write_text("permitir: [volar]\n", encoding="utf-8")
+    with pytest.raises(SystemExit, match="permisos desconocidos"):
+        sede.permisos(SimpleNamespace())
+
+
+class Dialogo:
+    def __init__(self, tipo: str, mensaje: str):
+        self.type, self.message, self.resultado = tipo, mensaje, None
+
+    def accept(self):
+        self.resultado = "aceptado"
+
+    def dismiss(self):
+        self.resultado = "cancelado"
+
+
+def _dialogo(sede, tipo, mensaje, permitidos):
+    manejadores = []
+    sede._dialogos(SimpleNamespace(on=lambda _ev, f: manejadores.append(f)), permitidos)
+    d = Dialogo(tipo, mensaje)
+    manejadores[0](d)
+    return d.resultado
+
+
+@pytest.mark.parametrize("tipo, mensaje, permitidos, esperado", [
+    ("beforeunload", "", set(), "aceptado"),
+    ("confirm", "¿Desea enviar la solicitud?", set(), "cancelado"),
+    ("confirm", "¿Desea enviar la solicitud?", {"presentar"}, "aceptado"),
+    ("confirm", "¿Desea pagar ahora?", {"presentar"}, "cancelado"),
+    ("confirm", "¿Confirma la cita?", {"cita"}, "aceptado"),
+    ("alert", "Aviso", {"presentar"}, "cancelado"),
+])
+def test_dialogos_segun_permisos(sede, tipo, mensaje, permitidos, esperado):
+    assert _dialogo(sede, tipo, mensaje, permitidos) == esperado
 
 
 # ------------------------------------------------------------------ expresiones regulares
@@ -287,6 +390,31 @@ def test_recetas_que_esquivan_la_guarda_de_red(sede, receta):
     assert sede.RECETA_PROHIBIDO.search(receta)
 
 
+@pytest.mark.parametrize("receta, acto", [
+    ("pg.set_input_files('input', 'fichero.dec')", "presentar"),
+    ("pg.locator('form').evaluate('f => f.submit()')", "presentar"),
+    ("pg.evaluate('procesoFirma()')", "firmar"),
+    ("pg.evaluate('pagarRecibo()')", "pagar"),
+])
+def test_receta_con_acto_necesita_su_permiso(sede, receta, acto):
+    motivo = sede.receta_prohibida(receta, set())
+    assert motivo and f"requiere permiso '{acto}'" in motivo
+    assert sede.receta_prohibida(receta, {acto}) is None
+
+
+@pytest.mark.parametrize("receta", [
+    "pg.add_init_script('window.__tGuard = 0')", "ctx.unroute('**/*')", "import subprocess",
+    "c = para_playwright('yo')", "ctx.route('**/*', lambda r: r.continue_())", "abrir('AutoFirma')",
+    "pg.evaluate('window.__tAfirma(\"afirma://x\")')",
+])
+def test_receta_que_toca_las_guardas_no_se_permite_nunca(sede, receta):
+    assert sede.receta_prohibida(receta, set(sede.ACTOS))
+
+
+def test_receta_legitima_sin_permisos(sede):
+    assert sede.receta_prohibida(RECETA_LEGITIMA, set()) is None
+
+
 def test_ejecutar_rechaza_la_receta_sin_abrir_el_navegador(sede, tmp_path, capsys):
     receta = tmp_path / "receta.py"
     receta.write_text("pg.add_init_script('window.__tGuard = 0')\n", encoding="utf-8")
@@ -295,9 +423,52 @@ def test_ejecutar_rechaza_la_receta_sin_abrir_el_navegador(sede, tmp_path, capsy
 
 
 # ------------------------------------------------------------------ guardas de página (texto de la regex)
-def test_guard_js_lleva_las_regex(sede):
-    assert "%DENY%" not in sede.GUARD_JS and "%NOTIF%" not in sede.GUARD_JS
-    assert sede.DENY_JS in sede.GUARD_JS and sede.NOTIF_JS in sede.GUARD_JS
+def test_guard_sin_permisos_lleva_todas_las_regex(sede):
+    js = sede.construir_guard(set())
+    assert "%" + "BLOQ%" not in js and not re.search(r"%[A-Z_]+%", js)
+    for acto, rx in sede.JS_ACTO.items():
+        assert json.dumps([acto, rx]) in js, acto
+    assert sede.NOTIF_JS in js and sede.CITA_URL_JS in js and sede.CITA_BOTON_JS in js
+    for bandera in ("NOTIF_ON", "AF_BLOQ", "CITA_ON"):
+        assert f"const {bandera} = true;" in js
+
+
+def test_guard_con_todos_los_permisos_no_bloquea_actos(sede):
+    js = sede.construir_guard(set(sede.ACTOS))
+    assert "const BLOQ = [].map(" in js
+    for bandera in ("NOTIF_ON", "AF_BLOQ", "CITA_ON"):
+        assert f"const {bandera} = false;" in js
+
+
+def test_guard_solo_quita_lo_permitido(sede):
+    js = sede.construir_guard({"firmar", "cita"})
+    assert json.dumps(["firmar", sede.JS_ACTO["firmar"]]) not in js
+    assert json.dumps(["cita", sede.JS_ACTO["cita"]]) not in js
+    assert json.dumps(["pagar", sede.JS_ACTO["pagar"]]) in js
+    assert "const AF_BLOQ = false;" in js and "const CITA_ON = false;" in js and "const NOTIF_ON = true;" in js
+
+
+@pytest.mark.parametrize("url, es_cita", [
+    ("https://www.citapreviadnie.es/citaPreviaDni/", True),
+    ("https://icp.administracionelectronica.gob.es/icpplus/index.html", True),
+    ("https://sedeclave.dgt.gob.es/WEB_CITE_CONSULTA/paginas/inicio.faces", True),
+    ("https://www2.agenciatributaria.gob.es/wlpl/TOCP-MUTE/internet/identificacion", True),
+    ("https://citaprevia-sede.sepe.gob.es/citapreviasepe/", True),
+    ("https://sede.ayto-ficticio.example/cita/nueva", True),
+    ("https://sede.mjusticia.gob.es/redese/clave/solicitarCertificado", False),   # "solicitar" contiene "cita"
+    ("https://sede.ayto-ficticio.example/datos-del-solicitante", False),
+    ("https://www1.agenciatributaria.gob.es/wlpl/TEWV-CORE/ResumenVlt", False),
+])
+def test_paginas_de_cita(sede, url, es_cita):
+    assert bool(re.search(sede.CITA_URL_JS, url, re.I)) is es_cita
+
+
+@pytest.mark.parametrize("texto, bloquea", [
+    ("Confirmar", True), ("CONFIRMAR", True), (" Confirmar cita", True), ("Confirmar y finalizar", True),
+    ("Aceptar", False), ("Siguiente", False), ("Volver", False),
+])
+def test_boton_final_de_cita(sede, texto, bloquea):
+    assert bool(re.search(sede.CITA_BOTON_JS, texto, re.I)) is bloquea
 
 
 @pytest.mark.parametrize("texto, bloquea", [

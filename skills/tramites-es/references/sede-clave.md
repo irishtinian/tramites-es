@@ -24,10 +24,10 @@ Cl@ve **no es una sede**: es la pasarela por la que te identificas en muchas sed
 
 | Botón | `onclick` | ¿Para el agente? |
 |---|---|---|
-| Acceso Cl@ve Móvil (incluye Cl@ve PIN) | `selectedIdP('IDP_MOVIL')` | **No** (regla dura 3) |
+| Acceso Cl@ve Móvil (incluye Cl@ve PIN) | `selectedIdP('IDP_MOVIL')` | **No** («Fuera del alcance» en `SKILL.md`) |
 | **Acceso DNIe / Certificado electrónico** | `selectedIdP('AFIRMA')` | **Sí, el único** |
 | Acceso Ciudadanos UE | `selectedIdP('EIDAS')` | No |
-| Acceso Cl@ve permanente | `selectedIdP('SEGSOC')` | **No** (regla dura 3) |
+| Acceso Cl@ve permanente | `selectedIdP('SEGSOC')` | **No** («Fuera del alcance» en `SKILL.md`) |
 
 - **Flujo con certificado:**
   1. Clic en "DNIe / Certificado".

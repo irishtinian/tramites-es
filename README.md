@@ -1,26 +1,45 @@
 # tramites-es
 
-**Tu agente de IA, haciendo de gestor con tu certificado digital. Tú siempre pulsas el botón final.**
+**Tu agente de IA, haciendo de gestor con tu certificado digital. Lo que puede hacer por ti lo decides tú.**
 
-`tramites-es` es un *skill* abierto (licencia MIT) que enseña a cualquier agente de IA (Claude Code, Codex, OpenClaw, Gemini CLI, Cursor, Copilot…) a moverse por las sedes electrónicas españolas en nombre de un **autónomo**: vigilar notificaciones sin abrirlas, sacar certificados, consultar deudas y recibos, preparar trámites y saber qué plataforma usa cada ayuntamiento. Todo **en tu ordenador**, con **tu** certificado, y sin que el agente pueda firmar, presentar ni pagar por ti.
+`tramites-es` es un *skill* abierto (licencia MIT) que enseña a cualquier agente de IA (Claude Code, Codex, OpenClaw, Gemini CLI, Cursor, Copilot…) a moverse por las sedes electrónicas españolas en nombre de un **autónomo**: vigilar notificaciones, sacar certificados, consultar deudas y recibos, preparar y presentar trámites, pagar, pedir citas previas y saber qué plataforma usa cada ayuntamiento. Todo **en tu ordenador** y con **tu** certificado.
 
-> ⚠️ **Estado: en desarrollo (v0.1.0-dev). No publicado todavía.** Las guías se están verificando sede a sede.
+> ⚠️ **Estado: en desarrollo (v0.2.0-dev). No publicado todavía.** Las guías se están verificando sede a sede.
 
-## Qué hace (v0.1)
+## Qué hace
 
-- 📬 **Notificaciones**: lista lo pendiente en DEHú, AEAT, Seguridad Social, DGT y tu ayuntamiento **sin abrir nada** (abrir una notificación hace correr los plazos).
-- 📄 **Certificados de estar al corriente** (AEAT, Seguridad Social, ATC Canarias): te deja todo preparado.
+- 📬 **Notificaciones**: lista lo pendiente en DEHú, AEAT, Seguridad Social, DGT y tu ayuntamiento, con el plazo de cada una. Si le das permiso, las abre y te explica qué piden (abrir una notificación hace correr los plazos).
+- 📄 **Certificados de estar al corriente** (AEAT, Seguridad Social, ATC Canarias) y otros documentos.
 - 💶 **Consultas**: deudas, recibos y bases de autónomo, vida laboral, datos fiscales y censales, declaraciones presentadas, recibos municipales.
+- ✍️ **Presentar y pagar**: instancias, declaraciones, solicitudes de ayudas y pagos, firmando con AutoFirma, si tú se lo permites.
+- 📅 **Cita previa** para ti: AEAT, Seguridad Social, DGT, DNI, extranjería, Registro Civil, SEPE…
 - 🗓️ **Calendario fiscal personal**: AEAT, ATC (Canarias) y haciendas forales, con fuente oficial y fecha de verificación.
 - 🏛️ **Tu ayuntamiento**: qué plataforma usa (Gestiona, TAO/STA, GTT, AOC, Sedipualb@…) y cómo presentar una instancia general en cualquier administración (REG/SIR).
 - 🎯 **Ayudas abiertas** para autónomos (base de datos nacional de subvenciones).
 
-## Qué NO hace (por diseño)
+## Tú decides qué puede hacer tu agente
 
-- ❌ No firma, no presenta, no paga, no da de alta ni de baja. **Eso lo pulsas tú** en la página real o en AutoFirma.
-- ❌ No abre notificaciones sin tu OK.
-- ❌ No usa Cl@ve PIN/Móvil/Permanente ni tus SMS (la AEAT lo considera uso indebido). Solo tu certificado digital.
-- ❌ No resuelve CAPTCHAs ni coge citas previas.
+Consultar no tiene efectos. Lo demás son **actos**, y cada uno es un permiso que das tú:
+
+| Permiso | Qué permite |
+|---|---|
+| `generar` | pedir certificados, informes y documentos |
+| `firmar` | firmar en tu nombre (AutoFirma, firma de la AEAT) |
+| `presentar` | enviar, registrar, adjuntar y presentar |
+| `pagar` | pagar deudas, recibos y tasas |
+| `comparecer` | abrir notificaciones (empiezan los plazos) |
+| `cambiar_datos` | domiciliar, dar de baja, cambiar datos de contacto o bancarios |
+| `cita` | reservar o confirmar una cita previa a tu nombre |
+
+- Fíjalos una vez en tu terminal: `uv run scripts/permisos.py fijar todo` (o solo los que quieras, p. ej. `fijar generar,cita`).
+- O dáselos a tu agente en sus instrucciones o en la conversación: el agente los pasa con `sede.py --permitir …`.
+- **Sin permiso**, el agente consulta y prepara, y antes de un acto te pregunta o te deja el enlace y el botón exacto. El navegador del skill bloquea los actos no permitidos para que nada con efectos ocurra sin querer.
+
+## Lo que el skill no hace, aunque le des permiso
+
+- ❌ No usa Cl@ve PIN/Móvil/Permanente ni tus SMS: la AEAT lo considera uso indebido aunque consientas. Solo tu certificado digital.
+- ❌ No resuelve CAPTCHAs: los resuelves tú y el agente sigue.
+- ❌ No acapara citas: pide **una** para ti, a ritmo humano. Nada de bots que refrescan para cazar huecos.
 - ❌ No envía tus datos ni tu certificado a ningún servidor. No hay nube: todo corre en tu equipo.
 - ❌ No es asesoramiento fiscal ni legal. Ver [DISCLAIMER.md](DISCLAIMER.md).
 
@@ -28,7 +47,7 @@
 
 - El certificado y su contraseña solo los toca un módulo (`scripts/cert.py`). Nunca aparecen en el chat, en los logs ni en la línea de comandos.
 - El navegador solo presenta tu certificado a **dominios oficiales**. En Linux arranca además con un almacén de certificados aislado. En Windows y macOS el sistema puede ofrecer otros certificados instalados; si aparece un selector, lo eliges tú.
-- Bloqueos activos en el navegador: los botones de firmar, enviar, presentar, pagar o comparecer quedan bloqueados para el agente. AutoFirma no se lanza sola.
+- Los actos que no hayas permitido quedan bloqueados en el navegador (botones, envíos, pasarelas de pago, AutoFirma). Lo que sí permites, el agente lo hace y lo verifica con el justificante oficial.
 - Sin hooks, sin servidores MCP y sin binarios: Markdown y scripts Python que puedes leer.
 - Ver [SECURITY.md](SECURITY.md) para el modelo de amenazas y cómo reportar problemas.
 
@@ -83,6 +102,8 @@ Para actualizar: `git pull` y vuelve a ejecutar el instalador. Para desinstalar:
 
 1. Reinicia tu agente y pídele *"comprueba el entorno de tramites-es"*: ejecuta `scripts/entorno.py` y te dice qué falta.
 2. El certificado lo configuras **tú** en tu terminal, desde la carpeta del skill instalado (el agente no puede hacerlo, a propósito): `uv run scripts/cert.py configurar --alias yo --p12 <ruta al .p12 o .pfx>`. Las guías `references/setup-windows.md`, `setup-macos.md` y `setup-linux.md` lo explican paso a paso.
+3. Decide qué puede hacer tu agente: `uv run scripts/permisos.py fijar <permisos>` (o `fijar todo`). Puedes verlos con `permisos.py ver` y quitarlos con `permisos.py quitar`.
+4. Para firmar, instala AutoFirma (`references/setup-autofirma.md`).
 
 ## Cómo contribuir
 

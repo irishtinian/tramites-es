@@ -14,7 +14,7 @@ fuentes:
 
 # Plataforma Aytos (`portal/entidades.do`)
 
-Riesgo: **Leer** (catálogo, Mi Carpeta) y **Preparar** (instancias, declaraciones responsables). Firmar, presentar, pagar y abrir notificaciones lo hace la persona.
+Riesgo: **Leer** (catálogo, Mi Carpeta) y **Preparar** (instancias, declaraciones responsables). Firmar, presentar, pagar y abrir notificaciones son **actos** (`firmar`, `presentar`, `pagar`, `comparecer`): los haces según los permisos que te dé tu usuario (`sede.py --permitir …`).
 
 ## Qué es y dónde se usa
 
@@ -43,7 +43,7 @@ Carpeta:   https://{HOST}/sede/miCarpeta.do?ent_id={ENT_ID}&idioma=1
 
 - Mi Carpeta llama a `abrirLogin(...)` y abre un modal `form#formLogin`.
 - Botones vistos:
-  - `#firmar` (`onclick=pulsarFirmarIdentificate()`): identificación **firmando con AutoFirma**. Es una firma: **sede.py lo bloquea** y lo pulsa la persona.
+  - `#firmar` (`onclick=pulsarFirmarIdentificate()`): identificación **firmando con AutoFirma**. Es el acto `firmar`: sin ese permiso, **sede.py lo bloquea**.
   - `#btnClave` (`onclick=pulsarLoginClave()`): pasarela Cl@ve. En la pasarela, el agente solo usa "DNIe / Certificado electrónico"; el certificado lo pide entonces `https://pasarela-ident.clave.gob.es`.
   - Según la instalación, también VÀLid, idCAT o Giltza. idCAT Mòbil y Giltza con contraseña o SMS son de la persona.
 - Origins:
@@ -54,33 +54,33 @@ Carpeta:   https://{HOST}/sede/miCarpeta.do?ent_id={ENT_ID}&idioma=1
 | `https://portalciudadano.ayto-alcorcon.es` | Sin mTLS. |
 | `https://pasarela-ident.clave.gob.es` | Pide certificado en la rama Cl@ve "DNIe / Certificado" (`sede-clave.md`). |
 
-- Ruta recomendada para el agente: **Cl@ve → DNIe / Certificado electrónico**. La identificación por `#firmar` la hace la persona con AutoFirma. Retorno de Cl@ve a Mi Carpeta: **pendiente de verificación con certificado**.
+- Ruta recomendada para el agente: **Cl@ve → DNIe / Certificado electrónico**, que no necesita firmar. La identificación por `#firmar` necesita el permiso `firmar` y AutoFirma. Retorno de Cl@ve a Mi Carpeta: **pendiente de verificación con certificado**.
 
 ## Trámites típicos del autónomo
 
-| Trámite | Entrada | Dónde para el agente | Qué hace la persona |
+| Trámite | Entrada | Sin permiso, paras en | Actos (con permiso los haces tú) |
 |---|---|---|---|
-| Instancia general | Ficha `tramitacionElectronica.do?...` (códigos del catálogo) | En la ficha, con texto y adjuntos preparados | Se identifica, adjunta, firma y envía |
-| Declaración responsable de actividad u obra | Catálogo → actividades / urbanismo | Localiza el asunto y prepara la documentación | Igual |
-| Tributos, autoliquidaciones, pagos | Portada → enlaces de tributos u oficina tributaria | Localiza la oficina y consulta | Paga o firma |
-| Mis trámites | Mi Carpeta → Trámites | Lista asientos y estados | — |
-| Notificaciones | Mi Carpeta → Notificaciones | **Solo lista** | Abre la que quiera |
-| Cotejo de documentos por CSV | Verificador de documentos | Prepara el CSV | Resuelve el CAPTCHA |
+| Instancia general | Ficha `tramitacionElectronica.do?...` (códigos del catálogo) | La ficha, con texto y adjuntos preparados | Identificarse, adjuntar, firmar y enviar: `firmar`, `presentar` |
+| Declaración responsable de actividad u obra | Catálogo → actividades / urbanismo | El asunto, con la documentación preparada | Igual |
+| Tributos, autoliquidaciones, pagos | Portada → enlaces de tributos u oficina tributaria | La consulta | Pagar: `pagar`; autoliquidar: `presentar`, `firmar` |
+| Mis trámites | Mi Carpeta → Trámites | — (listar asientos y estados es libre) | — |
+| Notificaciones | Mi Carpeta → Notificaciones | El listado | Abrir: `comparecer` |
+| Cotejo de documentos por CSV | Verificador de documentos | El CSV preparado | El CAPTCHA lo resuelve la persona |
 
-- **Badajoz:** tributos en el portal propio `https://tributos.aytobadajoz.es` (CiudadaNET). Hay pago con tarjeta: eso es de la persona.
+- **Badajoz:** tributos en el portal propio `https://tributos.aytobadajoz.es` (CiudadaNET). Hay pago con tarjeta (acto `pagar`; los datos de la tarjeta los mete la persona).
 - **Alcorcón:** autoliquidaciones, tasas y consulta de deuda en el propio portal.
 - Contenido de Mi Carpeta con sesión iniciada: **pendiente de verificación con certificado**.
 
 ## Firma
 
 - **AutoFirma trifásica**, deducida de `firmaDigital.js`, `autoscript.js` y `pulsarFirmarIdentificate()`. No se ejecutó.
-- Toda firma la hace la persona. sede.py captura `afirma://` y bloquea `#firmar`.
+- Firmar es el acto `firmar`. Con ese permiso, `sede.py` pasa `afirma://` a AutoFirma (`setup-autofirma.md`); sin él, lo captura y bloquea `#firmar`.
 - Éxito esperado: asiento y justificante en **Mi Carpeta → Trámites**. Los documentos emitidos llevan CSV. Verifica con `scripts/justificante.py` y en el listado.
 
 ## Trampas
 
 - **CAPTCHA aritmético escrito en palabras** en el verificador público de documentos. Algunas instalaciones activan CAPTCHA en otros formularios (variable `incluirCaptcha`; visto en Torrejón). No se resuelve: lo hace la persona.
-- El login con certificado "directo" es en realidad una firma AutoFirma: no intentes esquivar el bloqueo.
+- El login con certificado "directo" es en realidad una firma AutoFirma: sin el permiso `firmar`, no intentes esquivar el bloqueo; entra por Cl@ve.
 - El catálogo puede venir en latin-1: si el texto sale con caracteres raros, es la codificación, no un error de la sede.
 - No se observó WAF.
 

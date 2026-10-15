@@ -6,9 +6,10 @@
 #
 # origins: esquema + host, sin ruta. Son los hosts a los que sede.py presentará el certificado.
 #          Los flujos Cl@ve necesitan https://pasarela-ident.clave.gob.es (allí se pide el certificado).
-# riesgo:  leer     = consulta o listado (notificaciones: listar, nunca abrir);
-#          preparar = el agente prepara y la persona da el último clic;
-#          persona  = firma, presenta, paga, domicilia, abre notificaciones o confirma/cambia datos.
+# riesgo:  leer     = consulta o listado, sin efectos (abrir una notificación ya es el acto comparecer);
+#          preparar = se prepara sin efectos; el último paso es un acto;
+#          actuar   = firma, presenta, paga, domicilia, abre notificaciones o confirma/cambia datos: actos que el
+#                     agente hace si su usuario le ha dado ese permiso (SKILL.md; sede.py --permitir).
 # estado:  verificado_con_certificado = recorrido con certificado hasta el punto donde para el agente;
 #          verificado_sin_certificado = no necesita sesión y se recorrió hasta el punto de parada;
 #          parcial   = la URL de entrada está verificada, pero la parte con sesión (o la de la persona) no se recorrió entera;
@@ -21,7 +22,7 @@ sedes:
     nombre: "Agencia Tributaria Canaria (ATC)"
     nivel: autonomico
     plataforma: propia
-    # El acceso con certificado firma un reto con AutoFirma (botón Entrar de valida.jsp): sede.py lo bloquea y entra la persona.
+    # El acceso con certificado firma un reto con AutoFirma (botón Entrar de valida.jsp): acto firmar. Sin ese permiso, sede.py lo bloquea.
     login: "https://sede.gobiernodecanarias.org/tributos/jsf/publico/validacion/valida.jsp"
     origins: ["https://sede.gobiernodecanarias.org", "https://www3.gobiernodecanarias.org"]
     guia: references/sede-atc.md
@@ -46,33 +47,33 @@ sedes:
       - id: atc-modelo-420
         nombre: "Modelo 420: autoliquidación trimestral del IGIC (régimen general)"
         alias: ["420", "modelo 420", "IGIC trimestral", "declaración trimestral IGIC", "autoliquidación IGIC", "IVA Canarias"]
-        riesgo: persona
+        riesgo: actuar
         url: "https://www3.gobiernodecanarias.org/tributos/atc/w/modelo-420"
         guia: references/sede-atc.md
         estado: parcial
       - id: atc-modelo-425
         nombre: "Modelo 425: resumen anual del IGIC"
         alias: ["425", "modelo 425", "resumen anual IGIC", "declaración anual IGIC", "REPEP 425"]
-        riesgo: persona
+        riesgo: actuar
         url: "https://www3.gobiernodecanarias.org/tributos/atc/w/modelo-425"
         guia: references/sede-atc.md
         estado: parcial
       - id: atc-modelo-400
         nombre: "Modelo 400: declaración censal del IGIC"
         alias: ["400", "modelo 400", "alta en IGIC", "declaración censal IGIC", "cambio de régimen IGIC", "opción REPEP"]
-        riesgo: persona
+        riesgo: actuar
         url: "https://www3.gobiernodecanarias.org/tributos/atc/w/modelo-400"
         guia: references/sede-atc.md
         estado: parcial
       - id: atc-pago-deudas
         nombre: "Pago y consulta de deudas con la ATC"
         alias: ["pagar ATC", "deudas ATC", "pagar IGIC", "deudas con la Agencia Tributaria Canaria"]
-        riesgo: persona
+        riesgo: actuar
         url: "https://sede.gobiernodecanarias.org/tributos/ov/seguro/liquidacion/sinliquidacion.jsp?permiso=true"
         guia: references/sede-atc.md
         estado: pendiente
       - id: atc-notificaciones
-        nombre: "Notificaciones de la ATC (listar, nunca abrir; también llegan a DEHú)"
+        nombre: "Notificaciones de la ATC (listar; abrir = comparecer; también llegan a DEHú)"
         alias: ["notificaciones ATC", "notificaciones Agencia Tributaria Canaria", "buzón ATC"]
         riesgo: leer
         url: "https://sede.gobiernodecanarias.org/tributos/jsf/publico/sede/la_sede/menu_mis_notificaciones.jsp"
@@ -90,7 +91,7 @@ sedes:
     nombre: "Sede electrónica del Gobierno de Canarias"
     nivel: autonomico
     plataforma: propia
-    # «Validarme» ejecuta firmar(formData) → AutoFirma: sede.py lo bloquea y entra la persona.
+    # «Validarme» ejecuta firmar(formData) → AutoFirma: acto firmar. Sin ese permiso, sede.py lo bloquea.
     login: "https://sede.gobiernodecanarias.org/sede/identificacionmenu"
     origins: ["https://sede.gobiernodecanarias.org"]
     guia: references/sede-gobcan.md
@@ -106,7 +107,7 @@ sedes:
       - id: gobcan-registro-general
         nombre: "Registro General Electrónico del Gobierno de Canarias (solicitud genérica)"
         alias: ["registro electrónico Canarias", "instancia general Gobierno de Canarias", "solicitud genérica Canarias", "RGE Canarias"]
-        riesgo: persona
+        riesgo: actuar
         url: "https://sede.gobiernodecanarias.org/sede/rge"
         guia: references/sede-gobcan.md
         estado: parcial
@@ -118,7 +119,7 @@ sedes:
         guia: references/sede-gobcan.md
         estado: pendiente
       - id: gobcan-notificaciones
-        nombre: "Notificaciones del Gobierno de Canarias (listar, nunca abrir)"
+        nombre: "Notificaciones del Gobierno de Canarias (listar; abrir = comparecer)"
         alias: ["notificaciones Gobierno de Canarias", "buzón de notificaciones Canarias"]
         riesgo: leer
         url: "https://sede.gobiernodecanarias.org/sede/destacados_l/notificaciones_telematicas"
@@ -127,7 +128,7 @@ sedes:
       - id: gobcan-alta-terceros
         nombre: "Alta o modificación de terceros acreedores (cuenta para cobrar subvenciones), SICAC 5538"
         alias: ["alta de terceros", "tercero acreedor", "cuenta bancaria subvención Canarias", "SEFLOGIC"]
-        riesgo: persona
+        riesgo: actuar
         url: "https://sede.gobiernodecanarias.org/sede/procedimientos_servicios/tramites/5538"
         guia: references/sede-gobcan.md
         estado: parcial
@@ -145,21 +146,21 @@ sedes:
         # Convocatoria 2026 cerrada el 30-06-2026 (ficha SICAC 3885).
         nombre: "Subvenciones para la promoción del empleo autónomo (SCE), SICAC 3885"
         alias: ["subvención empleo autónomo Canarias", "ayuda para hacerse autónomo Canarias", "promoción empleo autónomo"]
-        riesgo: persona
+        riesgo: actuar
         url: "https://sede.gobiernodecanarias.org/sede/procedimientos_servicios/tramites/3885"
         guia: references/sede-gobcan.md
         estado: parcial
       - id: sce-concilia-autonomos
         nombre: "Subvenciones Concilia para autónomos (SCE), SICAC 10923"
         alias: ["Concilia autónomos", "conciliación autónomos Canarias"]
-        riesgo: persona
+        riesgo: actuar
         url: "https://sede.gobiernodecanarias.org/sede/procedimientos_servicios/tramites/10923"
         guia: references/sede-gobcan.md
         estado: parcial
       - id: sce-renovacion-demanda
         nombre: "Renovación de la demanda de empleo (SCE), SICAC 4049 con certificado y 4050 sin él"
         alias: ["renovar demanda de empleo", "DARDE", "sellar el paro Canarias"]
-        riesgo: persona
+        riesgo: actuar
         url: "https://sede.gobiernodecanarias.org/sede/procedimientos_servicios/tramites/4049"
         guia: references/sede-gobcan.md
         estado: parcial
@@ -185,42 +186,42 @@ sedes:
       - id: cabildo-tenerife-solicitud-general
         nombre: "Solicitud general al Cabildo de Tenerife (SIA 1246253)"
         alias: ["instancia general Cabildo de Tenerife", "solicitud general Cabildo"]
-        riesgo: persona
+        riesgo: actuar
         url: "https://sede.tenerife.es/es/tramites/1246253-Solicitud-general"
         guia: references/sede-gobcan.md
         estado: parcial
       - id: cabildo-tenerife-ayuda-industrial-2026
         nombre: "Subvenciones 2026 para nuevos proyectos industriales de pymes y autónomos (SIA 3246163)"
         alias: ["ayuda Cabildo autónomos", "subvención industrial Tenerife", "ayudas Cabildo de Tenerife"]
-        riesgo: persona
+        riesgo: actuar
         url: "https://sede.tenerife.es/es/tramites/3246163-Subvenciones-para-la-creacion-de-nuevos-proyectos-industriales-pymes-y-autonomos-convocatoria-2026"
         guia: references/sede-gobcan.md
         estado: parcial
       - id: cabildo-tenerife-vivienda-vacacional
         nombre: "Declaración responsable de inicio de vivienda vacacional (SIA 1161501)"
         alias: ["vivienda vacacional Tenerife", "alquiler vacacional Tenerife", "registro turístico vivienda vacacional"]
-        riesgo: persona
+        riesgo: actuar
         url: "https://sede.tenerife.es/es/tramites/1161501-Declaracion-responsable-de-inicio-de-la-actividad-de-vivienda-vacacional"
         guia: references/sede-gobcan.md
         estado: parcial
       - id: cabildo-tenerife-transportes
         nombre: "Autorizaciones de transporte: taxi, VTC y alquiler sin conductor"
         alias: ["taxi Tenerife", "VTC Tenerife", "visado taxi", "alquiler sin conductor Tenerife"]
-        riesgo: persona
+        riesgo: actuar
         url: "https://sede.tenerife.es/es/tramites"
         guia: references/sede-gobcan.md
         estado: parcial
       - id: cabildo-tenerife-pago-tasas
         nombre: "Pago de tasas y sanciones del Cabildo de Tenerife"
         alias: ["tasas Cabildo de Tenerife", "pagar sanción Cabildo"]
-        riesgo: persona
+        riesgo: actuar
         url: "https://sede.tenerife.es/es/pago-tasas-sanciones"
         guia: references/sede-gobcan.md
         estado: parcial
       - id: cabildo-tenerife-canal-notificacion
         nombre: "Cambio de canal de notificación en el Cabildo de Tenerife (SIA 2307462)"
         alias: ["cambiar canal de notificación Cabildo", "notificaciones electrónicas Cabildo de Tenerife"]
-        riesgo: persona
+        riesgo: actuar
         url: "https://sede.tenerife.es/es/tramites/2307462-Solicitud-de-cambio-de-canal-de-notificacion"
         guia: references/sede-gobcan.md
         estado: parcial
@@ -245,28 +246,28 @@ sedes:
       - id: ctt-carta-pago
         nombre: "Carta de pago en voluntaria sin identificarse (Consorcio de Tenerife)"
         alias: ["carta de pago Consorcio", "pagar recibo Consorcio de Tributos"]
-        riesgo: persona
+        riesgo: actuar
         url: "https://sede.tributostenerife.es/sta/CarpetaPublic/doEvent?APP_CODE=STA&PAGE_CODE=ACCESO_DEUDA"
         guia: references/plataforma-tao-sta.md
         estado: parcial
       - id: ctt-domiciliacion
         nombre: "Domiciliación bancaria de recibos (Consorcio de Tenerife)"
         alias: ["domiciliar recibos Consorcio", "domiciliación IBI Tenerife"]
-        riesgo: persona
+        riesgo: actuar
         url: "https://sede.tributostenerife.es/sta/Relec/CatalogDetail?action=make&dboidProcedure=6262600000434822207901&dboidRequest=6269000116144856107901&urlBack="
         guia: references/plataforma-tao-sta.md
         estado: parcial
       - id: ctt-certificados
         nombre: "Certificados tributarios del Consorcio de Tenerife (catálogo)"
         alias: ["certificado Consorcio de Tributos", "certificado de estar al corriente Consorcio", "certificado tributario municipal Tenerife"]
-        riesgo: persona
+        riesgo: actuar
         url: "https://sede.tributostenerife.es/sta/Relec/CatalogBrowse"
         guia: references/plataforma-tao-sta.md
         estado: parcial
       - id: ctt-instancia
         nombre: "Instancia genérica al Consorcio de Tenerife"
         alias: ["instancia Consorcio de Tributos", "reclamación recibo Consorcio"]
-        riesgo: persona
+        riesgo: actuar
         url: "https://sede.tributostenerife.es/sta/Relec/CatalogDetail?dboidRequest=6269000000000806407901&action=make&dboidProcedure=6262600000000799507901&urlBack="
         guia: references/plataforma-tao-sta.md
         estado: parcial
@@ -298,35 +299,35 @@ sedes:
       - id: granadilla-instancia-general
         nombre: "Instancia general al Ayuntamiento de Granadilla de Abona"
         alias: ["instancia general Granadilla", "solicitud general Granadilla"]
-        riesgo: persona
+        riesgo: actuar
         url: "https://sede.granadilladeabona.es/sta/Relec/CatalogDetail?dboidRequest=6269000049314813507529&action=make&dboidProcedure=6262600049314706607529&urlBack="
         guia: references/plataforma-tao-sta.md
         estado: parcial
       - id: granadilla-actividad-inocua
         nombre: "Comunicación previa de actividad inocua o no clasificada (Granadilla de Abona)"
         alias: ["abrir negocio Granadilla", "licencia de apertura Granadilla", "actividad inocua Granadilla"]
-        riesgo: persona
+        riesgo: actuar
         url: "https://sede.granadilladeabona.es/sta/Relec/CatalogDetail?dboidRequest=6269000054285072607529&action=make&dboidProcedure=6262600054285062407529&urlBack="
         guia: references/plataforma-tao-sta.md
         estado: parcial
       - id: granadilla-actividad-clasificada
         nombre: "Licencia de instalación para actividad clasificada (Granadilla de Abona)"
         alias: ["actividad clasificada Granadilla", "licencia de actividad Granadilla"]
-        riesgo: persona
+        riesgo: actuar
         url: "https://sede.granadilladeabona.es/sta/Relec/CatalogDetail?dboidRequest=6269000054284595407529&action=make&dboidProcedure=6262600054284563007529&urlBack="
         guia: references/plataforma-tao-sta.md
         estado: parcial
       - id: granadilla-domiciliacion
         nombre: "Domiciliación de tasas y precios públicos periódicos (Granadilla de Abona)"
         alias: ["domiciliar recibos Granadilla"]
-        riesgo: persona
+        riesgo: actuar
         url: "https://sede.granadilladeabona.es/sta/Relec/CatalogDetail?dboidRequest=6269000047798999607529&action=make&dboidProcedure=6262600047798961407529&urlBack="
         guia: references/plataforma-tao-sta.md
         estado: parcial
       - id: granadilla-certificado-tributario
         nombre: "Certificado de situación tributaria municipal (Granadilla de Abona)"
         alias: ["certificado de estar al corriente Granadilla", "certificado tributario Granadilla"]
-        riesgo: persona
+        riesgo: actuar
         url: "https://sede.granadilladeabona.es/sta/Relec/CatalogDetail?dboidRequest=6269000050056008207529&action=make&dboidProcedure=6262600050057490307529&urlBack="
         guia: references/plataforma-tao-sta.md
         estado: parcial
@@ -335,7 +336,7 @@ sedes:
     nombre: "Ayuntamiento de Santa Cruz de Tenerife"
     nivel: municipal
     plataforma: tao-sta
-    # Fichas en sede.* y ejecución STA en ovc.*. El primer acceso con certificado pide confirmar teléfono y correo (GUARDAR): lo hace la persona.
+    # Fichas en sede.* y ejecución STA en ovc.*. El primer acceso con certificado pide confirmar teléfono y correo (GUARDAR): acto cambiar_datos.
     # La sede de Urbanismo (sede.urbanismosantacruz.es) es otra plataforma y no tiene origins verificados.
     login: "https://ovc.santacruzdetenerife.es/sta/CarpetaPrivate/Certificate?APP_CODE=STA&PAGE_CODE=HOME"
     origins: ["https://ovc.santacruzdetenerife.es", "https://sede.santacruzdetenerife.es",
@@ -358,7 +359,7 @@ sedes:
         guia: references/plataforma-tao-sta.md
         estado: parcial
       - id: sct-notificaciones
-        nombre: "Buzón de notificaciones de Santa Cruz de Tenerife (listar, nunca abrir)"
+        nombre: "Buzón de notificaciones de Santa Cruz de Tenerife (listar; abrir = comparecer)"
         alias: ["notificaciones Ayuntamiento de Santa Cruz de Tenerife"]
         riesgo: leer
         url: "https://ovc.santacruzdetenerife.es/sta/CarpetaPrivate/Clave2Request?APP_CODE=STA&PAGE_CODE=SINGLE_NOTIF"
@@ -367,21 +368,21 @@ sedes:
       - id: sct-domiciliaciones
         nombre: "Domiciliaciones de recibos en Santa Cruz de Tenerife"
         alias: ["domiciliar recibos Santa Cruz de Tenerife"]
-        riesgo: persona
+        riesgo: actuar
         url: "https://ovc.santacruzdetenerife.es/sta/CarpetaPrivate/Clave2Request?APP_CODE=STA&PAGE_CODE=OTRIBDOMI"
         guia: references/plataforma-tao-sta.md
         estado: parcial
       - id: sct-solicitud-general
         nombre: "Solicitud general al Ayuntamiento de Santa Cruz de Tenerife"
         alias: ["instancia general Santa Cruz de Tenerife", "solicitud general Santa Cruz"]
-        riesgo: persona
+        riesgo: actuar
         url: "https://sede.santacruzdetenerife.es/sede/tramite/t399"
         guia: references/plataforma-tao-sta.md
         estado: parcial
       - id: sct-aportacion-documentos
         nombre: "Aportación de documentación a un expediente (Santa Cruz de Tenerife)"
         alias: ["aportar documentos Santa Cruz de Tenerife"]
-        riesgo: persona
+        riesgo: actuar
         url: "https://sede.santacruzdetenerife.es/sede/tramite/t572"
         guia: references/plataforma-tao-sta.md
         estado: parcial
@@ -390,7 +391,7 @@ sedes:
     nombre: "Ayuntamiento de Arona"
     nivel: municipal
     plataforma: tao-sta
-    # IBI e IAE de Arona los cobra el Consorcio de Tenerife. El primer acceso con certificado pide confirmar móvil y correo (GUARDAR): lo hace la persona.
+    # IBI e IAE de Arona los cobra el Consorcio de Tenerife. El primer acceso con certificado pide confirmar móvil y correo (GUARDAR): acto cambiar_datos.
     login: "https://sta.arona.org/sta/CarpetaPrivate/Certificate?APP_CODE=STA&PAGE_CODE=OVC_POSICIONGLOBAL"
     origins: ["https://sta.arona.org", "https://sede.arona.org"]
     guia: references/plataforma-tao-sta.md
@@ -404,7 +405,7 @@ sedes:
         guia: references/plataforma-tao-sta.md
         estado: parcial
       - id: arona-notificaciones
-        nombre: "Notificaciones del Ayuntamiento de Arona (listar, nunca abrir)"
+        nombre: "Notificaciones del Ayuntamiento de Arona (listar; abrir = comparecer)"
         alias: ["notificaciones Arona"]
         riesgo: leer
         url: "https://sta.arona.org/sta/CarpetaPrivate/Certificate?APP_CODE=STA&PAGE_CODE=SINGLE_NOTIF"
@@ -420,35 +421,35 @@ sedes:
       - id: arona-certificados-tributarios
         nombre: "Certificados tributarios del Ayuntamiento de Arona"
         alias: ["certificado de estar al corriente Arona", "certificado tributario Arona"]
-        riesgo: persona
+        riesgo: actuar
         url: "https://sta.arona.org/sta/CarpetaPrivate/Certificate?APP_CODE=STA&PAGE_CODE=SOLDOC_COR"
         guia: references/plataforma-tao-sta.md
         estado: parcial
       - id: arona-solicitud-general
         nombre: "Solicitud general (005) al Ayuntamiento de Arona"
         alias: ["instancia general Arona", "solicitud general Arona"]
-        riesgo: persona
+        riesgo: actuar
         url: "https://sta.arona.org/sta/Relec/CatalogDetail?dboidRequest=6269020958673047307515&action=make&dboidProcedure=6262620958672676507515&urlBack="
         guia: references/plataforma-tao-sta.md
         estado: parcial
       - id: arona-actividad-inocua
         nombre: "Actividad inocua: comunicación previa de inicio (Arona)"
         alias: ["abrir negocio Arona", "licencia de apertura Arona", "actividad inocua Arona"]
-        riesgo: persona
+        riesgo: actuar
         url: "https://sta.arona.org/sta/Relec/CatalogDetail?dboidRequest=6269020922842923607515&action=make&dboidProcedure=6262620922795699407515&urlBack="
         guia: references/plataforma-tao-sta.md
         estado: parcial
       - id: arona-actividad-clasificada
         nombre: "Actividad clasificada: licencia de instalación (Arona)"
         alias: ["actividad clasificada Arona", "licencia de actividad Arona"]
-        riesgo: persona
+        riesgo: actuar
         url: "https://sta.arona.org/sta/Relec/CatalogDetail?dboidRequest=6269020933022875107515&action=make&dboidProcedure=6262620923635423807515&urlBack="
         guia: references/plataforma-tao-sta.md
         estado: parcial
       - id: arona-domiciliacion
         nombre: "Domiciliación bancaria de deudas municipales (675, Arona)"
         alias: ["domiciliar recibos Arona"]
-        riesgo: persona
+        riesgo: actuar
         url: "https://sta.arona.org/sta/Relec/CatalogDetail?dboidRequest=6269020940711549507515&action=make&dboidProcedure=6262620940635854107515&urlBack="
         guia: references/plataforma-tao-sta.md
         estado: parcial
@@ -471,7 +472,7 @@ sedes:
         guia: references/plataforma-gestiona.md
         estado: parcial
       - id: adeje-notificaciones
-        nombre: "Notificaciones del Ayuntamiento de Adeje (listar, nunca abrir)"
+        nombre: "Notificaciones del Ayuntamiento de Adeje (listar; abrir = comparecer)"
         alias: ["notificaciones Adeje"]
         riesgo: leer
         url: "https://adeje.sedelectronica.es/enotifications"
@@ -480,28 +481,28 @@ sedes:
       - id: adeje-instancia-general
         nombre: "Instancia general al Ayuntamiento de Adeje"
         alias: ["instancia general Adeje", "solicitud general Adeje"]
-        riesgo: persona
+        riesgo: actuar
         url: "https://adeje.sedelectronica.es/catalog/t/5161fa8d-970e-4b48-a506-b2ac34ceafe5"
         guia: references/plataforma-gestiona.md
         estado: parcial
       - id: adeje-actividad-inocua
         nombre: "Comunicación previa de inicio de actividad inocua (Adeje)"
         alias: ["abrir negocio Adeje", "licencia de apertura Adeje", "actividad inocua Adeje"]
-        riesgo: persona
+        riesgo: actuar
         url: "https://adeje.sedelectronica.es/catalog/t/a3d3ac90-59ae-401d-baaa-d393bef3393b"
         guia: references/plataforma-gestiona.md
         estado: parcial
       - id: adeje-actividad-clasificada-instalacion
         nombre: "Instalación de actividad clasificada (Adeje)"
         alias: ["actividad clasificada Adeje", "licencia de actividad Adeje"]
-        riesgo: persona
+        riesgo: actuar
         url: "https://adeje.sedelectronica.es/catalog/t/b074ae93-59b5-4f3f-b648-65650713b909"
         guia: references/plataforma-gestiona.md
         estado: parcial
       - id: adeje-actividad-clasificada-inicio
         nombre: "Inicio de actividad clasificada (Adeje)"
         alias: ["inicio actividad clasificada Adeje"]
-        riesgo: persona
+        riesgo: actuar
         url: "https://adeje.sedelectronica.es/catalog/t/3d9f1c8f-40c0-4e38-8a76-2290efb76d25"
         guia: references/plataforma-gestiona.md
         estado: parcial
@@ -539,17 +540,17 @@ sedes:
         guia: references/plataforma-gtt.md
         estado: parcial
       - id: adeje-tributos-pagar
-        # sede.py bloquea abrir esta ruta (contiene «pagar»): el enlace es para que lo abra la persona.
+        # Abrir esta ruta es el acto pagar (contiene «pagar»): sin ese permiso, sede.py la bloquea.
         nombre: "Pagar impuestos y tasas u obtener el documento de pago (Adeje)"
         alias: ["pagar recibo Adeje", "pagar tasas Adeje", "documento de pago Adeje"]
-        riesgo: persona
+        riesgo: actuar
         url: "https://adeje.tributoslocales.es/380015/AADEJE/pagar"
         guia: references/plataforma-gtt.md
         estado: parcial
       - id: adeje-tributos-domiciliacion
         nombre: "Domiciliaciones de recibos (Adeje)"
         alias: ["domiciliar recibos Adeje"]
-        riesgo: persona
+        riesgo: actuar
         url: "https://adeje.tributoslocales.es/380015/AADEJE/"
         guia: references/plataforma-gtt.md
         estado: parcial
@@ -572,7 +573,7 @@ sedes:
         guia: references/plataforma-gestiona.md
         estado: verificado_con_certificado
       - id: arico-notificaciones
-        nombre: "Notificaciones del Ayuntamiento de Arico (listar, nunca abrir)"
+        nombre: "Notificaciones del Ayuntamiento de Arico (listar; abrir = comparecer)"
         alias: ["notificaciones Arico"]
         riesgo: leer
         url: "https://ayuntamientodearico.sedelectronica.es/enotifications"
@@ -588,7 +589,7 @@ sedes:
       - id: arico-instancia-general
         nombre: "Instancia general al Ayuntamiento de Arico"
         alias: ["instancia general Arico", "solicitud general Arico"]
-        riesgo: persona
+        riesgo: actuar
         url: "https://ayuntamientodearico.sedelectronica.es/catalog/t/5161fa8d-970e-4b48-a506-b2ac34ceafe5"
         guia: references/plataforma-gestiona.md
         estado: parcial

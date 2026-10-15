@@ -100,6 +100,16 @@ def cert(casa):
     return mod
 
 
+@pytest.fixture
+def permisos(casa):
+    """permisos.py recién importado (su FICHERO vive en la casa temporal). Se registra como 'permisos'
+    para que sede.permisos_usuario() lo encuentre en sys.modules en vez del fichero real."""
+    mod = cargar_modulo(SCRIPTS / "permisos.py", "permisos")
+    assert casa in mod.FICHERO.parents, f"permisos.py usaría una configuración real: {mod.FICHERO}"
+    yield mod
+    sys.modules.pop("permisos", None)
+
+
 @pytest.fixture(scope="session")
 def guarda():
     return cargar_modulo(GUARDAS_CI / "content_guard.py", "tramites_content_guard")

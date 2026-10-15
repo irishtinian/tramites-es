@@ -19,7 +19,7 @@ Los recibos municipales de un autónomo (IBI, IAE, vehículos o IVTM, basura, pl
 - Consorcio y oficinas STA: `plataforma-tao-sta.md`;
 - oficinas GTT: `plataforma-gtt.md`.
 
-Riesgo: **leer**. Consultar recibos es de solo lectura. Pagar, domiciliar o fraccionar lo hace la persona.
+Riesgo: **leer**. Consultar recibos es de solo lectura. Pagar (`pagar`), domiciliar (`cambiar_datos`) o fraccionar (`presentar`) son actos: los haces según los permisos de tu usuario.
 
 ## Cómo decidirlo
 
@@ -29,7 +29,7 @@ Riesgo: **leer**. Consultar recibos es de solo lectura. Pagar, domiciliar o frac
    ```
    El censo da la sede y la plataforma, pero todavía **no trae el recaudador**. Usa las tablas de abajo.
 2. Mira la isla y el tributo. Si el municipio está en el Consorcio, comprueba en la tabla de encomiendas si **ese** tributo está encomendado.
-3. Si no sale aquí o la fila dice «sin verificar», busca en la web municipal el enlace «Tributos», «Recaudación» o «Pago de recibos», y confirma que el dominio es oficial antes de usar el certificado (regla 6 de `SKILL.md`).
+3. Si no sale aquí o la fila dice «sin verificar», busca en la web municipal el enlace «Tributos», «Recaudación» o «Pago de recibos», y confirma que el dominio es oficial antes de usar el certificado («Solo sedes oficiales» en `SKILL.md`).
 
 ## Tenerife, El Hierro, parte de La Palma y Tuineje: Consorcio de Tributos de la Isla de Tenerife (CTT)
 

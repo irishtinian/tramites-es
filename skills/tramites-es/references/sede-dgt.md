@@ -15,7 +15,7 @@ estado_mapeo: "Mapeo en vivo 15-10-2026 (fases 1 y 2 y ronda 3) con certificado 
 ## 1. Para qué sirve
 
 - Puntos del carné.
-- Multas y sanciones: consulta, nunca pago.
+- Multas y sanciones: consulta; pagarlas es el acto `pagar`.
 - Buzón de notificaciones de tráfico (DEV, Dirección Electrónica Vial).
 - Informe de conductor.
 - Vehículos a nombre de la persona.
@@ -92,18 +92,20 @@ uv run scripts/sede.py abrir --sede dgt --url "https://auth-sedeweb.dgt.gob.es/W
 - **Posibles resultados:**
   - El listado, que **no se ha visto en vivo**: falta verificarlo con una cuenta que tenga DEV.
   - `/WEB_NTRA_CONSULTA/ErrorBuzon.faces`, con el texto "Es necesario disponer de una Dirección Electrónica Vial…". **Es un estado válido:** la persona no tiene DEV. Dilo así; no lo trates como un error técnico. La investigación previa da la DEV por voluntaria para la persona física, pero no está verificado en fuente primaria.
-- **Dónde para:** en el listado. Abrir una notificación = notificado.
-  - `sede.py` trata la página como de notificaciones (la URL contiene "Notificaciones") y bloquea acceder, abrir, descargar y ver el detalle.
-- **La persona:** abre ella la notificación desde el buzón cuando decida.
-  - Darse de alta o de baja en la DEV (`WEB_NTRA_CONSULTA-suscripcion`) es un cambio de datos: también lo hace ella.
+- **Abrir una notificación** = queda notificado (acto `comparecer`).
+  - `sede.py` trata la página como de notificaciones (la URL contiene "Notificaciones"). Sin ese permiso, bloquea acceder, abrir, descargar y ver el detalle.
+  - Con el permiso, confirma con tu usuario cuál abrir (`tramite-vigilar-notificaciones.md` §2.1).
+- **Darse de alta o de baja en la DEV** (`WEB_NTRA_CONSULTA-suscripcion`) es el acto `cambiar_datos`: desde el alta, la DGT notifica por ahí.
 - **Representantes:** `https://auth-sedeweb.dgt.gob.es/WEB_NTRA_CONSULTA/accesoRepresentantesIdiomaPostback.faces?idioma=es` (no recorrido).
 
-### 3.4 Informe de conductor (`dgt-informe-conductor`) · Preparar · parcial
+### 3.4 Informe de conductor (`dgt-informe-conductor`) · Actuar (`generar`) · parcial
 
 - **URL:** `https://sedeclave.dgt.gob.es/WEB_HPER/HPER` (datos actuales) o `https://sedeclave.dgt.gob.es/WEB_HPER/HPRO` (últimos 10 años). Entra por Cl@ve; con sesión de MiDGT en la misma ejecución, sin clic.
 - **Primera pantalla:** fecha de nacimiento en tres campos (`form1:diaNacimiento`, `form1:mesNacimiento` y `form1:anoNacimiento`) y los botones "Confirmar" y "Limpiar".
-- **Dónde para el agente:** antes de "Confirmar". Ese botón llama a `enviar()` y `sede.py` lo bloquea.
-- **La persona:** abre el enlace, pone su fecha de nacimiento y pulsa **"Confirmar"**. Según la ficha, sale una pantalla con la descarga del informe en PDF; no se ha verificado.
+- **"Confirmar"** llama a `enviar()` y pide el informe: acto `generar`.
+  - Con ese permiso (`--permitir generar`), rellena la fecha de nacimiento que te dé tu usuario y confirma.
+  - Sin él, `sede.py` lo bloquea: tu usuario abre el enlace, pone su fecha y pulsa "Confirmar".
+  - Según la ficha, sale una pantalla con la descarga del informe en PDF; **no se ha verificado**.
 
 ### 3.5 Tablón Edictal de sanciones (`dgt-tablon-edictal`) · Leer · verificado sin certificado
 
@@ -116,7 +118,7 @@ uv run scripts/sede.py abrir --sede dgt --url "https://auth-sedeweb.dgt.gob.es/W
 - **Selects de localidad en cascada con autocompletado:** pueden elegir otra localidad del mismo municipio. Revisa el valor efectivo.
 - **Enlace interno roto:** la página de sanciones contiene uno a un host de preproducción (`consolasedepro01.trafico.es:8080`). Ignóralo: no es un dominio oficial de la lista.
 - **Widget de chat:** `chats.dgt.es` da error de certificado del servidor. No afecta.
-- **Cita previa:** usa reCAPTCHA y está fuera de alcance (regla dura 4).
+- **Cita previa:** acto `cita`, ver `tramite-cita-previa.md`. Usa reCAPTCHA: si pide resolverlo, lo hace la persona.
 
 ## 5. Fuentes
 

@@ -7,10 +7,10 @@
 # login:   URL verificada que lleva al punto donde se pide el certificado (directo o vía Cl@ve / pasarela SS).
 # origins: esquema + host, sin ruta. SOLO los hosts que piden el certificado (verificados con cert-probe y con sesión).
 #          sede.py añade además el origin de la URL de login. Los flujos Cl@ve lo piden en pasarela-ident.clave.gob.es.
-# riesgo:  leer     = consulta o listado (notificaciones: listar, nunca abrir);
-#          preparar = el agente prepara y el último paso (emitir/confirmar, sin firma) lo da la persona,
-#                     o el agente con su OK explícito para ese documento si sede.py no lo bloquea;
-#          persona  = firma, presenta, paga, abre notificaciones o cambia datos: siempre la persona.
+# riesgo:  leer     = consulta o listado, sin efectos (abrir una notificación ya es el acto comparecer);
+#          preparar = se prepara sin efectos; el último paso (emitir/confirmar, sin firma) es un acto (normalmente generar);
+#          actuar   = firma, presenta, paga, abre notificaciones o cambia datos: actos que el agente hace
+#                     si su usuario le ha dado ese permiso (SKILL.md; sede.py --permitir).
 # estado:  verificado_con_certificado = recorrido con certificado hasta el punto donde para el agente;
 #          verificado_sin_certificado = no necesita sesión y se recorrió;
 #          parcial   = acceso o primera pantalla verificados, pero no el resultado;
@@ -72,14 +72,14 @@ sedes:
       - id: aeat-certificado-corriente
         nombre: "Certificado de estar al corriente de obligaciones tributarias (G304)"
         alias: ["certificado estar al corriente hacienda", "certificado de no deuda hacienda", "certificado tributario", "certificado para subvención hacienda", "certificado para contratar con la administración"]
-        riesgo: persona   # el agente llega a "Validar solicitud"; "Firmar Enviar" es de la persona
+        riesgo: actuar   # hasta "Validar solicitud" sin efectos; "Firmar Enviar" = actos generar + firmar
         url: "https://www1.agenciatributaria.gob.es/wlpl/EMCE-JDIT/ECOTInternetCiudadanosServlet"
         guia: references/tramite-certificado-corriente.md
         estado: verificado_con_certificado   # hasta "Firmar Enviar"
       - id: aeat-certificado-situacion-censal
         nombre: "Certificado de situación censal (G313)"
         alias: ["certificado situación censal", "certificado censal", "certificado alta actividad hacienda", "certificado iae"]
-        riesgo: persona
+        riesgo: actuar
         url: "https://www1.agenciatributaria.gob.es/wlpl/EMCE-JDIT/ServletSitCenInternet"
         guia: references/sede-aeat.md
         estado: parcial   # primera pantalla
@@ -93,52 +93,60 @@ sedes:
       - id: aeat-modelo-303
         nombre: "Modelo 303 (IVA trimestral)"
         alias: ["modelo 303", "iva trimestral", "declaración iva", "presentar iva"]
-        riesgo: persona
+        riesgo: actuar
         url: "https://www1.agenciatributaria.gob.es/wlpl/TOAE-JDIT/VentanaCensalIva?fOrigen=pre303"
         guia: references/sede-aeat.md
         estado: parcial   # hasta la ventana censal Pre303
       - id: aeat-modelo-130
         nombre: "Modelo 130 (pago fraccionado del IRPF)"
         alias: ["modelo 130", "pago fraccionado irpf", "irpf trimestral autónomo"]
-        riesgo: persona
+        riesgo: actuar
         url: "https://www1.agenciatributaria.gob.es/wlpl/PAMW-M130/E2026/CONT/index.zul"   # E2026 cambia con el año
         guia: references/sede-aeat.md
         estado: verificado_con_certificado   # formulario abierto, nada guardado
       - id: aeat-modelo-111
         nombre: "Modelo 111 (retenciones de trabajo y actividades)"
         alias: ["modelo 111", "retenciones trabajadores", "retenciones profesionales"]
-        riesgo: persona
+        riesgo: actuar
         url: "https://www1.agenciatributaria.gob.es/wlpl/OV17-M111/index.zul"
         guia: references/sede-aeat.md
         estado: verificado_con_certificado   # formulario abierto, nada guardado
       - id: aeat-modelo-115
         nombre: "Modelo 115 (retenciones de alquiler)"
         alias: ["modelo 115", "retenciones alquiler", "alquiler local retención"]
-        riesgo: persona
+        riesgo: actuar
         url: "https://www1.agenciatributaria.gob.es/wlpl/OV17-M115/index.zul"
         guia: references/sede-aeat.md
         estado: verificado_con_certificado   # formulario abierto, nada guardado
       - id: aeat-modelo-390
         nombre: "Modelo 390 (resumen anual del IVA)"
         alias: ["modelo 390", "resumen anual iva"]
-        riesgo: persona
+        riesgo: actuar
         url: "https://www1.agenciatributaria.gob.es/wlpl/PAIV-M390/E2025/CONT/index.zul"   # E2025 cambia con el ejercicio
         guia: references/sede-aeat.md
         estado: parcial   # primera pantalla del formulario
       - id: aeat-aplazamiento
         nombre: "Aplazamiento o fraccionamiento de deudas (RB01)"
         alias: ["aplazar deuda hacienda", "fraccionar deuda hacienda", "aplazamiento hacienda"]
-        riesgo: persona
+        riesgo: actuar
         url: "https://sede.agenciatributaria.gob.es/Sede/procedimientoini/RB01.shtml"
         guia: references/sede-aeat.md
         estado: pendiente   # solo se consultó "Mis expedientes"
       - id: aeat-censo-036
         nombre: "Modelo 036 (alta, modificación o baja censal)"
         alias: ["modelo 036", "alta autónomo hacienda", "baja actividad hacienda", "cambiar domicilio fiscal", "censos web"]
-        riesgo: persona
+        riesgo: actuar
         url: "https://sede.agenciatributaria.gob.es/Sede/procedimientos/G322.shtml"
         guia: references/sede-aeat.md
         estado: pendiente
+      - id: cita-aeat
+        nombre: "Cita previa en la Agencia Tributaria (Asistencia y Cita)"
+        alias: ["cita previa hacienda", "cita hacienda", "cita renta", "cita agencia tributaria", "cita aeat", "anular cita hacienda"]
+        riesgo: actuar   # reservar = cita; anular o modificar = cambiar_datos (exige certificado)
+        permisos: [cita]
+        url: "https://www2.agenciatributaria.gob.es/wlpl/TOCP-MUTE/internet/identificacion"   # pedirla no exige certificado (NIF y nombre)
+        guia: references/tramite-cita-previa.md
+        estado: pendiente   # solo documentación pública; ninguna cita pedida
 
   tgss:
     nombre: "Seguridad Social (TGSS / Import@ss)"
@@ -165,7 +173,7 @@ sedes:
       - id: tgss-certificado-corriente
         nombre: "Certificado de estar al corriente con la Seguridad Social / informe de deuda"
         alias: ["certificado estar al corriente seguridad social", "certificado de no deuda seguridad social", "certificado tgss", "informe de deuda seguridad social"]
-        riesgo: preparar   # sin firma; "Continuar" con OK explícito de la persona (límite ~3 informes/día)
+        riesgo: preparar   # sin firma; "Continuar" = acto generar (límite ~3 informes/día)
         url: "https://portal.seg-social.gob.es/wps/portal/importass/Seguridad/PortalRedirectorN1A?idApp=2265&N1&A"
         guia: references/tramite-certificado-corriente.md
         estado: verificado_con_certificado
@@ -221,28 +229,28 @@ sedes:
       - id: tgss-cambio-base
         nombre: "Cambio de base de cotización / rendimientos previstos"
         alias: ["cambiar base cotización", "cambio de base autónomo", "rendimientos previstos", "cambiar tramo autónomo"]
-        riesgo: persona
+        riesgo: actuar
         url: "https://portal.seg-social.gob.es/wps/myportal/importass/importass/tramites/relacionLaboralRETA"
         guia: references/sede-tgss-importass.md
         estado: parcial   # solo la pantalla de entrada; "Modificar" no pulsado
       - id: tgss-alta-reta
         nombre: "Alta en el régimen de autónomos (RETA)"
         alias: ["alta autónomo seguridad social", "darme de alta de autónomo", "alta reta"]
-        riesgo: persona
+        riesgo: actuar
         url: "https://portal.seg-social.gob.es/wps/myportal/importass/importass/tramites/altaAutonomo"
         guia: references/sede-tgss-importass.md
         estado: parcial   # primera pantalla, sin "Aceptar y continuar"
       - id: tgss-baja-reta
         nombre: "Baja en el régimen de autónomos (RETA)"
         alias: ["baja autónomo", "darme de baja de autónomo", "baja reta", "cese actividad seguridad social"]
-        riesgo: persona
+        riesgo: actuar
         url: "https://portal.seg-social.gob.es/wps/myportal/importass/importass/tramites/relacionLaboralRETA"
         guia: references/sede-tgss-importass.md
         estado: parcial   # entrada localizada; modal de baja no abierto
       - id: tgss-aplazamiento
         nombre: "Aplazamiento de deudas con la Seguridad Social"
         alias: ["aplazar deuda seguridad social", "aplazamiento tgss"]
-        riesgo: persona
+        riesgo: actuar
         url: "https://portal.seg-social.gob.es/wps/portal/importass/Seguridad/PortalRedirectorN1P?idApp=2806&N1&P"
         guia: references/sede-tgss-importass.md
         estado: pendiente
@@ -253,6 +261,14 @@ sedes:
         url: "https://sede.seg-social.gob.es/wps/portal/sede/sede/Inicio/NotificacionesTelematicas"   # de la investigación previa; no mapeada
         guia: references/tramite-vigilar-notificaciones.md
         estado: pendiente
+      - id: cita-inss
+        nombre: "Cita previa en el INSS / CAISS (pensiones y otras prestaciones)"
+        alias: ["cita previa seguridad social", "cita inss", "cita caiss", "cita pensiones", "cita prestaciones", "cita jubilación", "cita ism"]
+        riesgo: actuar   # anular = cambiar_datos; la TGSS no tiene cita previa web
+        permisos: [cita]
+        url: "https://sede.seg-social.gob.es/wps/portal/sede/Seguridad/PortalRedirectorN2P?idApp=321&idContenido=403c4672-c045-4868-bee5-202e3f37f289&idPagina=com.ss.sede.Ciudadanos&N2&P"   # con certificado; sin certificado (reCAPTCHA): ver la guía
+        guia: references/tramite-cita-previa.md
+        estado: pendiente   # solo documentación pública; ninguna cita pedida
 
   dehu:
     nombre: "DEHú (Dirección Electrónica Habilitada única)"
@@ -318,7 +334,7 @@ sedes:
       - id: dgt-informe-conductor
         nombre: "Informe de conductor"
         alias: ["informe de conductor", "historial conductor", "antecedentes tráfico", "informe permiso conducir"]
-        riesgo: preparar   # "Confirmar" (enviar()) lo bloquea sede.py: lo pulsa la persona
+        riesgo: preparar   # "Confirmar" (enviar()) = acto generar; sin ese permiso, sede.py lo bloquea
         url: "https://sedeclave.dgt.gob.es/WEB_HPER/HPER"
         guia: references/sede-dgt.md
         estado: parcial   # primera pantalla; informe no generado
@@ -329,6 +345,14 @@ sedes:
         url: "https://sede.dgt.gob.es/es/multas/consulta-del-tablon-edictal-de-sanciones/"
         guia: references/sede-dgt.md
         estado: verificado_sin_certificado
+      - id: cita-dgt
+        nombre: "Cita previa en Jefaturas y Oficinas de Tráfico"
+        alias: ["cita previa dgt", "cita dgt", "cita tráfico", "cita jefatura de tráfico", "cita canje permiso", "anular cita dgt"]
+        riesgo: actuar   # anular = cambiar_datos
+        permisos: [cita]
+        url: "https://sedeclave.dgt.gob.es/WEB_CITE_CONSULTA/paginas/inicio.faces"   # reCAPTCHA v3 (invisible)
+        guia: references/tramite-cita-previa.md
+        estado: pendiente   # solo documentación pública; ninguna cita pedida
 
   carpeta-ciudadana:
     nombre: "Mi Carpeta Ciudadana"
@@ -406,7 +430,7 @@ sedes:
       - id: justicia-antecedentes-penales
         nombre: "Certificado de antecedentes penales"
         alias: ["antecedentes penales", "certificado de penales", "certificado antecedentes"]
-        riesgo: persona   # asistente con datos de pago (NRC) y confirmación
+        riesgo: actuar   # asistente con datos de pago (NRC) y confirmación
         url: "https://sede.mjusticia.gob.es/certape/clave/InicioSede?lang=es_es&idtramite=1288778883620&idpagina=1215197884559"
         guia: references/sede-justicia.md
         estado: parcial   # paso 1, sin "Siguiente"
@@ -420,7 +444,7 @@ sedes:
       - id: justicia-delitos-sexuales
         nombre: "Certificado del Registro Central de Delincuentes Sexuales"
         alias: ["certificado delitos sexuales", "certificado registro central delincuentes sexuales", "certificado para trabajar con menores"]
-        riesgo: persona   # TRAMPA: la URL de "Acceder" (/redese/clave/solicitarCertificado) EMITE el certificado al abrirla
+        riesgo: actuar   # TRAMPA: la URL de "Acceder" (/redese/clave/solicitarCertificado) EMITE el certificado al abrirla
         url: "https://sede.mjusticia.gob.es/es/tramites/certificado-registro-central"   # la ficha, nunca la URL de solicitud
         guia: references/sede-justicia.md
         estado: verificado_con_certificado   # trampa: abrir la URL con sesión emite el certificado (ver sede-justicia.md)
@@ -438,6 +462,14 @@ sedes:
         url: "https://carpeta.justicia.es/group/guest/home"
         guia: references/sede-justicia.md
         estado: pendiente   # bucle de login por la cookie SESSION SameSite=Lax (fallo de Justicia)
+      - id: cita-registro-civil
+        nombre: "Cita previa en el Registro Civil (jura de nacionalidad, inscripciones)"
+        alias: ["cita registro civil", "cita jura nacionalidad", "jura de nacionalidad", "cita nacionalidad", "inscripción nacionalidad"]
+        riesgo: actuar   # anular = cambiar_datos
+        permisos: [cita]
+        url: "https://sede.administracionespublicas.gob.es/icpplustiej/citar?i=es&org=JUS-RC"   # plataforma ICP, sin certificado; CAPTCHA de imagen
+        guia: references/tramite-cita-previa.md
+        estado: pendiente   # solo documentación pública; ninguna cita pedida
 
   catastro:
     nombre: "Sede Electrónica del Catastro"
@@ -482,3 +514,55 @@ sedes:
         url: "https://www1.sedecatastro.gob.es/Accesos/SECAccvr.aspx"
         guia: references/sede-catastro.md
         estado: pendiente
+
+  # Citas previas sin sede propia en este fichero (no se presenta el certificado: se piden con datos).
+  policia-dni:
+    nombre: "Policía Nacional: cita previa de DNI y pasaporte"
+    nivel: estatal
+    login: null   # acceso con los datos del DNI/NIE + CAPTCHA, o con DNIe en lector
+    origins: []
+    guia: references/tramite-cita-previa.md
+    verificado_el: 2026-10-15
+    tramites:
+      - id: cita-dni
+        nombre: "Cita previa para obtener o renovar el DNI o el pasaporte"
+        alias: ["cita dni", "cita previa dni", "renovar dni", "cita pasaporte", "renovar pasaporte", "primer dni nacionalidad"]
+        riesgo: actuar   # anular o cambiar = cambiar_datos
+        permisos: [cita]
+        url: "https://www.citapreviadnie.es/citaPreviaDni/"   # CAPTCHA de imagen en el acceso con datos
+        guia: references/tramite-cita-previa.md
+        estado: pendiente   # solo documentación pública; ninguna cita pedida
+
+  extranjeria:
+    nombre: "Cita previa de extranjería (ICP: Oficinas de Extranjería y Policía Nacional)"
+    nivel: estatal
+    login: null   # "Presentación sin Cl@ve" con los datos del documento; la aplicación rechaza clientes que no son un navegador
+    origins: []
+    guia: references/tramite-cita-previa.md
+    verificado_el: 2026-10-15
+    tramites:
+      - id: cita-extranjeria
+        nombre: "Cita previa de extranjería (NIE, TIE, huellas, autorizaciones)"
+        alias: ["cita extranjería", "cita huellas", "toma de huellas", "cita tie", "cita nie", "recogida tarjeta tie", "cita oficina de extranjería", "cita policía extranjeros"]
+        riesgo: actuar   # anular = cambiar_datos (con el número de justificante)
+        permisos: [cita]
+        url: "https://sede.administracionespublicas.gob.es/pagina/index/directorio/icpplus"   # "Acceder al procedimiento" -> aplicación icpplus
+        guia: references/tramite-cita-previa.md
+        estado: pendiente   # solo documentación pública; ninguna cita pedida
+
+  sepe:
+    nombre: "Servicio Público de Empleo Estatal (SEPE)"
+    nivel: estatal
+    login: null
+    origins: []
+    guia: references/tramite-cita-previa.md
+    verificado_el: 2026-10-15
+    tramites:
+      - id: cita-sepe
+        nombre: "Cita previa en las oficinas de prestaciones del SEPE"
+        alias: ["cita sepe", "cita paro", "cita prestación desempleo", "cita inem", "cita subsidio desempleo"]
+        riesgo: actuar   # anular = cambiar_datos
+        permisos: [cita]
+        url: "https://citaprevia-sede.sepe.gob.es/citapreviasepe/?origen=sepe&codidioma=es"   # CAPTCHA de imagen y audio
+        guia: references/tramite-cita-previa.md
+        estado: pendiente   # solo documentación pública; ninguna cita pedida

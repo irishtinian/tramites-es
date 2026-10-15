@@ -1,5 +1,5 @@
 {
   "name": "tramites-es",
-  "version": "0.1.0-dev",
-  "description": "Trámites de autónomos en sedes electrónicas españolas con tu certificado digital. Nunca firma, presenta ni paga: eso lo haces tú."
+  "version": "0.2.0-dev",
+  "description": "Trámites de autónomos en sedes electrónicas españolas con tu certificado digital. Lo que tu agente puede hacer en tu nombre (firmar, presentar, pagar, citas) lo decides tú con tus permisos."
 }

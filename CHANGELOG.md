@@ -1,9 +1,23 @@
 # Cambios
 
+## [0.2.0-dev] — sin publicar
+
+### Los permisos los decide la persona usuaria
+
+- El skill ya no prohíbe firmar, presentar ni pagar: cada acto con efectos es un **permiso** que da la persona (`generar`, `firmar`, `presentar`, `pagar`, `comparecer`, `cambiar_datos`, `cita`). Sin permiso, el agente pregunta.
+- `scripts/permisos.py` (nuevo): `ver`, `fijar todo|<lista>` y `quitar`. `fijar` y `quitar` solo funcionan en una terminal interactiva.
+- `sede.py --permitir <actos>`: las guardas de página, red, diálogos y recetas bloquean solo los actos no permitidos y dicen qué permiso falta (`BLOQUEADO (requiere permiso 'x')` y `como_seguir`).
+- AutoFirma: con el permiso `firmar`, `sede.py` pasa `afirma://` al AutoFirma del equipo. `--autofirma-auto N` elige el certificado en Linux sin escritorio (experimental).
+- Páginas de cita previa: sin permiso `cita`, un "Confirmar" a secas también se bloquea.
+- Guía nueva `tramite-cita-previa.md`: una cita para el titular, a ritmo humano (AEAT, INSS, DGT, DNI, extranjería, Registro Civil, SEPE, ATC, padrón).
+- Guías y YAML reescritos con el acto de cada paso (`riesgo: persona` → `riesgo: actuar`). `reglas-y-seguridad.md` explica permisos y protecciones.
+- Siguen fuera del alcance aunque haya permiso: automatizar Cl@ve PIN/Móvil/Permanente o SMS, resolver CAPTCHAs y acaparar citas.
+- Arreglo: `permisos.py ver` fallaba al mostrar la fecha de `fijado_el`.
+
 ## [0.1.0-dev] — sin publicar
 
 - Estructura del skill `tramites-es` (un único skill autocontenido) y manifiestos para Claude Code, Codex y Gemini.
-- Reglas duras y guía de seguridad.
+- Reglas duras y guía de seguridad (sustituidas en la 0.2 por el modelo de permisos).
 - Scripts: `cert.py` (único que toca el certificado), `sede.py` (navegador con certificado por origin y bloqueos), `entorno.py`, `buscar.py`, `justificante.py`.
 - Bloqueos probados en vivo el 15-oct-2026 contra sedes reales, en modo solo lectura.
 - Bloqueo de navegaciones a URLs que ejecutan una acción al abrirlas. Origen: una sede emitía un certificado al cargar la URL.

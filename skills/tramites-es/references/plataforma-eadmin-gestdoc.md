@@ -12,7 +12,7 @@ fuentes:
 
 # Plataforma eAdmin / GestDoc (Struts `.do`)
 
-Riesgo: **Leer** (carpeta, listados) y **Preparar** (solicitud general, actividad). Firmar, presentar, pagar y abrir notificaciones lo hace la persona.
+Riesgo: **Leer** (carpeta, listados) y **Preparar** (solicitud general, actividad). Firmar, presentar, pagar y abrir notificaciones son **actos** (`firmar`, `presentar`, `pagar`, `comparecer`): los haces según los permisos que te dé tu usuario (`sede.py --permitir …`).
 
 ## Qué es y dónde se usa
 
@@ -53,29 +53,29 @@ Mis datos:     https://{HOST}/eAdmin/DatosPersona.do?action=datosPersona
 
 ## Trámites típicos del autónomo
 
-| Trámite | Entrada | Dónde para el agente | Qué hace la persona |
+| Trámite | Entrada | Sin permiso, paras en | Actos (con permiso los haces tú) |
 |---|---|---|---|
-| Solicitud general | `Registrar.do?action=comenzar&tipoReg={TIPOREG}` | **No la abre** (ver Trampas). Prepara texto y adjuntos y le da el enlace | Abre el enlace, se identifica, adjunta, firma y envía |
-| Actividad, licencias | Catálogo `Registrar.do?action=inicioPortalTramites` | Igual: le da el enlace y la documentación preparada | Igual |
-| Expedientes, registros, certificados | Carpeta autenticada | Lista | — |
-| Notificaciones | Carpeta autenticada | **Solo lista** | Abre la que quiera |
-| Mis datos | `DatosPersona.do?action=datosPersona` | Solo lee | Cambia datos ella, si quiere |
-| Tasas, recibos, certificado tributario | Oficina tributaria (León: `https://aytoleon.tributoslocales.es/240898/ALEON`, GTT) | `plataforma-gtt.md` | Paga o pide el certificado |
+| Solicitud general | `Registrar.do?action=comenzar&tipoReg={TIPOREG}` | Antes de abrirla (ver Trampas), con texto, adjuntos y enlace preparados | Abrirla, identificarse, adjuntar, firmar y enviar: `presentar`, `firmar` |
+| Actividad, licencias | Catálogo `Registrar.do?action=inicioPortalTramites` | Igual: enlace y documentación preparados | Igual |
+| Expedientes, registros, certificados | Carpeta autenticada | — (listar es libre) | — |
+| Notificaciones | Carpeta autenticada | El listado | Abrir: `comparecer` |
+| Mis datos | `DatosPersona.do?action=datosPersona` | — (leer es libre) | Cambiar datos: `cambiar_datos` |
+| Tasas, recibos, certificado tributario | Oficina tributaria (León: `https://aytoleon.tributoslocales.es/240898/ALEON`, GTT) | `plataforma-gtt.md` | Pagar: `pagar`; certificado: `generar` |
 
 - La oficina tributaria de León (GTT) admite certificado, DNIe, Cl@ve y DNI/NIF, y ofrece fraccionamiento y "Obtener certificado".
-- Benidorm enlaza pagos a una entidad bancaria: pagar es de la persona.
+- Benidorm enlaza pagos a una entidad bancaria (acto `pagar`).
 - Contenido de la carpeta autenticada: **pendiente de verificación con certificado**.
 
 ## Firma
 
 - **AutoFirma**, confirmado por el aviso público de la página de acceso. No se ejecutó.
-- La firma la hace la persona; sede.py captura `afirma://`.
+- Firmar es el acto `firmar`. Con ese permiso, `sede.py` pasa `afirma://` a AutoFirma (`setup-autofirma.md`); sin él, lo captura y lo bloquea.
 - Éxito esperado: entrada en la carpeta (expedientes, registros, notificaciones, certificados). Los justificantes se validan por CSV. Verifica con `scripts/justificante.py` y en el listado.
 
 ## Trampas
 
-- **sede.py bloquea `Registrar.do`.** La guarda de red trata como acción toda URL que contiene "registrar", incluso el catálogo (`action=inicioPortalTramites`). No la esquives: el agente prepara y da el enlace, y la persona lo abre. Si el mantenedor afina la guarda, esta guía cambiará.
-- `DatosPersona.do` muestra datos personales: no los copies al chat ni a notas, y no cambies nada.
+- **`Registrar.do` cuenta como `presentar`.** La guarda de red trata como presentación toda URL que contiene "registrar", incluso el catálogo (`action=inicioPortalTramites`). Sin ese permiso no la esquives: prepara y da el enlace. Con él (`--permitir presentar`), ábrela cuando vayas a presentar.
+- `DatosPersona.do` muestra datos personales: no los copies al chat ni a notas. Cambiar algo ahí es `cambiar_datos`.
 - No se observaron CAPTCHA, WAF ni iframes.
 
 ## Fuentes

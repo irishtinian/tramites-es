@@ -13,7 +13,7 @@ fuentes:
 
 # Sede propia del Ayuntamiento de Zaragoza
 
-Riesgo: **Leer** (catálogo, fichas) y **Preparar** (registro, actividad, certificados). Firmar, presentar, pagar y abrir notificaciones lo hace la persona.
+Riesgo: **Leer** (catálogo, fichas) y **Preparar** (registro, actividad, certificados). Firmar, presentar, pagar y abrir notificaciones son **actos** (`firmar`, `presentar`, `pagar`, `comparecer`): los haces según los permisos que te dé tu usuario (`sede.py --permitir …`).
 
 Estado **parcial**: la entrada del registro (`/procedimiento/11901`) agotó el tiempo y no se vio el selector final; la firma no está confirmada.
 
@@ -53,18 +53,18 @@ OVT:        https://tributos.zaragoza.es/info.0
 
 ## Trámites típicos del autónomo
 
-| Trámite | ID de ficha | Dónde para el agente | Qué hace la persona |
+| Trámite | ID de ficha | Sin permiso, paras en | Actos (con permiso los haces tú) |
 |---|---|---|---|
-| Registro General (instancia) | `11901` | En la ficha, con texto y adjuntos preparados | "Iniciar trámite", se identifica, adjunta, firma y envía |
+| Registro General (instancia) | `11901` | La ficha, con texto y adjuntos preparados | "Iniciar trámite", identificarse, adjuntar, firmar y enviar: `presentar`, `firmar` |
 | Comunicación previa de apertura | `148` | Ídem | Ídem |
 | Inicio de actividad | `13038` | Ídem | Ídem |
-| Autoliquidación de la tasa de licencia de actividad | `13401` | Explica el importe y el modelo | Autoliquida y **paga** |
+| Autoliquidación de la tasa de licencia de actividad | `13401` | La explicación del importe y el modelo | Autoliquidar y **pagar**: `presentar`, `pagar` |
 | Veladores y sombrillas | `196` | Ídem que la instancia | Ídem |
-| Basura: incorporación / baja | `215` / `23401` | Ídem | Ídem |
-| Certificado de estar al corriente | `27120` (o la OVT) | Ídem | Lo solicita y firma |
-| Ayuda al autónomo | `41838` | Lee requisitos y plazos | La solicita (`ayudas.md`) |
+| Basura: incorporación / baja | `215` / `23401` | Ídem | Ídem, y la baja es además `cambiar_datos` |
+| Certificado de estar al corriente | `27120` (o la OVT) | Ídem | Solicitar y firmar: `generar`, `firmar` |
+| Ayuda al autónomo | `41838` | Requisitos y plazos leídos | Solicitarla: `firmar`, `presentar` (`ayudas.md`) |
 | Actividad ocasional en vía pública | `29120` | Ídem que la instancia | Ídem |
-| Autoliquidación del IAE, aplazamientos, certificado tributario | OVT `https://tributos.zaragoza.es/info.0` | Consulta | Paga, aplaza o firma |
+| Autoliquidación del IAE, aplazamientos, certificado tributario | OVT `https://tributos.zaragoza.es/info.0` | La consulta | Pagar, aplazar o pedir el certificado: `pagar`, `presentar`, `generar`, `firmar` |
 
 - Las personas jurídicas solo pueden hacer los trámites de actividad por vía electrónica.
 - **OVT tributaria:** solo ofrece Cl@ve como entrada (el certificado, por la rama "DNIe / Certificado"). Con sesión: **pendiente de verificación con certificado**.
@@ -73,7 +73,7 @@ OVT:        https://tributos.zaragoza.es/info.0
 ## Firma
 
 - **Pendiente.** La sede publica una ayuda del componente de firma y un verificador de documentos, pero el mecanismo concreto no se vio.
-- La firma la hace la persona; sede.py captura `afirma://` y bloquea firmar, enviar y pagar.
+- Firmar, enviar y pagar son los actos `firmar`, `presentar` y `pagar`. Con esos permisos, `sede.py` pasa `afirma://` a AutoFirma (`setup-autofirma.md`); sin ellos, captura `afirma://` y bloquea firmar, enviar y pagar.
 - Éxito esperado: asiento y justificante del registro, y consulta posterior en la carpeta enlazada por la sede. Verifica con `scripts/justificante.py` y con el verificador de documentos.
 
 ## Trampas
