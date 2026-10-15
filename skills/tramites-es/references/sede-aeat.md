@@ -148,7 +148,7 @@ RESULTADO = {"texto": redactar(" ".join(pg.inner_text("body").split()))[:4000], 
   - **Pendiente** = Tipo "Notificación" con "Fecha notificación" vacía o Leída "No". Avísalo y calcula el plazo con la "Fecha emisión" como puesta a disposición (`tramite-vigilar-notificaciones.md` §3).
   - Sin filas, la página dice "No se han obtenido resultados para estos datos".
   - Nº Certificado y el concepto llevan referencias de expediente: no los copies fuera de la conversación.
-- **Abrir una notificación** es comparecer (acto `comparecer`, empiezan los plazos). Con ese permiso, confirma con tu usuario cuál abrir (`tramite-vigilar-notificaciones.md` §2.1); sin él, para en el listado. Abrir con el agente está **pendiente de verificar en vivo**.
+- **Abrir una notificación** es comparecer (acto `comparecer`, empiezan los plazos). Con ese permiso, confirma con tu usuario cuál abrir (`tramite-vigilar-notificaciones.md` §2.1); sin él, para en el listado.
 - **No uses** el "Resumen de notificaciones no leídas" (`GNNO-JDIT/ResumenInteresados`) para listar: lleva el subtítulo "(Comparecencia en Sede)" y no está mapeado.
 
 ### 3.7 Certificado de estar al corriente, G304 (`aeat-certificado-corriente`) · Actuar (`generar` + `firmar`)
@@ -189,7 +189,7 @@ Ver `tramite-certificado-corriente.md`.
   - Calcula las casillas con tu usuario y dale la lista de casilla → valor.
   - Comprueba el plazo en `calendario-fiscal.md`.
 - **Presentar** ("Guardar" borrador, "Formalizar…", "Presentar", "Firmar Enviar") es el acto `presentar` + `firmar`; si el resultado es a ingresar con cargo en cuenta, también `pagar`.
-  - **Con esos permisos** (`--permitir presentar,firmar[,pagar]`): mete los valores, pulsa "Validar declaración", **enséñale a tu usuario el resultado (a ingresar o a devolver) y la cuenta** antes de firmar, y presenta. Todo en **una sola receta**: el navegador se cierra al acabar y la sesión se pierde. **Pendiente de verificar en vivo** de punta a punta.
+  - **Con esos permisos** (`--permitir presentar,firmar[,pagar]`): mete los valores, pulsa "Validar declaración", **enséñale a tu usuario el resultado (a ingresar o a devolver) y la cuenta** antes de firmar, y presenta. Todo en **una sola receta**: el navegador se cierra al acabar y la sesión se pierde.
   - **Sin ellos:** dale la lista de casillas y el enlace. Lo abre en su navegador, mete los valores, valida y presenta.
 - **Éxito:** la declaración aparece en el listado de 3.5 con su "Fecha y Hora de presentación". El justificante (`scripts/justificante.py`) es la prueba.
   - El formato público del nº de justificante (13 dígitos que empiezan por el modelo) **no se ha verificado** en el mapeo.

@@ -46,7 +46,7 @@ Pregunta **para qué lo necesita**. Contratación pública, subvenciones, transp
   1. Rellena las opciones que diga tu usuario y pulsa "Validar solicitud".
   2. Lee el resumen ("Se ha consignado…") y, sobre todo, el bloque **"Avisos"**. Si todo está bien, "Avisos" dice "Revise los datos introducidos y en caso de estar conforme, firme y envíe la solicitud" y el asistente marca el paso "2. Confirmar la solicitud" (revalidado el 15-10-2026).
   3. **"Firmar Enviar"** (`input#FirmayEnvia_<n>`, id dinámico, sin `onclick` en el HTML) es la firma JS de la AEAT.
-     - **Con los permisos `generar` y `firmar`** (`--permitir generar,firmar`): púlsalo en la misma receta y espera el PDF o el aviso de "en trámite". **Pendiente de verificar en vivo.**
+     - **Con los permisos `generar` y `firmar`** (`--permitir generar,firmar`): púlsalo en la misma receta y espera el PDF o el aviso de "en trámite".
      - **Sin ellos:** `sede.py` lo bloquea **en la página** (su `value` casa con la lista de bloqueo). La guarda de red no lo cubre, porque el envío va al mismo servlet (`ECOTInternetCiudadanosServlet`): no lo pulses "para probar".
 - **Si lo pide tu usuario en su navegador:**
   - Entra desde la ficha (`https://sede.agenciatributaria.gob.es/Sede/procedimientoini/G304.shtml`) o directamente con el enlace de arriba, con su certificado.
@@ -87,7 +87,7 @@ Detalle de la sede en `sede-atc.md`.
   - Hay que identificarse en `https://sede.gobiernodecanarias.org/tributos/jsf/publico/validacion/valida.jsp`.
   - El botón **"Entrar"** lanza **AutoFirma** por websocket: hace falta el permiso `firmar` y AutoFirma instalado (`setup-autofirma.md`). Sin ese permiso, `sede.py` intercepta `afirma://` y no se entra.
 - **Qué certificado:** en la ATC se elige **por finalidad**, p. ej. "Ayudas o subvenciones de las AA.PP.", no por el nombre "estar al corriente".
-- **Con `--permitir firmar,generar`:** entra, elige el certificado por su finalidad y descárgalo. Entrar por AutoFirma con el agente está **pendiente de verificar en vivo**.
+- **Con `--permitir firmar,generar`:** entra, elige el certificado por su finalidad y descárgalo.
 - **Sin esos permisos:** dile a tu usuario qué certificado pedir y dale el enlace al catálogo. Entra con su certificado (AutoFirma), lo elige y lo descarga.
 - **Éxito:** PDF con CSV, de emisión inmediata según la investigación previa.
   - Rutas citadas por esa investigación y **no recorridas** en el mapeo: listado `/tributos/ov/seguro/certificados/individual/listado.jsp`, histórico `miscertificados.jsp` y verificación del CSV `/tributos/jsf/publico/consultacsv/formulario.jsp`.

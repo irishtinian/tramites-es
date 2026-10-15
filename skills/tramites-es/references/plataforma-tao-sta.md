@@ -77,7 +77,7 @@ Los nombres de carpetas y parámetros son comunes. El host, los `PAGE_CODE` y lo
 
 Son nombres observados en 4 instalaciones, **no una garantía**: compruébalos en cada una (ver «Cómo adaptarla»).
 
-- **Recibos:** muestran las pestañas pendientes en voluntaria, en ejecutiva y pagados. Los botones «Pagar ahora», «Añadir a la cesta» y «Generar carta de pago» son el acto `pagar`: con ese permiso, confirma con tu usuario recibo e importe antes de pagar; sin él, dile cuáles tiene pendientes y dónde pagarlos. El pago con el agente está **pendiente de verificar en vivo**.
+- **Recibos:** muestran las pestañas pendientes en voluntaria, en ejecutiva y pagados. Los botones «Pagar ahora», «Añadir a la cesta» y «Generar carta de pago» son el acto `pagar`: con ese permiso, confirma con tu usuario recibo e importe antes de pagar; sin él, dile cuáles tiene pendientes y dónde pagarlos.
   - Sin recibos, la pestaña dice «No tiene recibos pendientes.» (Granadilla, 15-10-2026).
   - Columnas en el Consorcio: Tributo / Referencia, Ejercicio, Num. recibo, Institución, Periodo (Voluntaria/Ejecutiva), Importe principal, Carta Pago. **No hay fecha límite de pago**: para el plazo de voluntaria, remite al calendario del contribuyente del recaudador (en el CTT, `https://www.tributostenerife.es`) y dilo como "a confirmar".
   - Granadilla avisa de que agua y alcantarillado **no** están en su carpeta, y remite al Consorcio para lo demás: consulta siempre los dos.
@@ -91,7 +91,7 @@ Son nombres observados en 4 instalaciones, **no una garantía**: compruébalos e
   ```
 - **Ficha:** muestra requisitos y el botón **Tramitar**. Prepara el texto, los datos y la lista de adjuntos.
 - **Tramitar, adjuntar y enviar** son el acto `presentar`; firmar cada adjunto y la solicitud, `firmar`.
-  - **Con esos permisos** (`sede.py --permitir firmar,presentar`): rellena, adjunta, confirma el contenido con tu usuario y envía. Cada firma lanza AutoFirma (`setup-autofirma.md`). **Pendiente de verificar en vivo** de punta a punta.
+  - **Con esos permisos** (`sede.py --permitir firmar,presentar`): rellena, adjunta, confirma el contenido con tu usuario y envía. Cada firma lanza AutoFirma (`setup-autofirma.md`).
   - **Sin ellos:** para en la ficha y dale a tu usuario el texto, los adjuntos y el enlace.
 - **Adjuntos y firma:** el formulario abre una ventana de adjuntos (`openUploader`, campo `#fichero`, «Pulse para adjuntar»). Llama a `procesoFirma()` y `firmar()` (AutoFirma) y después aparece **Continuar**.
 - **Cómo verificar:**

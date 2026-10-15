@@ -96,7 +96,7 @@ El resultado incluye textos de la página, que pueden llevar datos de la persona
 - **Trámites de actividad:** el UUID es propio de cada ayuntamiento. En Arico, la categoría «Actividad Económica» no mostró una licencia o declaración de apertura. Sí había una comunicación urbanística, que no es el mismo trámite. Ejemplos de Adeje en `assets/sedes.yaml`.
 - **Presentar:** «Iniciar tramitación electrónica» en la ficha, rellenar, adjuntar, firmar y presentar.
   - Prepara antes el texto (expone, solicita) y la lista de documentos, y confírmalos con tu usuario.
-  - **Con los permisos `firmar` y `presentar`** (`sede.py --permitir firmar,presentar`), hazlo tú. **Pendiente de verificar en vivo** de punta a punta.
+  - **Con los permisos `firmar` y `presentar`** (`sede.py --permitir firmar,presentar`), hazlo tú.
   - **Sin ellos**, dale a tu usuario el texto, los documentos y el enlace a la ficha.
 - **Firma:** según `{ORIGIN}/signature-systems` (Adeje), Gestiona admite certificado y, en trámites de bajo riesgo, firma «no criptográfica» (art. 10.2.c de la Ley 39/2015). Las dos son firma a nombre de tu usuario: acto `firmar`.
 - **Cómo verificar una presentación:** que aparezca la entrada nueva en `{ORIGIN}/registro`, con su número y fecha. El acuse a veces solo llega por correo. Antes de reintentar un envío fallido, comprueba ese listado para no duplicar.

@@ -40,7 +40,7 @@ Mira el certificado con `uv run scripts/cert.py listar`: tipo, `caduca` y `dias_
 ## 2. Antes de empezar
 
 - **Mismo equipo y mismo usuario del sistema** para solicitar y descargar, y no formatear entre medias (lo exige la FNMT). Por eso esto se hace en el ordenador de tu usuario, en **su escritorio y su navegador normal**, con el certificado de persona física instalado en ese navegador.
-  - El navegador de `sede.py` en Linux usa un almacén de certificados aislado y temporal: el certificado nuevo no quedaría instalado en ningún sitio útil. Usar `sede.py` para este trámite está **pendiente de verificar**.
+  - El navegador de `sede.py` en Linux usa un almacén de certificados aislado y temporal: el certificado nuevo no quedaría instalado en ningún sitio útil. Para este trámite, usa el navegador normal de tu usuario.
   - En el modo completo necesitas poder manejar ese escritorio (por ejemplo, `xdotool` sobre su pantalla o una herramienta de control del ordenador). Sin escritorio (un servidor por SSH, `xvfb`), solo puedes hacer el modo acompañado.
 - **Configurador FNMT** instalado (paso 1 de la sede). Versión publicada el 15-10-2026: 5.1.2, en `https://descargas.cert.fnmt.es/` (Windows `.exe`, macOS `.pkg`, Linux `.deb`; el `.rpm` enlazado era la 5.0.3). Descárgalo **solo** de ahí. Instalarlo pide la contraseña de administrador: la escribe la persona.
 - **Correo:** el código de solicitud llega por email. Si tienes acceso a su correo y su permiso para leerlo, búscalo tú. Si no, que te lo pase.

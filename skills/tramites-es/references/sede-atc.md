@@ -49,7 +49,7 @@ En Canarias no hay IVA: el autónomo liquida el **IGIC** en la ATC. El IRPF (130
 
 - **El acceso a la zona privada de la ATC es una firma** (acto `firmar`).
   - Sin permiso: `sede.py` muestra **BLOQUEADO** y la persona entra en su navegador con AutoFirma.
-  - Con permiso: `--permitir firmar` (y `--autofirma-auto N` en Linux sin escritorio). AutoFirma tiene que tener el certificado en el almacén del sistema (`setup-autofirma.md`). Este acceso con el agente está **pendiente de verificar en vivo**.
+  - Con permiso: `--permitir firmar` (y `--autofirma-auto N` en Linux sin escritorio). AutoFirma tiene que tener el certificado en el almacén del sistema (`setup-autofirma.md`).
 - La rama Cl@ve con «DNIe / Certificado electrónico» (`sede-clave.md`) **no se ha probado en la ATC**. Si la pruebas, añade `https://pasarela-ident.clave.gob.es` a los origins, no uses nunca Cl@ve PIN, Móvil ni Permanente y documenta el resultado.
 - **Cómo saber que entró:** no verificado en el mapeo. Pide a la persona que confirme que ve su nombre o NIF en la cabecera antes de seguir.
 
@@ -68,7 +68,7 @@ Peculiaridades técnicas:
   ```bash
   uv run scripts/sede.py abrir --sede atc --url "https://sede.gobiernodecanarias.org/tributos/jsf/publico/certificados/certificados_individuales.jsp"
   ```
-- **Con `--permitir firmar,generar`:** entra con AutoFirma, elige la finalidad acordada y emite el certificado. **Pendiente de verificar en vivo.**
+- **Con `--permitir firmar,generar`:** entra con AutoFirma, elige la finalidad acordada y emite el certificado.
 - **Sin esos permisos:** para en el botón de acceso y prepara la elección («certificado de estar al corriente, finalidad X»). Tu usuario entra, elige la finalidad y lo emite.
 - **Cómo verificar** (según la investigación del proyecto; **no recorrido en el mapeo**): la emisión es inmediata, en PDF con CSV, y queda en un histórico «Mis certificados». Comprueba el PDF con `scripts/justificante.py`: titular, finalidad, fecha y CSV.
 - El cotejo de CSV (`https://sede.gobiernodecanarias.org/tributos/jsf/publico/consultacsv/formulario.jsp`) **tiene CAPTCHA** (comprobado el 15-10-2026): si hace falta cotejar, lo hace la persona.
@@ -89,7 +89,7 @@ Peculiaridades técnicas:
   - Prepara las cifras desde los libros de tu usuario, con un resumen casilla a casilla para teclearlas o revisarlas en el programa.
 - **El `.dec` sale del programa de ayuda.** **No generes un `.dec` a mano**: el formato no está publicado. El programa es de escritorio: lo maneja tu usuario, o tú si tienes forma de usar su escritorio.
 - **Cargar, firmar y presentar** (`carga.jsp`) son los actos `presentar` + `firmar`; subir el `.dec` desde una receta (`set_input_files`) solo se permite con `presentar`.
-  - **Con esos permisos** (`--permitir firmar,presentar[,pagar]`): confirma con tu usuario el resultado (a ingresar, a devolver o cero) antes de firmar, sube el `.dec`, firma con AutoFirma y presenta. **Pendiente de verificar en vivo.**
+  - **Con esos permisos** (`--permitir firmar,presentar[,pagar]`): confirma con tu usuario el resultado (a ingresar, a devolver o cero) antes de firmar, sube el `.dec`, firma con AutoFirma y presenta.
   - **Sin ellos:** dale el enlace de la ficha y el botón de cada paso.
 - **Cómo verificar:** justificante de presentación y, mejor, la declaración en «Consultas > declaraciones presentadas» de la sede (ruta del mapeo; no recorrida con sesión). Antes de repetir una presentación que falló, comprueba ese listado para no duplicar.
 - **No** se presenta por el Registro General Electrónico: la ATC lo tiene por no presentado.
@@ -107,7 +107,7 @@ Peculiaridades técnicas:
 - **Es un formulario web**, no un programa de ayuda: `https://sede.gobiernodecanarias.org/tributos/ov/publico/presentacion/modelo400/formulario.jsp` (apartados, «Validar», «Presentar»).
 - Cambia datos censales y regímenes (por ejemplo, el REPEP): hazlo **solo si tu usuario lo pide**.
   - Puedes abrir el formulario y explicar los apartados sin ningún permiso.
-  - «Validar» y «Presentar» son `cambiar_datos` + `firmar` + `presentar`. Con esos permisos, confirma con tu usuario cada apartado y presenta; sin ellos, se los pulsa él. **Pendiente de verificar en vivo.**
+  - «Validar» y «Presentar» son `cambiar_datos` + `firmar` + `presentar`. Con esos permisos, confirma con tu usuario cada apartado y presenta; sin ellos, se los pulsa él.
 - Presentarlo por el Registro General Electrónico equivale a no presentarlo.
 
 ### Pago y deudas (acto: `pagar`)

@@ -44,7 +44,7 @@ Los impuestos de la comunidad (IGIC, 400, 420, 425) **no** están aquí: van en 
 | Origins | `https://sede.gobiernodecanarias.org` (el portal del SCE está en `https://www.gobiernodecanarias.org`) |
 | `sede.py` | `--sede gobcan` o `--sede sce` |
 
-- **Secuencia con certificado:** «Certificado Digital / DNI-E» → **Validarme**. Ese botón ejecuta `firmar(formData)`, que abre AutoFirma para firmar el acceso: es el acto `firmar`. Sin permiso, `sede.py` lo bloquea y entra la persona. Con permiso, `--permitir firmar` (más `--autofirma-auto N` en Linux sin escritorio) lanza AutoFirma, **pendiente de verificar en vivo**.
+- **Secuencia con certificado:** «Certificado Digital / DNI-E» → **Validarme**. Ese botón ejecuta `firmar(formData)`, que abre AutoFirma para firmar el acceso: es el acto `firmar`. Sin permiso, `sede.py` lo bloquea y entra la persona. Con permiso, `--permitir firmar` (más `--autofirma-auto N` en Linux sin escritorio) lanza AutoFirma.
 - No hay certificado por TLS (ni en el *handshake* ni en `/sede/identificacion`; comprobado el 15-10-2026). El certificado se elige desde AutoFirma, **no** desde el navegador: el desplegable `#validCertificates` sale vacío con el certificado de `sede.py`.
 - No rellenes a mano los campos ocultos `certificadoSeleccionado`, `hiddenInfoCertificado` y `firma`: los rellena el MiniApplet con la firma de AutoFirma.
 - La rama Cl@ve → «DNIe / Certificado electrónico» **no se ha probado** en esta sede. Si la pruebas, añade `https://pasarela-ident.clave.gob.es` a los origins y documenta el resultado (`sede-clave.md`). Cl@ve PIN, Móvil y Permanente, nunca.
@@ -88,7 +88,7 @@ El Gobierno publica sus cortes en `https://sede.gobiernodecanarias.org/sede/la_s
 
 - **Ficha:** `https://sede.gobiernodecanarias.org/sede/rge`. Tramitador: `https://sede.gobiernodecanarias.org/sede/tramitador/creacion/tramites/registro_electronico`.
 - Sirve para escritos a cualquier órgano de la comunidad. Hay documentos excepcionados cuya presentación no surte efecto, y los modelos 400, 420 y 425 **no** valen por aquí.
-- Redacta el texto del escrito y la lista de adjuntos, y confírmalos con tu usuario. Con `--permitir firmar,presentar`, entra (Validarme), rellena, firma y presenta; sin esos permisos, se lo das para que lo haga él. **Pendiente de verificar en vivo.**
+- Redacta el texto del escrito y la lista de adjuntos, y confírmalos con tu usuario. Con `--permitir firmar,presentar`, entra (Validarme), rellena, firma y presenta; sin esos permisos, se lo das para que lo haga él.
 - **Cómo verificar:** justificante con número de registro y el asiento en el área personal, «Consulta de documentos presentados».
 
 ### Área personal y notificaciones (riesgo: leer; pendientes)
@@ -140,7 +140,7 @@ Lee la ficha, comprueba plazo y requisitos y prepara la documentación. Solicita
 
 - **BLOQUEADO en «Validarme»** = falta el permiso `firmar`: el acceso al tramitador del Gobierno pasa por AutoFirma.
 - **Borradores:** entrar en `/sede/tramitador/creacion/…` puede crear una solicitud pendiente. Si la persona retoma un borrador, puede haber que encadenar varios «Continuar».
-- **Firmar por partes:** en el tramitador se firma cada adjunto y la instancia por separado, y antes hay que pulsar «Guardar y validar». Con `--permitir firmar,presentar`, cada firma lanza AutoFirma. Pendiente de verificar en vivo de punta a punta.
+- **Firmar por partes:** en el tramitador se firma cada adjunto y la instancia por separado, y antes hay que pulsar «Guardar y validar». Con `--permitir firmar,presentar`, cada firma lanza AutoFirma.
 - **Representación:** si actúa una sociedad con su propio certificado, la persona debe revisar la casilla de «representa a un tercero» (en el historial del proyecto hubo que desmarcarla).
 - **Fichas fuera de plazo:** la ficha avisa antes de llegar al tramitador. Léela siempre.
 - **Revisa el resumen campo a campo** antes de que la persona firme: en el historial del proyecto se coló una errata en el email de una solicitud.

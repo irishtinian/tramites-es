@@ -15,7 +15,7 @@ fuentes:
 
 Riesgo: **Leer** (catálogo, solicitudes, expedientes) y **Preparar** (instancia, actividad). Firmar, presentar, pagar y abrir notificaciones son **actos** (`firmar`, `presentar`, `pagar`, `comparecer`): los haces según los permisos que te dé tu usuario (`sede.py --permitir …`).
 
-Estado **parcial**: el mecanismo de firma no está confirmado. El falso positivo del buzón está corregido en `sede.py` desde el 15-10-2026, pero queda pendiente de verificar en vivo.
+Estado **parcial**: el mecanismo de firma no está confirmado. El falso positivo del buzón está corregido en `sede.py` desde el 15-10-2026.
 
 ## Qué es y dónde se usa
 

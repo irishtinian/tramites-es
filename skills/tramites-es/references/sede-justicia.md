@@ -46,9 +46,7 @@ uv run scripts/sede.py ejecutar clave_login.py --sede justicia --titular yo
   - finalidad (`select#cboFinalidad`: Trabajo, Licencia, Concurso público, Interés particular…);
   - apostilla y la casilla "reflejar país y finalidad".
 - **Qué hace el agente:** entra, lee el formulario con `probe` y acuerda con su usuario la finalidad y si necesita apostilla.
-- **Enviar** ("Siguiente", `#btnSubmit`, y luego "Confirmar") es el acto `presentar`; si la sede pide el pago con NRC, también `pagar`. Con esos permisos, rellena teléfono y finalidad, confirma los datos con tu usuario y envía (`sede.py --permitir presentar`). Sin ellos, para antes de "Siguiente" y le dices qué rellenar y qué pulsar.
-- En el mapeo no se pulsó "Siguiente": el paso "Confirmar" está **pendiente de verificar en vivo**.
-- **Éxito:** consulta el estado y descarga en `https://sede.mjusticia.gob.es/certape/clave/FormularioConsulta?lang=es_es&idtramite=1288778883620&idpagina=1215197884559` (`justicia-antecedentes-consulta`, **pendiente**: no recorrido). El certificado lleva CSV.
+- **Enviar** ("Siguiente", `#btnSubmit`, y luego "Confirmar") es el acto `presentar`; si la sede pide el pago con NRC, también `pagar`. Con esos permisos, rellena teléfono y finalidad, confirma los datos con tu usuario y envía (`sede.py --permitir presentar`). Sin ellos, para antes de "Siguiente" y le dices qué rellenar y qué pulsar.- **Éxito:** consulta el estado y descarga en `https://sede.mjusticia.gob.es/certape/clave/FormularioConsulta?lang=es_es&idtramite=1288778883620&idpagina=1215197884559` (`justicia-antecedentes-consulta`, **pendiente**: no recorrido). El certificado lleva CSV.
 
 ### 3.2 Certificado de delitos de naturaleza sexual (`justicia-delitos-sexuales`) · Actuar (`generar`)
 
@@ -62,7 +60,7 @@ uv run scripts/sede.py ejecutar clave_login.py --sede justicia --titular yo
 >   - Sin ese permiso, `sede.py` corta cualquier navegación cuya URL contenga `solicitar`, `emitir`, `expedir`, `generar`… y la registra como "URL que ejecuta una acción al abrirla". Pide el permiso a tu usuario; no lo esquives cambiando la URL.
 >   - Con el permiso (`sede.py --permitir generar`), ábrela solo cuando tu usuario quiera ese certificado, una vez: cada apertura queda registrada como una solicitud a su nombre.
 
-- **Con el permiso `generar`:** entra por Cl@ve, abre la URL "Acceder" de la ficha, comprueba el texto "Solicitud procesada con éxito" y descarga el PDF con "Descargar certificado" (`#butDescargarCertificado`). "Apostillar" solo si tu usuario lo necesita para el extranjero. El recorrido completo con el agente está **pendiente de verificar en vivo**.
+- **Con el permiso `generar`:** entra por Cl@ve, abre la URL "Acceder" de la ficha, comprueba el texto "Solicitud procesada con éxito" y descarga el PDF con "Descargar certificado" (`#butDescargarCertificado`). "Apostillar" solo si tu usuario lo necesita para el extranjero.
 - **Sin el permiso:**
   - Explica qué es el certificado y para qué lo piden.
   - Da el enlace a la ficha: `https://sede.mjusticia.gob.es/es/tramites/certificado-registro-central`.

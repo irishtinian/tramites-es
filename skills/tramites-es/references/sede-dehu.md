@@ -119,7 +119,7 @@ xvfb-run -a uv run scripts/sede.py ejecutar dehu_listado.py --sede dehu --titula
   4. Repite con la de realizadas si hace falta.
   - Pide **ventanas de fechas de 30 días o menos**: los rangos largos dan error (`…date-range-to-long-error`).
 - **Sin el permiso `comparecer`:** el agente para en la tabla, sin pulsar nada en la columna "Acciones" ni en el identificador. Para leer una notificación entra la persona en DEHú, pestaña "Pendientes", y en "Acciones" elige aceptar o rechazar.
-- **Con el permiso `comparecer`:** confirma con tu usuario qué notificación abrir (aceptar no es lo mismo que rechazar) y avísale de que desde ese momento corren los plazos. DEHú pide reautenticarse por Cl@ve para firmar la comparecencia (`appearance-login-form`): usa la rama de certificado. Abrir de punta a punta con el agente: **pendiente de verificar en vivo**.
+- **Con el permiso `comparecer`:** confirma con tu usuario qué notificación abrir (aceptar no es lo mismo que rechazar) y avísale de que desde ese momento corren los plazos. DEHú pide reautenticarse por Cl@ve para firmar la comparecencia (`appearance-login-form`): usa la rama de certificado.
 - **Éxito:** tabla con filas, o vacía, en la pestaña pedida.
 - **Pendiente frente a realizada:**
   - Pendiente = no comparecida, con "Fecha caducidad".

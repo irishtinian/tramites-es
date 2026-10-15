@@ -1,10 +1,8 @@
 # Aviso legal
 
-> **Borrador pendiente de revisión por un profesional del derecho antes de la publicación.**
-
 1. **No es asesoramiento.** `tramites-es` es software libre que ayuda a un agente de IA a consultar, preparar y, si la persona usuaria lo autoriza, realizar trámites. No constituye asesoramiento fiscal, laboral, contable ni jurídico. Ante dudas sobre obligaciones, plazos o importes, consulta a un profesional o al organismo correspondiente.
 2. **Sin relación con la Administración.** Proyecto independiente, sin vinculación con la AEAT, la Seguridad Social, la DGT, la Agencia Tributaria Canaria, ninguna comunidad autónoma ni ningún ayuntamiento. Los nombres de organismos se usan solo para describir dónde se hace cada trámite.
-3. **Tú eres el titular y el responsable.** El certificado digital es personal. **Tú decides** qué actos con efectos (firmar, presentar, pagar, comparecer en notificaciones, cambiar datos, pedir citas) puede realizar tu agente con él. Lo que tu agente haga con los permisos que le das se hace en tu nombre: eres responsable del uso de tu certificado y de lo que se presente con él (Ley 6/2020 y Reglamento eIDAS). Revisa los justificantes.
+3. **Quien lo usa es el responsable.** La persona que instala y usa `tramites-es` es la única responsable de su uso. El certificado digital es personal y **tú decides** qué actos con efectos (firmar, presentar, pagar, comparecer en notificaciones, cambiar datos, pedir citas) puede realizar tu agente con él. Lo que tu agente haga con los permisos que le das se hace en tu nombre: respondes del uso de tu certificado y de lo que se presente con él (Ley 6/2020 y Reglamento eIDAS). Revisa los justificantes.
 4. **Cl@ve.** El software no automatiza Cl@ve PIN, Cl@ve Móvil ni Cl@ve Permanente, de acuerdo con el aviso de la Agencia Tributaria sobre su uso personal e intransferible. Tampoco resuelve CAPTCHAs ni acapara citas previas.
 5. **Exactitud.** Las sedes y la normativa cambian. Cada guía indica sus fuentes y su fecha de verificación, pero puede haber errores o quedar desactualizada. Comprueba siempre en la fuente oficial antes de actuar.
 6. **Sin garantía.** Se distribuye "tal cual", sin garantía de ningún tipo (ver [LICENSE](LICENSE)). Los autores no responden de recargos, sanciones, plazos perdidos ni ningún otro perjuicio derivado de su uso.

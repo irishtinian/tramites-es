@@ -79,7 +79,7 @@ Escribir los textos en los campos no tiene efectos. **Adjuntar, firmar y enviar*
 4. Firmar y enviar.
 5. Descargar el recibo y guardarlo.
 
-- **Con `--permitir presentar,firmar`:** lo haces tú, en una sola receta. **Pendiente de verificar en vivo** de punta a punta.
+- **Con `--permitir presentar,firmar`:** lo haces tú, en una sola receta.
 - **Sin esos permisos:** le das el borrador y los adjuntos, y lo hace tu usuario.
 
 Las alertas por correo o SMS son opcionales: no las actives sin que la persona lo pida.

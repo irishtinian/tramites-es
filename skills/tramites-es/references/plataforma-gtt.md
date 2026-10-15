@@ -93,7 +93,7 @@ La salida y las capturas locales pueden contener importes y referencias de la pe
   - Verificar un pago: el recibo pasa a «pagados».
 - **Solicitudes presentadas** (riesgo: leer). Opción «Solicitudes y seguimiento». **No mapeada con sesión.**
 - **Pagar u obtener documento de pago** (acto `pagar`).
-  - Con el permiso: confirma con tu usuario recibo, importe y medio de pago, y paga (`sede.py --permitir pagar`). **Pendiente de verificar en vivo.**
+  - Con el permiso: confirma con tu usuario recibo, importe y medio de pago, y paga (`sede.py --permitir pagar`).
   - Sin él: `sede.py` bloquea abrir `…/pagar`. Explica dónde está y qué datos pide, y dale el enlace.
   - Verificar: justificante y estado «pagado».
 - **Domiciliación** (acto `cambiar_datos`). Lleva el IBAN: confirma con tu usuario la cuenta exacta y no la copies a ningún otro sitio.

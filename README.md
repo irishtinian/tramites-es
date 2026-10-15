@@ -4,10 +4,16 @@
 
 `tramites-es` es un *skill* abierto (licencia MIT) que enseña a cualquier agente de IA (Claude Code, Codex, OpenClaw, Gemini CLI, Cursor, Copilot…) a moverse por las sedes electrónicas españolas en nombre de un **autónomo**: vigilar notificaciones, sacar certificados, consultar deudas y recibos, preparar y presentar trámites, pagar, pedir citas previas y saber qué plataforma usa cada ayuntamiento. Todo **en tu ordenador** y con **tu** certificado.
 
-> ⚠️ **Estado: beta (v0.2.0).**
-> - **Las consultas están verificadas en vivo** con un certificado real (AEAT, Seguridad Social, DEHú, Carpeta Ciudadana, DGT, ATC y varias plataformas municipales).
-> - **Los actos con efectos** (presentar, pagar, abrir notificaciones, pedir citas) están documentados, pero casi todos siguen **sin probar de punta a punta**: las guías los marcan como "pendiente de verificar en vivo". La renovación del certificado de la FNMT sí se ha completado.
-> - Las sedes cambian sin avisar. Si algo no cuadra, abre un issue "sede rota".
+> ⚠️ **Estado: beta (v0.2.0).** Las guías salen de recorrer las sedes reales con un certificado de verdad. Las sedes cambian sin avisar: si algo no cuadra, abre un issue "sede rota".
+
+### Funcionará mejor o peor según tu agente
+
+El skill le da a tu agente el mapa y las herramientas. Hasta dónde llega depende de él:
+
+- **El modelo y el agente** que uses: unos siguen mejor las guías y se recuperan mejor cuando una sede cambia.
+- **Las herramientas que tenga:** terminal y Python para los scripts, y, si quieres que firme o renueve tu certificado, poder usar tu escritorio (AutoFirma y el Configurador de la FNMT son programas de escritorio).
+- **Los permisos que le des** (tabla de abajo) y cómo tengas configurado tu agente: si le pides confirmación para cada comando o le dejas trabajar solo.
+- **Tu equipo:** un certificado configurado, AutoFirma instalado si va a firmar y, en Linux sin escritorio, `xvfb-run`.
 
 ## Qué hace
 

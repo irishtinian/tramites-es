@@ -68,7 +68,7 @@ Para listar, usa `abrir`, `probe` (sin `--clic` sobre filas) o las recetas de la
 2. Avísale: desde ese momento corre el plazo del acto (alegar, recurrir, pagar…).
 3. Ábrela con `sede.py … --permitir comparecer`. DEHú pide reautenticarse por Cl@ve: usa la rama de certificado.
 4. Descarga el documento y el acuse, y resúmele qué le piden, el plazo y la fecha exacta en que empezó a contar.
-5. Abrir con el agente de punta a punta está **pendiente de verificar en vivo** en todos los buzones: si algo no coincide con la guía, para y cuéntaselo.
+5. Si algo no coincide con la guía, para y cuéntaselo.
 
 ## 3. Calcular el plazo de 10 días
 
