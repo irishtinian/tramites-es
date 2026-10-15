@@ -26,6 +26,8 @@ PATRONES = {
     # ("registro de entrada general" no es un número de registro).
     "registro": r"(?i:n[uú]mero de (?:registro|anotaci[oó]n|entrada)|n[ºo°]\.? de registro|registro de entrada)\s*[:\-]?\s*((?=[0-9A-Za-z/\-]*\d)[0-9A-Za-z/\-]{6,40})",
     "nrc": r"(?i:\bNRC)\s*[:\-]?\s*((?=[0-9A-Z]*\d)[0-9A-Z]{16,25})\b",
+    # Seguridad Social: "Código CEA" (Código Electrónico de Autenticidad), grupos de 5 separados por guiones.
+    "cea": r"(?i:C[oó]digo CEA|C[oó]digo Electr[oó]nico de Autenticidad)\s*[:\-]?\s*([A-Z0-9]{5}(?:-[A-Z0-9]{5}){3,7})\b",
     "fecha": r"\b(\d{1,2}[/\-.]\d{1,2}[/\-.]\d{4}(?:\s+\d{1,2}:\d{2}(?::\d{2})?)?)",
 }
 ORGANISMOS = {  # se prueba en orden: la ATC antes que la AEAT ("agencia tributaria canaria" contiene "agencia tributaria")
@@ -40,8 +42,18 @@ ORGANISMOS = {  # se prueba en orden: la ATC antes que la AEAT ("agencia tributa
 
 def texto(p: Path) -> str:
     if p.suffix.lower() == ".pdf":
-        from pypdf import PdfReader
-        return "\n".join((pg.extract_text() or "") for pg in PdfReader(str(p)).pages)
+        try:
+            from pypdf import PdfReader
+            return "\n".join((pg.extract_text() or "") for pg in PdfReader(str(p)).pages)
+        except ImportError:
+            # Sin uv ni pypdf: pdftotext (poppler-utils) si está instalado.
+            import shutil
+            import subprocess
+            exe = shutil.which("pdftotext")
+            if not exe:
+                raise SystemExit("Para leer PDF hace falta pypdf (lo instala 'uv run' solo) o pdftotext (poppler-utils).")
+            r = subprocess.run([exe, str(p), "-"], capture_output=True, timeout=60)  # orden de lectura, no -layout
+            return r.stdout.decode("utf-8", errors="replace")
     t = p.read_text(encoding="utf-8", errors="replace")
     return re.sub(r"<[^>]+>", " ", t) if p.suffix.lower() in (".html", ".htm") else t
 
@@ -56,14 +68,21 @@ def extraer(p: Path) -> dict:
     plano = " ".join(t.split())
     res = {"fichero": p.name, "caracteres": len(plano)}
     for k, pat in PATRONES.items():
-        m = re.findall(pat, plano, 0 if k in ("csv", "registro", "nrc") else re.I)
+        m = re.findall(pat, plano, 0 if k in ("csv", "registro", "nrc", "cea") else re.I)
         res[k] = (m[0] if k != "fecha" else m[:3]) if m else None
+    if not res["cea"] and re.search(r"(?i)c[oó]digo CEA|electr[oó]nico de autenticidad", plano):
+        # El PDF de la TGSS maqueta etiqueta y valor en filas distintas: se busca el formato del código.
+        m = re.search(r"\b([A-Z0-9]{5}(?:-[A-Z0-9]{5}){5})\b", plano)
+        res["cea"] = m.group(1) if m else None
     res["organismo"] = next((o for o, pat in ORGANISMOS.items() if re.search(pat, plano, re.I)), None)
     m = re.search(r"(certificado[^.]{0,80}|justificante[^.]{0,80}|recibo[^.]{0,60})", plano, re.I)
     res["tipo_documento"] = enmascarar(m.group(1)[:100]) if m else None
-    res["prueba_de_exito"] = bool(res["csv"] or res["registro"] or res["nrc"])
+    res["prueba_de_exito"] = bool(res["csv"] or res["registro"] or res["nrc"] or res["cea"])
+    if res["csv"] or res["cea"]:
+        res["nota"] = ("El CSV/CEA permite a cualquiera descargar este documento en la sede: trátalo como dato "
+                       "personal y no lo pegues en sitios públicos.")
     if not res["prueba_de_exito"]:
-        res["aviso"] = "No se ha encontrado CSV, nº de registro ni NRC: no des el trámite por terminado; comprueba el listado oficial de la sede."
+        res["aviso"] = "No se ha encontrado CSV, CEA, nº de registro ni NRC: no des el trámite por terminado; comprueba el listado oficial de la sede."
     return res
 
 

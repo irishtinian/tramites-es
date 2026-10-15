@@ -66,10 +66,16 @@ def main() -> int:
     checks["chrome"] = chrome()
     if not checks["chrome"]:
         pasos.append(f"Instala Google Chrome ({GUIA}).")
+    avisos = []  # no impiden usar el skill
     if SO == "linux":
-        checks["pantalla"] = bool(os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY"))
-        if not checks["pantalla"]:
-            pasos.append("No hay pantalla: usa 'xvfb-run -a' delante del comando o ejecútalo desde el escritorio.")
+        hay = bool(os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY"))
+        checks["xvfb_run"] = bool(shutil.which("xvfb-run"))
+        checks["pantalla"] = True if hay else ("xvfb-run" if checks["xvfb_run"] else False)
+        if not hay and checks["xvfb_run"]:
+            avisos.append("Sin escritorio: lanza sede.py como 'xvfb-run -a python3 scripts/sede.py … --json salida.json'. "
+                          "buscar.py, calendario.py y ayudas.py no necesitan pantalla.")
+        elif not hay:
+            pasos.append("No hay pantalla ni xvfb-run: la persona debe instalar xvfb (requiere sudo) o usar el escritorio.")
     checks["curl"] = bool(shutil.which("curl"))
     checks["openssl"] = bool(shutil.which("openssl"))
     checks["autofirma"] = autofirma()
@@ -92,7 +98,8 @@ def main() -> int:
     except Exception as ex:
         checks["certificados"] = f"error: {type(ex).__name__}"
     ok = not [p for p in pasos if "AutoFirma" not in p]
-    print(json.dumps({"ok": ok, "comprobaciones": checks, "pasos": pasos, "guia": GUIA}, ensure_ascii=False, indent=1))
+    print(json.dumps({"ok": ok, "comprobaciones": checks, "pasos": pasos, "avisos": avisos, "guia": GUIA},
+                     ensure_ascii=False, indent=1))
     return 0 if ok else 1
 
 

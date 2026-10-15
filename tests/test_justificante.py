@@ -135,3 +135,27 @@ def test_main_uso_incorrecto(justificante, monkeypatch, capsys):
     monkeypatch.setattr(sys, "argv", ["justificante.py"])
     assert justificante.main() == 2
     assert capsys.readouterr().out == ""
+
+
+# ------------------------------------------------------------------ CEA de la Seguridad Social
+CEA_FICTICIO = "ABC1D-EFGHI-2JKLM-NO3PQ-RST45-6U789"
+
+
+def test_cea_tras_su_etiqueta(justificante, tmp_path):
+    r = _extraer(justificante, tmp_path, f"Tesorería General de la Seguridad Social. Código CEA: {CEA_FICTICIO} Página: 1")
+    assert r["cea"] == CEA_FICTICIO
+    assert r["prueba_de_exito"] is True
+    assert "nota" in r
+
+
+def test_cea_en_tabla_con_etiqueta_y_valor_separados(justificante, tmp_path):
+    texto = ("Id. CEA: Fecha: Código CEA: Página: 1234AB5678CD 01/01/2026 " + CEA_FICTICIO + " 1 "
+             "La autenticidad de este documento puede ser comprobada mediante el Código Electrónico de Autenticidad.")
+    r = _extraer(justificante, tmp_path, texto)
+    assert r["cea"] == CEA_FICTICIO
+    assert r["organismo"] is None or r["organismo"] == "Seguridad Social"
+
+
+def test_sin_etiqueta_cea_no_se_inventa(justificante, tmp_path):
+    r = _extraer(justificante, tmp_path, f"Referencia interna {CEA_FICTICIO} sin más contexto.")
+    assert r["cea"] is None
