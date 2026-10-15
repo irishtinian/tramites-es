@@ -1,0 +1,12 @@
+{
+  "name": "tramites-es",
+  "interface": { "displayName": "Trámites ES (autónomos)" },
+  "plugins": [
+    {
+      "name": "tramites-es",
+      "source": { "source": "local", "path": "./" },
+      "policy": { "installation": "AVAILABLE" },
+      "category": "Productivity"
+    }
+  ]
+}

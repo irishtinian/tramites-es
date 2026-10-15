@@ -1,0 +1,14 @@
+# Nunca subir certificados, contraseñas ni sesiones
+*.p12
+*.pfx
+*_PASSWORD*
+certificados.json
+sesiones/
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+# SO
+.DS_Store
+Thumbs.db

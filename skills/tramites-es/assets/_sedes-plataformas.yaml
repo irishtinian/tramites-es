@@ -1,0 +1,654 @@
+# Fragmento para assets/sedes.yaml: municipios de ejemplo de las recetas de plataforma + REG/SIR.
+# Mismo esquema que sedes.yaml, más la clave `plataforma` (slug de references/plataforma-<slug>.md).
+# Mapeo público SIN certificado del 2026-10-15: lo de dentro de la sesión está pendiente de verificación.
+# origins: solo dominios de Administraciones públicas, con la evidencia en el comentario.
+#   Ningún host de esta lista pide certificado en el handshake (tls-probe/cert-probe).
+#   pasarela-ident.clave.gob.es lo pide por ruta en la rama "DNIe / Certificado" de Cl@ve;
+#   en el resto, dónde se pide queda pendiente de verificación con certificado.
+# riesgo: leer | preparar | persona  (persona = firma, presenta, paga, abre notificaciones o cambia datos)
+# estado: verificado_sin_certificado | parcial | pendiente_con_certificado | bloqueado_por_sede
+# Los IDs de trámite son LOCALES de cada municipio: no se copian a otro.
+# verificado_el va entre comillas: sin ellas YAML lo lee como fecha y buscar.py no puede serializarlo a JSON.
+sedes:
+
+  reg-age:
+    nombre: "Registro Electrónico General de la AGE (REG) + SIR"
+    nivel: estatal
+    login: "https://reg.redsara.es/es/login"
+    origins:
+      - "https://reg.redsara.es"                 # sin mTLS; "Nuevo registro" -> /es/login -> Cl@ve
+      - "https://pasarela.clave.gob.es"          # selector de Cl@ve; no pide certificado
+      - "https://pasarela-ident.clave.gob.es"    # pide el certificado (IdP2/AuthenticateCitizen)
+    guia: references/registro-reg-sir.md
+    verificado_el: "2026-10-15"
+    tramites:
+      - id: reg-instancia-general
+        nombre: "Instancia general a cualquier administración"
+        alias: ["instancia general", "registro", "presentar escrito ayuntamiento", "solicitud genérica", "escrito administración", "registro electrónico general", "SIR"]
+        riesgo: preparar
+        url: "https://reg.redsara.es/es/login"
+        guia: references/registro-reg-sir.md
+        estado: verificado_sin_certificado
+
+  # ---------------------------------------------------------------- AOC (Cataluña)
+  sort:
+    nombre: "Ajuntament de Sort"
+    nivel: municipal
+    plataforma: aoc
+    login: "https://seu-e.cat/mygov/2520940003"
+    origins:
+      - "https://seu-e.cat"                      # sin mTLS
+      - "https://etram.seu-e.cat"                # sin mTLS
+      - "https://valid.aoc.cat"                  # VÀLid, button#btnContinuaCert; sin mTLS en handshake; petición real pendiente
+    guia: references/plataforma-aoc.md
+    verificado_el: "2026-10-15"
+    tramites:
+      - id: sort-instancia-general
+        nombre: "Instancia genérica (Sort)"
+        alias: ["instància genèrica"]
+        riesgo: preparar
+        url: "https://seu-e.cat/ca/web/sort/tramits-i-gestions/-/tramits/tramit/14767856"
+        guia: references/plataforma-aoc.md
+        estado: verificado_sin_certificado
+      - id: sort-catalogo
+        nombre: "Catálogo de trámites: actividad, urbanismo y recaudación (Sort)"
+        alias: ["actividad", "licencia de actividad", "tasas", "recibos"]
+        riesgo: leer
+        url: "https://seu-e.cat/ca/web/sort/tramits-i-gestions"
+        guia: references/plataforma-aoc.md
+        estado: parcial
+      - id: sort-seguimiento-notificaciones
+        nombre: "Mis trámites (MyGov) y notificaciones e-NOTUM, solo listar (Sort)"
+        alias: ["notificaciones", "mis trámites", "e-notum", "mygov"]
+        riesgo: leer
+        url: "https://seu-e.cat/mygov/2520940003"
+        guia: references/plataforma-aoc.md
+        estado: pendiente_con_certificado
+
+  baix-pallars:
+    nombre: "Ajuntament de Baix Pallars"
+    nivel: municipal
+    plataforma: aoc
+    login: "https://seu-e.cat/mygov/2503900000"
+    origins:
+      - "https://seu-e.cat"                      # sin mTLS
+      - "https://etram.seu-e.cat"                # sin mTLS
+      - "https://valid.aoc.cat"                  # VÀLid; sin mTLS en handshake; petición real pendiente
+    guia: references/plataforma-aoc.md
+    verificado_el: "2026-10-15"
+    tramites:
+      - id: baix-pallars-instancia-general
+        nombre: "Instancia genérica (Baix Pallars)"
+        alias: ["instància genèrica"]
+        riesgo: preparar
+        url: "https://seu-e.cat/ca/web/baixpallars/tramits-i-gestions/-/tramits/tramit/14360794"
+        guia: references/plataforma-aoc.md
+        estado: verificado_sin_certificado
+
+  # ---------------------------------------------------------------- Sedipualb@
+  palma:
+    nombre: "Ajuntament de Palma"
+    nivel: municipal
+    plataforma: sedipualba
+    login: "https://palma.sedipualba.es/carpetaciudadana.aspx"
+    origins:
+      - "https://palma.sedipualba.es"            # sin mTLS; login en iframe /segex/
+      - "https://sede.dipualba.es"               # módulo de firma; cert-probe HTTP 200 sin mTLS
+      - "https://pasarela-ident.clave.gob.es"    # si se elige "certificado mediante Cl@ve"
+    guia: references/plataforma-sedipualba.md
+    verificado_el: "2026-10-15"
+    tramites:
+      - id: palma-instancia-general
+        nombre: "Instancia general (Palma)"
+        alias: ["instància general"]
+        riesgo: preparar
+        url: "https://palma.sedipualba.es/carpetaciudadana/tramite.aspx?idtramite=13808"
+        guia: references/plataforma-sedipualba.md
+        estado: verificado_sin_certificado
+      - id: palma-obras-actividad
+        nombre: "Comunicación previa de obras y actividad (Palma)"
+        alias: ["obras", "actividad", "comunicación previa"]
+        riesgo: preparar
+        url: "https://palma.sedipualba.es/carpetaciudadana/tramite.aspx?idtramite=14161"
+        guia: references/plataforma-sedipualba.md
+        estado: verificado_sin_certificado
+      - id: palma-carpeta
+        nombre: "Carpeta Ciudadana: trámites, registros y notificaciones, solo listar (Palma)"
+        alias: ["notificaciones", "mis trámites", "registros presentados"]
+        riesgo: leer
+        url: "https://palma.sedipualba.es/carpetaciudadana.aspx"
+        guia: references/plataforma-sedipualba.md
+        estado: pendiente_con_certificado
+      - id: palma-tributos
+        nombre: "Oficina virtual tributaria municipal: autoliquidaciones, tasas y multas (Palma)"
+        alias: ["tasas", "recibos", "tributos", "multas"]
+        riesgo: leer
+        url: "https://palma.tributoslocales.es/ct"
+        guia: references/plataforma-gtt.md
+        estado: parcial                          # el 15-oct-2026 no admitía certificado; IBI/IAE/IVTM/residuos en la ATIB
+
+  cartagena:
+    nombre: "Ayuntamiento de Cartagena"
+    nivel: municipal
+    plataforma: sedipualba
+    login: "https://cartagena.sedipualba.es/carpetaciudadana.aspx"
+    origins:
+      - "https://cartagena.sedipualba.es"        # sin mTLS
+      - "https://sede.dipualba.es"               # módulo de firma; sin mTLS
+      - "https://pasarela-ident.clave.gob.es"    # si se elige "certificado mediante Cl@ve"
+    guia: references/plataforma-sedipualba.md
+    verificado_el: "2026-10-15"
+    tramites:
+      - id: cartagena-catalogo
+        nombre: "Catálogo: registro, actividades, tributos y certificados (Cartagena)"
+        alias: ["actividad", "licencia de actividad", "instancia", "tasas"]
+        riesgo: leer
+        url: "https://cartagena.sedipualba.es/catalogoservicios.aspx"
+        guia: references/plataforma-sedipualba.md
+        estado: verificado_sin_certificado
+
+  # ---------------------------------------------------------------- GSede / MOAD
+  sevilla:
+    nombre: "Ayuntamiento de Sevilla"
+    nivel: municipal
+    plataforma: gsede-moad
+    login: "https://sede.sevilla.org/opencms/system/modules/gsede/elements/secciones/autenticacion/autenticacion.jsp"
+    origins:
+      - "https://sede.sevilla.org"               # cert-probe autenticacion.jsp: HTTP 200 sin mTLS; #autButton
+      - "https://pasarela-ident.clave.gob.es"    # rama Cl@ve
+    guia: references/plataforma-gsede-moad.md
+    verificado_el: "2026-10-15"
+    tramites:
+      - id: sevilla-solicitud-general
+        nombre: "Solicitud General (Sevilla)"
+        alias: ["instancia general", "solicitud general"]
+        riesgo: preparar
+        url: "https://sede.sevilla.org/opencms/system/modules/sede/index"
+        guia: references/plataforma-gsede-moad.md
+        estado: verificado_sin_certificado        # se abre desde la portada: ticket({procedure:'SGE_01'})
+      - id: sevilla-tributos-urbanismo
+        nombre: "Impuestos, tasas, actividad y urbanismo (Sevilla)"
+        alias: ["tasas", "actividad", "urbanismo", "veladores"]
+        riesgo: leer
+        url: "https://sede.sevilla.org/opencms/system/modules/sede/index"
+        guia: references/plataforma-gsede-moad.md
+        estado: parcial
+      - id: sevilla-notificaciones
+        nombre: "Notificaciones del Ayuntamiento de Sevilla en DEHú, solo listar"
+        alias: ["notificaciones", "dehu"]
+        riesgo: leer
+        url: "https://dehu.redsara.es/"
+        guia: references/plataforma-gsede-moad.md
+        estado: verificado_sin_certificado
+
+  valladolid:
+    nombre: "Ayuntamiento de Valladolid"
+    nivel: municipal
+    plataforma: gsede-moad
+    login: "https://sede.valladolid.es/opencms/system/modules/gsede/elements/secciones/autenticacion/autenticacion.jsp"
+    origins:
+      - "https://sede.valladolid.es"             # cert-probe: HTTP 200 sin mTLS
+      - "https://pasarela-ident.clave.gob.es"    # rama Cl@ve
+    guia: references/plataforma-gsede-moad.md
+    verificado_el: "2026-10-15"
+    tramites:
+      - id: valladolid-catalogo
+        nombre: "Catálogo: solicitud general, actividad y tributos (Valladolid)"
+        alias: ["instancia general", "actividad", "terrazas"]
+        riesgo: leer
+        url: "https://sede.valladolid.es/opencms/system/modules/sede/index"
+        guia: references/plataforma-gsede-moad.md
+        estado: verificado_sin_certificado
+      - id: valladolid-tributos
+        nombre: "Carpeta del Contribuyente (Valladolid)"
+        alias: ["recibos", "tributos", "certificado de no deuda"]
+        riesgo: leer
+        url: "https://contribuyente.valladolid.es/"
+        guia: references/plataforma-tao-sta.md
+        estado: parcial
+
+  # ---------------------------------------------------------------- Aytos
+  badajoz:
+    nombre: "Ayuntamiento de Badajoz"
+    nivel: municipal
+    plataforma: aytos
+    login: "https://sede.aytobadajoz.es/sede/miCarpeta.do?ent_id=1&idioma=1"
+    origins:
+      - "https://sede.aytobadajoz.es"            # sin mTLS; #firmar (AutoFirma) es de la persona
+      - "https://pasarela-ident.clave.gob.es"    # ruta del agente: #btnClave -> DNIe / Certificado
+    guia: references/plataforma-aytos.md
+    verificado_el: "2026-10-15"
+    tramites:
+      - id: badajoz-instancia-general
+        nombre: "Instancia general (Badajoz)"
+        alias: ["instancia general"]
+        riesgo: preparar
+        url: "https://sede.aytobadajoz.es/sede/tramitacionElectronica.do?asu_mod_cod=1&asu_cod=2&asunto=2&aplcorreo=4"
+        guia: references/plataforma-aytos.md
+        estado: verificado_sin_certificado
+      - id: badajoz-catalogo
+        nombre: "Catálogo: actividades, urbanismo y tributos (Badajoz)"
+        alias: ["actividad", "urbanismo", "tasas"]
+        riesgo: leer
+        url: "https://sede.aytobadajoz.es/sede/catalogoTramites.do?ent_id=1&idioma=1"
+        guia: references/plataforma-aytos.md
+        estado: parcial
+      - id: badajoz-carpeta
+        nombre: "Mi Carpeta: trámites y notificaciones, solo listar (Badajoz)"
+        alias: ["notificaciones", "mis trámites"]
+        riesgo: leer
+        url: "https://sede.aytobadajoz.es/sede/miCarpeta.do?ent_id=1&idioma=1"
+        guia: references/plataforma-aytos.md
+        estado: pendiente_con_certificado
+      - id: badajoz-tributos
+        nombre: "Portal de tributos (Badajoz)"
+        alias: ["recibos", "tributos", "autoliquidación"]
+        riesgo: leer
+        url: "https://tributos.aytobadajoz.es"
+        guia: references/plataforma-aytos.md
+        estado: parcial
+
+  alcorcon:
+    nombre: "Ayuntamiento de Alcorcón"
+    nivel: municipal
+    plataforma: aytos
+    login: "https://portalciudadano.ayto-alcorcon.es/sede/miCarpeta.do?ent_id=1&idioma=1"
+    origins:
+      - "https://portalciudadano.ayto-alcorcon.es"   # sin mTLS
+      - "https://pasarela-ident.clave.gob.es"        # ruta del agente: Cl@ve -> DNIe / Certificado
+    guia: references/plataforma-aytos.md
+    verificado_el: "2026-10-15"
+    tramites:
+      - id: alcorcon-obra-menor
+        nombre: "Declaración responsable de obra menor (Alcorcón)"
+        alias: ["declaración responsable", "obra menor", "obras"]
+        riesgo: preparar
+        url: "https://portalciudadano.ayto-alcorcon.es/sede/tramitacionElectronica.do?asu_mod_cod=3&asu_cod=153"
+        guia: references/plataforma-aytos.md
+        estado: verificado_sin_certificado
+      - id: alcorcon-tributos
+        nombre: "Autoliquidaciones, tasas y consulta de deuda (Alcorcón)"
+        alias: ["tasas", "recibos", "tributos"]
+        riesgo: leer
+        url: "https://portalciudadano.ayto-alcorcon.es/portal/entidades.do?ent_id=1&idioma=1"
+        guia: references/plataforma-aytos.md
+        estado: parcial
+
+  # ---------------------------------------------------------------- eXperta / PAEMUR
+  mula:
+    nombre: "Ayuntamiento de Mula"
+    nivel: municipal
+    plataforma: experta-paemur
+    login: "https://sede.mula.regiondemurcia.es/web/inicioWebc.do?opcion=noreg&entidad=30029"
+    origins:
+      - "https://sede.mula.regiondemurcia.es"    # HTTP 200 sin mTLS; ACCEDER -> pulsarCertificado()
+      - "https://pasarela-ident.clave.gob.es"    # rama Cl@ve (pulsarClave)
+    guia: references/plataforma-experta-paemur.md
+    verificado_el: "2026-10-15"
+    tramites:
+      - id: mula-registro-general
+        nombre: "Instancia / registro general (Mula)"
+        alias: ["instancia general"]
+        riesgo: preparar
+        url: "https://sede.mula.regiondemurcia.es/web/catalogoAsuntos.do?opcion=5&entidad=30029"
+        guia: references/plataforma-experta-paemur.md
+        estado: verificado_sin_certificado        # categoría buscarAsuntosSede('10')
+      - id: mula-actividades-certificados
+        nombre: "Licencias de actividad, actividades y certificados (Mula)"
+        alias: ["actividad", "licencia de actividad", "certificados"]
+        riesgo: preparar
+        url: "https://sede.mula.regiondemurcia.es/web/catalogoAsuntos.do?opcion=5&entidad=30029"
+        guia: references/plataforma-experta-paemur.md
+        estado: verificado_sin_certificado        # categorías 27, 28, 23 y 31
+      - id: mula-ventanilla
+        nombre: "Expedientes, comunicaciones y notificaciones, solo listar (Mula)"
+        alias: ["notificaciones", "comunicaciones", "expedientes"]
+        riesgo: leer
+        url: "https://sede.mula.regiondemurcia.es/web/inicioWebc.do?opcion=noreg&entidad=30029"
+        guia: references/plataforma-experta-paemur.md
+        estado: parcial
+
+  las-palmas-gc:
+    nombre: "Ayuntamiento de Las Palmas de Gran Canaria"
+    nivel: municipal
+    plataforma: experta-paemur
+    login: "https://sedeelectronica.laspalmasgc.es/3webc/inicioWebc.do?opcion=noreg"
+    origins:
+      - "https://sedeelectronica.laspalmasgc.es" # sin mTLS; la ruta histórica dio HTTP 400 y la raíz agotó tiempo
+    guia: references/plataforma-experta-paemur.md
+    verificado_el: "2026-10-15"
+    tramites:
+      - id: las-palmas-catalogo
+        nombre: "Ventanilla virtual municipal (Las Palmas de Gran Canaria)"
+        alias: ["instancia general", "actividad"]
+        riesgo: leer
+        url: "https://sedeelectronica.laspalmasgc.es/3webc/inicioWebc.do?opcion=noreg"
+        guia: references/plataforma-experta-paemur.md
+        estado: bloqueado_por_sede
+
+  # ---------------------------------------------------------------- eAdmin / GestDoc
+  leon:
+    nombre: "Ayuntamiento de León"
+    nivel: municipal
+    plataforma: eadmin-gestdoc
+    login: "https://sede.aytoleon.es/eAdmin/Login.do?action=login"
+    origins:
+      - "https://sede.aytoleon.es"               # sin mTLS; form[name=claveForm] -> Cl@ve
+      - "https://pasarela-ident.clave.gob.es"    # pide el certificado (rama DNIe / Certificado)
+    guia: references/plataforma-eadmin-gestdoc.md
+    verificado_el: "2026-10-15"
+    tramites:
+      - id: leon-solicitud-general
+        nombre: "Solicitud general (León)"
+        alias: ["instancia general", "solicitud general"]
+        riesgo: preparar
+        url: "https://sede.aytoleon.es/eAdmin/Registrar.do?action=comenzar&tipoReg=2"
+        guia: references/plataforma-eadmin-gestdoc.md
+        estado: verificado_sin_certificado        # sede.py bloquea Registrar.do: el enlace lo abre la persona
+      - id: leon-catalogo
+        nombre: "Catálogo: actividad y urbanismo (León)"
+        alias: ["actividad", "licencia de actividad"]
+        riesgo: leer
+        url: "https://sede.aytoleon.es/eAdmin/Registrar.do?action=inicioPortalTramites"
+        guia: references/plataforma-eadmin-gestdoc.md
+        estado: parcial                          # sede.py bloquea Registrar.do
+      - id: leon-carpeta
+        nombre: "Carpeta: registros, certificados y notificaciones, solo listar (León)"
+        alias: ["notificaciones", "registros presentados", "expedientes"]
+        riesgo: leer
+        url: "https://sede.aytoleon.es/eAdmin/Login.do?action=login"
+        guia: references/plataforma-eadmin-gestdoc.md
+        estado: pendiente_con_certificado
+      - id: leon-tributos
+        nombre: "Oficina virtual tributaria (León)"
+        alias: ["recibos", "tasas", "certificado tributario", "fraccionamiento"]
+        riesgo: leer
+        url: "https://aytoleon.tributoslocales.es/240898/ALEON"
+        guia: references/plataforma-gtt.md
+        estado: parcial
+
+  benidorm:
+    nombre: "Ayuntamiento de Benidorm"
+    nivel: municipal
+    plataforma: eadmin-gestdoc
+    login: "https://sede.benidorm.org/eAdmin/Login.do?action=login"
+    origins:
+      - "https://sede.benidorm.org"              # sin mTLS
+      - "https://pasarela-ident.clave.gob.es"    # rama Cl@ve
+    guia: references/plataforma-eadmin-gestdoc.md
+    verificado_el: "2026-10-15"
+    tramites:
+      - id: benidorm-catalogo
+        nombre: "Portal de trámites: registro, actividad y certificados (Benidorm)"
+        alias: ["instancia general", "actividad", "certificados"]
+        riesgo: leer
+        url: "https://sede.benidorm.org/eAdmin/Registrar.do?action=inicioPortalTramites"
+        guia: references/plataforma-eadmin-gestdoc.md
+        estado: verificado_sin_certificado        # sede.py bloquea Registrar.do
+
+  # ---------------------------------------------------------------- OpenSIAC
+  sabadell:
+    nombre: "Ajuntament de Sabadell"
+    nivel: municipal
+    plataforma: opensiac
+    login: "https://seu.sabadell.cat/opensiac/certlogin/conectar.action"
+    origins:
+      - "https://seu.sabadell.cat"               # cert-probe certlogin: HTTP 200 sin mTLS
+      - "https://pasarela-ident.clave.gob.es"    # acceso observado: Cl@ve
+    guia: references/plataforma-opensiac.md
+    verificado_el: "2026-10-15"
+    tramites:
+      - id: sabadell-instancia-general
+        nombre: "Instancia general (Sabadell)"
+        alias: ["instància general"]
+        riesgo: preparar
+        url: "https://seu.sabadell.cat/opensiac/informacionpublica/tramitesinfo.action?tramitesInfoForm.id=620"
+        guia: references/plataforma-opensiac.md
+        estado: verificado_sin_certificado
+      - id: sabadell-catalogo
+        nombre: "Catálogo: actividad, licencias, tributos y certificados (Sabadell)"
+        alias: ["actividad", "licencias", "tasas"]
+        riesgo: leer
+        url: "https://seu.sabadell.cat/opensiac/informacionpublica/tramites_enter.action"
+        guia: references/plataforma-opensiac.md
+        estado: parcial
+      - id: sabadell-carpeta
+        nombre: "Carpeta: solicitudes y expedientes (Sabadell)"
+        alias: ["mis solicitudes", "expedientes"]
+        riesgo: leer
+        url: "https://seu.sabadell.cat/opensiac/certlogin/conectar.action"
+        guia: references/plataforma-opensiac.md
+        estado: pendiente_con_certificado
+
+  paterna:
+    nombre: "Ayuntamiento de Paterna"
+    nivel: municipal
+    plataforma: opensiac
+    login: "https://sede.paterna.es/opensiac/certlogin/conectar.action"
+    origins:
+      - "https://sede.paterna.es"                # cert-probe: HTTP 200 sin mTLS; solo Cl@ve
+      - "https://pasarela-ident.clave.gob.es"    # pide el certificado (rama DNIe / Certificado)
+    guia: references/plataforma-opensiac.md
+    verificado_el: "2026-10-15"
+    tramites:
+      - id: paterna-catalogo
+        nombre: "Catálogo: registro, actividad, licencias y certificados (Paterna)"
+        alias: ["instancia general", "actividad", "licencias"]
+        riesgo: leer
+        url: "https://sede.paterna.es/opensiac/informacionpublica/tramites_enter.action"
+        guia: references/plataforma-opensiac.md
+        estado: verificado_sin_certificado
+      - id: paterna-carpeta
+        nombre: "Carpeta: mis solicitudes (Paterna)"
+        alias: ["mis solicitudes", "expedientes"]
+        riesgo: leer
+        url: "https://sede.paterna.es/opensiac/carpetaciudadana/consultasolicitudes_enter.action?script=si"
+        guia: references/plataforma-opensiac.md
+        estado: pendiente_con_certificado
+      - id: paterna-tributos
+        nombre: "Oficina virtual tributaria: tasas, IAE y recibos (Paterna)"
+        alias: ["recibos", "tasas", "tributos"]
+        riesgo: leer
+        url: "https://paterna.tributoslocales.es"
+        guia: references/plataforma-gtt.md
+        estado: parcial
+
+  # ---------------------------------------------------------------- Sedes propias
+  madrid:
+    nombre: "Ayuntamiento de Madrid"
+    nivel: municipal
+    plataforma: madrid
+    login: "https://servcla.madrid.es/CACIU_FTCARPETA/"
+    origins:
+      - "https://servcla.madrid.es"              # sin mTLS
+      - "https://cas.madrid.es"                  # selector "DNIe / Certificado"; sin mTLS; GET directo da 403 (Akamai)
+      - "https://sede.madrid.es"                 # sin mTLS; 403 a clientes no navegador
+      - "https://pasarela-ident.clave.gob.es"    # solo si el enlace del CAS deriva a Cl@ve (pendiente)
+    guia: references/plataforma-madrid.md
+    verificado_el: "2026-10-15"
+    tramites:
+      - id: madrid-catalogo
+        nombre: "Catálogo: registro, actividad económica, licencias y tributos (Madrid)"
+        alias: ["instancia general", "actividad", "declaración responsable", "licencia"]
+        riesgo: leer
+        url: "https://sede.madrid.es/portal/site/tramites"
+        guia: references/plataforma-madrid.md
+        estado: verificado_sin_certificado
+      - id: madrid-carpeta
+        nombre: "Mi Carpeta: registros y notificaciones, solo listar (Madrid)"
+        alias: ["notificaciones", "registros presentados", "mi carpeta"]
+        riesgo: leer
+        url: "https://www.madrid.es/micarpeta"
+        guia: references/plataforma-madrid.md
+        estado: pendiente_con_certificado
+      - id: madrid-tributos-atm
+        nombre: "Agencia Tributaria Madrid: certificado de estar al corriente y aplazamientos"
+        alias: ["certificado de estar al corriente", "aplazamiento", "fraccionamiento", "tributos"]
+        riesgo: preparar
+        url: "https://agenciatributaria.madrid.es"
+        guia: references/plataforma-madrid.md
+        estado: parcial
+
+  barcelona:
+    nombre: "Ajuntament de Barcelona"
+    nivel: municipal
+    plataforma: barcelona
+    login: "https://seuelectronica2.ajuntament.barcelona.cat/APPS/ptbportal/login.do?loginTarget=folder&style=ciudadano&language=ca"
+    origins:
+      - "https://seuelectronica2.ajuntament.barcelona.cat"   # espacio personal; sin mTLS
+      - "https://seuelectronica.ajuntament.barcelona.cat"    # oficina virtual; sin mTLS
+      - "https://valid.aoc.cat"                              # VÀLid, button#btnContinuaCert; petición real pendiente
+    guia: references/plataforma-barcelona.md
+    verificado_el: "2026-10-15"
+    tramites:
+      - id: barcelona-buscador
+        nombre: "Buscador de trámites de la Oficina Virtual (Barcelona)"
+        alias: ["instància", "actividad", "tributos"]
+        riesgo: leer
+        url: "https://seuelectronica.ajuntament.barcelona.cat/oficinavirtual/ca/all-search-result"
+        guia: references/plataforma-barcelona.md
+        estado: verificado_sin_certificado
+      - id: barcelona-comunicat-activitat
+        nombre: "Comunicat d'activitat (Barcelona)"
+        alias: ["comunicación de actividad", "abrir negocio", "actividad"]
+        riesgo: preparar
+        url: "https://seuelectronica.ajuntament.barcelona.cat/oficinavirtual/ca/tramit/20220001567"
+        guia: references/plataforma-barcelona.md
+        estado: verificado_sin_certificado
+      - id: barcelona-terrassa
+        nombre: "Llicència de terrassa (Barcelona)"
+        alias: ["terraza", "veladores"]
+        riesgo: preparar
+        url: "https://seuelectronica.ajuntament.barcelona.cat/oficinavirtual/ca/tramit/20150001188"
+        guia: references/plataforma-barcelona.md
+        estado: verificado_sin_certificado
+      - id: barcelona-residus-comercials
+        nombre: "Alta en el preu públic de residus comercials, autoliquidación y pago (Barcelona)"
+        alias: ["basura comercial", "residuos comerciales"]
+        riesgo: persona
+        url: "https://seuelectronica.ajuntament.barcelona.cat/oficinavirtual/ca/tramit/20100000131"
+        guia: references/plataforma-barcelona.md
+        estado: verificado_sin_certificado
+      - id: barcelona-certificat-negatiu-deute
+        nombre: "Certificat negatiu de deute (Barcelona)"
+        alias: ["certificado de estar al corriente", "certificado de no deuda"]
+        riesgo: preparar
+        url: "https://seuelectronica.ajuntament.barcelona.cat/oficinavirtual/ca/tramit/20200001444"
+        guia: references/plataforma-barcelona.md
+        estado: verificado_sin_certificado
+      - id: barcelona-factura-electronica
+        nombre: "Factura electrónica al Ajuntament (Barcelona)"
+        alias: ["factura electrónica", "facturar al ayuntamiento"]
+        riesgo: preparar
+        url: "https://seuelectronica.ajuntament.barcelona.cat/oficinavirtual/ca/tramit/20140001157"
+        guia: references/plataforma-barcelona.md
+        estado: verificado_sin_certificado
+      - id: barcelona-notificaciones
+        nombre: "Notificación electrónica, solo listar (Barcelona)"
+        alias: ["notificaciones"]
+        riesgo: leer
+        url: "https://seuelectronica.ajuntament.barcelona.cat/oficinavirtual/ca/tramit/20180001305"
+        guia: references/plataforma-barcelona.md
+        estado: pendiente_con_certificado
+
+  valencia:
+    nombre: "Ajuntament de València"
+    nivel: municipal
+    plataforma: valencia
+    login: "https://sede.valencia.es/sede/carpeta/index.xhtml"
+    origins:
+      - "https://sede.valencia.es"               # sin mTLS en la raíz; form#formCert (petición real pendiente)
+      - "https://pasarela-ident.clave.gob.es"    # rama form#formClave -> DNIe / Certificado
+    guia: references/plataforma-valencia.md
+    verificado_el: "2026-10-15"
+    tramites:
+      - id: valencia-catalogo
+        nombre: "Catálogo de procedimientos (València)"
+        alias: ["instancia general", "actividad", "tasas"]
+        riesgo: leer
+        url: "https://sede.valencia.es/sede/"
+        guia: references/plataforma-valencia.md
+        estado: verificado_sin_certificado
+      - id: valencia-actividad-inocua
+        nombre: "Comunicación de actividad inocua, LA.AS.10 (València)"
+        alias: ["actividad inocua", "comunicación de actividad", "abrir negocio"]
+        riesgo: preparar
+        url: "https://sede.valencia.es/sede/registro/procedimiento/LA.AS.10"
+        guia: references/plataforma-valencia.md
+        estado: verificado_sin_certificado
+      - id: valencia-terraza
+        nombre: "Terraza, VP.OC.15 (València)"
+        alias: ["terraza", "veladores"]
+        riesgo: preparar
+        url: "https://sede.valencia.es/sede/registro/procedimiento/VP.OC.15"
+        guia: references/plataforma-valencia.md
+        estado: verificado_sin_certificado
+      - id: valencia-situacion-tributaria
+        nombre: "Certificados de situación tributaria, HA.GT.30 (València)"
+        alias: ["certificado de estar al corriente", "certificado de no deuda"]
+        riesgo: preparar
+        url: "https://sede.valencia.es/sede/registro/procedimiento/HA.GT.30"
+        guia: references/plataforma-valencia.md
+        estado: verificado_sin_certificado
+      - id: valencia-domicilio-tributario
+        nombre: "Cambio de domicilio tributario, HA.GE.45 (València)"
+        alias: ["domicilio tributario", "cambiar domicilio"]
+        riesgo: persona
+        url: "https://sede.valencia.es/sede/registro/procedimiento/HA.GE.45"
+        guia: references/plataforma-valencia.md
+        estado: verificado_sin_certificado
+      - id: valencia-carpeta
+        nombre: "Carpeta: instancias, cuenta tributaria y notificaciones, solo listar (València)"
+        alias: ["notificaciones", "cuenta tributaria", "mis trámites"]
+        riesgo: leer
+        url: "https://sede.valencia.es/sede/carpeta/index.xhtml"
+        guia: references/plataforma-valencia.md
+        estado: pendiente_con_certificado
+
+  zaragoza:
+    nombre: "Ayuntamiento de Zaragoza"
+    nivel: municipal
+    plataforma: zaragoza
+    # Se entra por la ficha: la ejecución /procedimiento/11901 agotó 60 s en el mapeo.
+    login: "https://www.zaragoza.es/sede/servicio/tramite/11901"
+    origins:
+      - "https://www.zaragoza.es"                # sin mTLS; "Iniciar trámite con certificado o Cl@ve" (petición real pendiente)
+      - "https://pasarela-ident.clave.gob.es"    # rama Cl@ve
+    guia: references/plataforma-zaragoza.md
+    verificado_el: "2026-10-15"
+    tramites:
+      - id: zaragoza-registro-general
+        nombre: "Registro General (Zaragoza)"
+        alias: ["instancia general", "registro general"]
+        riesgo: preparar
+        url: "https://www.zaragoza.es/sede/servicio/tramite/11901"
+        guia: references/plataforma-zaragoza.md
+        estado: verificado_sin_certificado
+      - id: zaragoza-comunicacion-apertura
+        nombre: "Comunicación previa de apertura (Zaragoza)"
+        alias: ["apertura", "comunicación previa", "abrir negocio", "actividad"]
+        riesgo: preparar
+        url: "https://www.zaragoza.es/sede/servicio/tramite/148"
+        guia: references/plataforma-zaragoza.md
+        estado: verificado_sin_certificado
+      - id: zaragoza-estar-al-corriente
+        nombre: "Certificado de estar al corriente (Zaragoza)"
+        alias: ["certificado de estar al corriente", "certificado de no deuda"]
+        riesgo: preparar
+        url: "https://www.zaragoza.es/sede/servicio/tramite/27120"
+        guia: references/plataforma-zaragoza.md
+        estado: verificado_sin_certificado
+      - id: zaragoza-catalogo
+        nombre: "Catálogo de trámites: autónomos, actividades y urbanismo (Zaragoza)"
+        alias: ["actividad", "urbanismo", "ayuda autónomo"]
+        riesgo: leer
+        url: "https://www.zaragoza.es/sede/portal/tramites-servicios/"
+        guia: references/plataforma-zaragoza.md
+        estado: verificado_sin_certificado
+      - id: zaragoza-tributos
+        nombre: "Oficina virtual tributaria: IAE, recibos y certificados (Zaragoza)"
+        alias: ["recibos", "tasas", "tributos", "autoliquidación"]
+        riesgo: leer
+        url: "https://tributos.zaragoza.es/info.0"
+        guia: references/plataforma-zaragoza.md
+        estado: parcial

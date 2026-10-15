@@ -1,0 +1,72 @@
+name: Nueva sede o ayuntamiento
+description: Propón una sede, un ayuntamiento o una plataforma municipal que todavía no tiene guía.
+title: "[nueva sede] <organismo o municipio>"
+labels: ["nueva-sede"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Antes de abrirlo, prueba `scripts/buscar.py "<municipio>"`: si tu ayuntamiento usa una plataforma con receta (Gestiona, TAO/STA, GTT, AOC, Sedipualb@…), quizá basta con corregir `assets/municipios.csv`.
+
+        **Sin datos personales**: nada de NIF, nombres, direcciones, nº de expediente ni capturas con datos reales.
+  - type: input
+    id: organismo
+    attributes:
+      label: Organismo o municipio
+      placeholder: "Ayuntamiento de <municipio> (<provincia>)"
+    validations:
+      required: true
+  - type: dropdown
+    id: tipo
+    attributes:
+      label: Tipo
+      options:
+        - Sede estatal
+        - Sede autonómica
+        - Diputación, cabildo o consell
+        - Ayuntamiento
+        - Plataforma municipal nueva
+    validations:
+      required: true
+  - type: input
+    id: url
+    attributes:
+      label: Dirección de la sede electrónica
+      description: Solo el dominio y la ruta de entrada, sin parámetros de sesión.
+      placeholder: "https://sede.<municipio>.es/"
+    validations:
+      required: true
+  - type: textarea
+    id: fuente
+    attributes:
+      label: Fuente oficial que acredita el dominio
+      description: Enlace a la web oficial del organismo, su boletín o el directorio de sedes que muestra que ese dominio es su sede. Sin esto no se añade.
+    validations:
+      required: true
+  - type: input
+    id: plataforma
+    attributes:
+      label: Plataforma (si la conoces)
+      description: Gestiona, TAO/STA, GTT, AOC, Sedipualb@, propia… o "no lo sé".
+  - type: textarea
+    id: tramites
+    attributes:
+      label: Trámites de autónomo que te interesan
+      placeholder: "Recibos de IBI y tasas, notificaciones, instancia general…"
+  - type: dropdown
+    id: acceso
+    attributes:
+      label: ¿Cómo se entra?
+      options:
+        - Con certificado digital
+        - Solo con Cl@ve
+        - Con certificado o Cl@ve
+        - No lo sé
+  - type: checkboxes
+    id: compromiso
+    attributes:
+      label: Antes de enviar
+      options:
+        - label: No he incluido datos personales ni secretos.
+          required: true
+        - label: Puedo ayudar a probar la guía en modo solo lectura.

@@ -1,0 +1,5 @@
+# Ficheros binarios autorizados (ruta relativa a la raíz del repositorio, una por línea).
+#
+# Por defecto el repositorio no lleva binarios: solo Markdown, YAML, JSON y Python que se pueden leer.
+# Si de verdad hace falta uno (p. ej. una imagen para el README), añádelo aquí en el mismo PR y explica
+# por qué. Lo revisa un CODEOWNER. Los certificados y claves (.p12, .pfx, .pem, .key...) nunca se aceptan.

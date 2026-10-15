@@ -1,0 +1,5 @@
+interface:
+  display_name: "Trámites ES (autónomos)"
+  short_description: "Sedes electrónicas españolas con tu certificado: consultar y preparar; tú firmas, presentas y pagas."
+policy:
+  allow_implicit_invocation: true

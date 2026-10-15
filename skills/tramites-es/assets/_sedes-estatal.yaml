@@ -1,0 +1,484 @@
+# Fragmento de assets/sedes.yaml: sedes ESTATALES (AEAT, Seguridad Social, DEHú, Cl@ve, DGT,
+# Carpeta Ciudadana, Justicia, Catastro). Mismo esquema que sedes.yaml.
+# sede.py y buscar.py cargan juntos sedes.yaml y todos los assets/_sedes-*.yaml (no hace falta fusionar).
+# Sin datos personales. Fuente: mapeo en vivo del 15-10-2026 (fases 1 y 2 y ronda 3; con certificado de
+# persona física solo para consultas; nada firmado, presentado, pagado ni abierto) y las guías citadas.
+#
+# login:   URL verificada que lleva al punto donde se pide el certificado (directo o vía Cl@ve / pasarela SS).
+# origins: esquema + host, sin ruta. SOLO los hosts que piden el certificado (verificados con cert-probe y con sesión).
+#          sede.py añade además el origin de la URL de login. Los flujos Cl@ve lo piden en pasarela-ident.clave.gob.es.
+# riesgo:  leer     = consulta o listado (notificaciones: listar, nunca abrir);
+#          preparar = el agente prepara y el último paso (emitir/confirmar, sin firma) lo da la persona,
+#                     o el agente con su OK explícito para ese documento si sede.py no lo bloquea;
+#          persona  = firma, presenta, paga, abre notificaciones o cambia datos: siempre la persona.
+# estado:  verificado_con_certificado = recorrido con certificado hasta el punto donde para el agente;
+#          verificado_sin_certificado = no necesita sesión y se recorrió;
+#          parcial   = acceso o primera pantalla verificados, pero no el resultado;
+#          pendiente = sin recorrer con certificado (o fallo abierto que lo impide).
+# Las URL con <...> son plantillas: sustituye el marcador antes de usarlas.
+
+sedes:
+
+  aeat:
+    nombre: "Agencia Tributaria (AEAT)"
+    nivel: estatal
+    login: "https://www1.agenciatributaria.gob.es/wlpl/TEWV-CORE/ResumenVlt"   # Mis expedientes; www1 pide el certificado en el handshake
+    origins: ["https://www1.agenciatributaria.gob.es"]
+    guia: references/sede-aeat.md
+    verificado_el: 2026-10-15
+    tramites:
+      - id: aeat-deudas
+        nombre: "Consulta de deudas con Hacienda"
+        alias: ["deudas hacienda", "pagar deuda", "cuánto debo a hacienda", "deuda agencia tributaria", "carta de pago hacienda"]
+        riesgo: leer
+        url: "https://www1.agenciatributaria.gob.es/wlpl/SRVO-JDIT/ConsultaDdas?faccion=CONS_DDAS"
+        guia: references/sede-aeat.md
+        estado: verificado_con_certificado
+      - id: aeat-datos-censales
+        nombre: "Mis datos censales (actividades, domicilio fiscal, obligaciones)"
+        alias: ["datos censales", "censo hacienda", "epígrafes iae", "mis obligaciones hacienda", "domicilio fiscal", "036 consulta"]
+        riesgo: leer
+        url: "https://www1.agenciatributaria.gob.es/wlpl/BUGC-JDIT/MdcAcceso"
+        guia: references/sede-aeat.md
+        estado: verificado_con_certificado
+      - id: aeat-mis-expedientes
+        nombre: "Mis expedientes (resumen de la AEAT)"
+        alias: ["mis expedientes hacienda", "área personal aeat", "expedientes agencia tributaria", "domiciliaciones hacienda"]
+        riesgo: leer
+        url: "https://www1.agenciatributaria.gob.es/wlpl/TEWV-CORE/ResumenVlt"
+        guia: references/sede-aeat.md
+        estado: verificado_con_certificado
+      - id: aeat-datos-fiscales
+        nombre: "Datos fiscales (Renta)"
+        alias: ["datos fiscales", "datos fiscales renta", "borrador renta datos", "rendimientos imputados"]
+        riesgo: leer
+        url: "https://www1.agenciatributaria.gob.es/wlpl/DFPA-D182/SvVisDF25Net"   # 25 = ejercicio 2025; cambia cada campaña
+        guia: references/sede-aeat.md
+        estado: verificado_con_certificado
+      - id: aeat-declaraciones-presentadas
+        nombre: "Consulta y copia de declaraciones presentadas"
+        alias: ["declaraciones presentadas", "copia declaración", "justificante modelo", "he presentado el 303", "consulta modelo 130", "copia renta"]
+        riesgo: leer
+        url: "https://www1.agenciatributaria.gob.es/wlpl/SCEJ-MANT/CONSUL/index.zul?MODELO=<modelo>&EJERCICIO=<AAAA>"
+        guia: references/sede-aeat.md
+        estado: verificado_con_certificado   # listado; la descarga "Ver" no se pulsó
+      - id: aeat-notificaciones
+        nombre: "Notificaciones de la AEAT (solo listar)"
+        alias: ["notificaciones hacienda", "notificaciones aeat", "carta de hacienda", "requerimiento hacienda", "buzón hacienda"]
+        riesgo: leer
+        url: "https://www1.agenciatributaria.gob.es/wlpl/GNNO-JDIT/SvInteresadosQuery?VEZ=BUSCAR1"
+        guia: references/tramite-vigilar-notificaciones.md
+        estado: parcial   # formulario verificado; la guarda ya permite "Buscar"; listado no obtenido aún
+      - id: aeat-certificado-corriente
+        nombre: "Certificado de estar al corriente de obligaciones tributarias (G304)"
+        alias: ["certificado estar al corriente hacienda", "certificado de no deuda hacienda", "certificado tributario", "certificado para subvención hacienda", "certificado para contratar con la administración"]
+        riesgo: persona   # el agente llega a "Validar solicitud"; "Firmar Enviar" es de la persona
+        url: "https://www1.agenciatributaria.gob.es/wlpl/EMCE-JDIT/ECOTInternetCiudadanosServlet"
+        guia: references/tramite-certificado-corriente.md
+        estado: verificado_con_certificado   # hasta "Firmar Enviar"
+      - id: aeat-certificado-situacion-censal
+        nombre: "Certificado de situación censal (G313)"
+        alias: ["certificado situación censal", "certificado censal", "certificado alta actividad hacienda", "certificado iae"]
+        riesgo: persona
+        url: "https://www1.agenciatributaria.gob.es/wlpl/EMCE-JDIT/ServletSitCenInternet"
+        guia: references/sede-aeat.md
+        estado: parcial   # primera pantalla
+      - id: aeat-certificados-expedidos
+        nombre: "Consulta de certificados tributarios expedidos (G331)"
+        alias: ["certificados expedidos hacienda", "descargar certificado hacienda", "estado solicitud certificado"]
+        riesgo: leer
+        url: "https://www1.agenciatributaria.gob.es/L/inwinvoc/es.aeat.dit.adu.emce.recogidaCertInt.RceAcciones?fAccion=0&fTramite=G3311&fTipoPet=2"
+        guia: references/sede-aeat.md
+        estado: pendiente
+      - id: aeat-modelo-303
+        nombre: "Modelo 303 (IVA trimestral)"
+        alias: ["modelo 303", "iva trimestral", "declaración iva", "presentar iva"]
+        riesgo: persona
+        url: "https://www1.agenciatributaria.gob.es/wlpl/TOAE-JDIT/VentanaCensalIva?fOrigen=pre303"
+        guia: references/sede-aeat.md
+        estado: parcial   # hasta la ventana censal Pre303
+      - id: aeat-modelo-130
+        nombre: "Modelo 130 (pago fraccionado del IRPF)"
+        alias: ["modelo 130", "pago fraccionado irpf", "irpf trimestral autónomo"]
+        riesgo: persona
+        url: "https://www1.agenciatributaria.gob.es/wlpl/PAMW-M130/E2026/CONT/index.zul"   # E2026 cambia con el año
+        guia: references/sede-aeat.md
+        estado: verificado_con_certificado   # formulario abierto, nada guardado
+      - id: aeat-modelo-111
+        nombre: "Modelo 111 (retenciones de trabajo y actividades)"
+        alias: ["modelo 111", "retenciones trabajadores", "retenciones profesionales"]
+        riesgo: persona
+        url: "https://www1.agenciatributaria.gob.es/wlpl/OV17-M111/index.zul"
+        guia: references/sede-aeat.md
+        estado: verificado_con_certificado   # formulario abierto, nada guardado
+      - id: aeat-modelo-115
+        nombre: "Modelo 115 (retenciones de alquiler)"
+        alias: ["modelo 115", "retenciones alquiler", "alquiler local retención"]
+        riesgo: persona
+        url: "https://www1.agenciatributaria.gob.es/wlpl/OV17-M115/index.zul"
+        guia: references/sede-aeat.md
+        estado: verificado_con_certificado   # formulario abierto, nada guardado
+      - id: aeat-modelo-390
+        nombre: "Modelo 390 (resumen anual del IVA)"
+        alias: ["modelo 390", "resumen anual iva"]
+        riesgo: persona
+        url: "https://www1.agenciatributaria.gob.es/wlpl/PAIV-M390/E2025/CONT/index.zul"   # E2025 cambia con el ejercicio
+        guia: references/sede-aeat.md
+        estado: parcial   # primera pantalla del formulario
+      - id: aeat-aplazamiento
+        nombre: "Aplazamiento o fraccionamiento de deudas (RB01)"
+        alias: ["aplazar deuda hacienda", "fraccionar deuda hacienda", "aplazamiento hacienda"]
+        riesgo: persona
+        url: "https://sede.agenciatributaria.gob.es/Sede/procedimientoini/RB01.shtml"
+        guia: references/sede-aeat.md
+        estado: pendiente   # solo se consultó "Mis expedientes"
+      - id: aeat-censo-036
+        nombre: "Modelo 036 (alta, modificación o baja censal)"
+        alias: ["modelo 036", "alta autónomo hacienda", "baja actividad hacienda", "cambiar domicilio fiscal", "censos web"]
+        riesgo: persona
+        url: "https://sede.agenciatributaria.gob.es/Sede/procedimientos/G322.shtml"
+        guia: references/sede-aeat.md
+        estado: pendiente
+
+  tgss:
+    nombre: "Seguridad Social (TGSS / Import@ss)"
+    nivel: estatal
+    login: "https://portal.seg-social.gob.es/wps/myportal/importass/importass/tramites/historialRecibosRETA"   # -> idp.seg-social.es/PGIS/Login -> #IPCEIdP
+    origins: ["https://ipce.seg-social.es"]
+    guia: references/sede-tgss-importass.md
+    verificado_el: 2026-10-15
+    tramites:
+      - id: tgss-vida-laboral
+        nombre: "Informe de vida laboral"
+        alias: ["vida laboral", "informe vida laboral", "días cotizados", "historial laboral"]
+        riesgo: leer
+        url: "https://portal.seg-social.gob.es/wps/myportal/importass/importass/tramites/datosvidalaboral"
+        guia: references/sede-tgss-importass.md
+        estado: verificado_con_certificado
+      - id: tgss-recibos-reta
+        nombre: "Recibos de la cuota de autónomo (RETA)"
+        alias: ["recibos autónomo", "cuota autónomo", "recibo seguridad social", "cuánto pago de autónomo", "recibos reta"]
+        riesgo: leer
+        url: "https://portal.seg-social.gob.es/wps/myportal/importass/importass/tramites/historialRecibosRETA"
+        guia: references/sede-tgss-importass.md
+        estado: verificado_con_certificado
+      - id: tgss-certificado-corriente
+        nombre: "Certificado de estar al corriente con la Seguridad Social / informe de deuda"
+        alias: ["certificado estar al corriente seguridad social", "certificado de no deuda seguridad social", "certificado tgss", "informe de deuda seguridad social"]
+        riesgo: preparar   # sin firma; "Continuar" con OK explícito de la persona (límite ~3 informes/día)
+        url: "https://portal.seg-social.gob.es/wps/portal/importass/Seguridad/PortalRedirectorN1A?idApp=2265&N1&A"
+        guia: references/tramite-certificado-corriente.md
+        estado: verificado_con_certificado
+      - id: tgss-certificados-emitidos
+        nombre: "Consulta de certificados de la Seguridad Social ya emitidos"
+        alias: ["certificados emitidos seguridad social", "descargar certificado tgss"]
+        riesgo: leer
+        url: "https://portal.seg-social.gob.es/wps/portal/importass/Seguridad/PortalRedirectorN1A?idApp=2266&N1&A"
+        guia: references/sede-tgss-importass.md
+        estado: pendiente
+      - id: tgss-deudas
+        nombre: "Deudas con la Seguridad Social (documento de ingreso)"
+        alias: ["deudas seguridad social", "cuánto debo a la seguridad social", "deuda tgss", "pagar seguridad social"]
+        riesgo: leer
+        url: "https://portal.seg-social.gob.es/wps/portal/importass/Seguridad/PortalRedirectorN1A?idApp=370&N1&A"
+        guia: references/sede-tgss-importass.md
+        estado: parcial   # solo la pantalla de entrada; "Continuar" lleva a un documento de pago
+      - id: tgss-bases-cotizacion
+        nombre: "Informe de bases de cotización"
+        alias: ["bases de cotización", "informe bases", "base de cotización autónomo"]
+        riesgo: leer
+        url: "https://portal.seg-social.gob.es/wps/myportal/importass/importass/tramites/informebases"
+        guia: references/sede-tgss-importass.md
+        estado: pendiente
+      - id: tgss-cuotas-ingresadas
+        nombre: "Informe de cuotas ingresadas"
+        alias: ["cuotas ingresadas", "cuotas pagadas seguridad social", "certificado cuotas pagadas"]
+        riesgo: leer
+        url: "https://portal.seg-social.gob.es/wps/portal/importass/Seguridad/PortalRedirectorN1P?idApp=110&N1&P"
+        guia: references/sede-tgss-importass.md
+        estado: pendiente
+      - id: tgss-datos-cotizacion-reta
+        nombre: "Informe de datos de cotización de trabajo autónomo"
+        alias: ["datos de cotización autónomo", "informe cotización reta"]
+        riesgo: leer
+        url: "https://portal.seg-social.gob.es/wps/portal/importass/Seguridad/PortalRedirectorN1P?idApp=762&N1&P"
+        guia: references/sede-tgss-importass.md
+        estado: pendiente
+      - id: tgss-regularizacion-reta
+        nombre: "Regularización anual de cuotas de autónomo (consulta)"
+        alias: ["regularización cuotas autónomo", "regularización anual reta", "me devuelven cuotas", "me reclaman cuotas"]
+        riesgo: leer
+        url: "https://portal.seg-social.gob.es/wps/myportal/importass/importass/tramites/detalleResultadoRegularizacionAutonomos"
+        guia: references/sede-tgss-importass.md
+        estado: pendiente
+      - id: tgss-resoluciones-reta
+        nombre: "Resoluciones de alta, baja y modificaciones en autónomos"
+        alias: ["resolución alta autónomo", "resolución baja autónomo", "acreditación alta reta", "justificante alta autónomo"]
+        riesgo: leer
+        url: "https://portal.seg-social.gob.es/wps/myportal/importass/importass/tramites/busquedaDocumentos/"
+        guia: references/sede-tgss-importass.md
+        estado: verificado_con_certificado
+      - id: tgss-cambio-base
+        nombre: "Cambio de base de cotización / rendimientos previstos"
+        alias: ["cambiar base cotización", "cambio de base autónomo", "rendimientos previstos", "cambiar tramo autónomo"]
+        riesgo: persona
+        url: "https://portal.seg-social.gob.es/wps/myportal/importass/importass/tramites/relacionLaboralRETA"
+        guia: references/sede-tgss-importass.md
+        estado: parcial   # solo la pantalla de entrada; "Modificar" no pulsado
+      - id: tgss-alta-reta
+        nombre: "Alta en el régimen de autónomos (RETA)"
+        alias: ["alta autónomo seguridad social", "darme de alta de autónomo", "alta reta"]
+        riesgo: persona
+        url: "https://portal.seg-social.gob.es/wps/myportal/importass/importass/tramites/altaAutonomo"
+        guia: references/sede-tgss-importass.md
+        estado: parcial   # primera pantalla, sin "Aceptar y continuar"
+      - id: tgss-baja-reta
+        nombre: "Baja en el régimen de autónomos (RETA)"
+        alias: ["baja autónomo", "darme de baja de autónomo", "baja reta", "cese actividad seguridad social"]
+        riesgo: persona
+        url: "https://portal.seg-social.gob.es/wps/myportal/importass/importass/tramites/relacionLaboralRETA"
+        guia: references/sede-tgss-importass.md
+        estado: parcial   # entrada localizada; modal de baja no abierto
+      - id: tgss-aplazamiento
+        nombre: "Aplazamiento de deudas con la Seguridad Social"
+        alias: ["aplazar deuda seguridad social", "aplazamiento tgss"]
+        riesgo: persona
+        url: "https://portal.seg-social.gob.es/wps/portal/importass/Seguridad/PortalRedirectorN1P?idApp=2806&N1&P"
+        guia: references/sede-tgss-importass.md
+        estado: pendiente
+      - id: tgss-notificaciones
+        nombre: "Notificaciones de la Seguridad Social (solo listar)"
+        alias: ["notificaciones seguridad social", "notificaciones tgss", "buzón seguridad social"]
+        riesgo: leer
+        url: "https://sede.seg-social.gob.es/wps/portal/sede/sede/Inicio/NotificacionesTelematicas"   # de la investigación previa; no mapeada
+        guia: references/tramite-vigilar-notificaciones.md
+        estado: pendiente
+
+  dehu:
+    nombre: "DEHú (Dirección Electrónica Habilitada única)"
+    nivel: estatal
+    login: "https://dehu.redsara.es/api/login/login-clave-sso?selectedLanguage=es"   # -> Cl@ve; luego DEHú dio error=1000
+    origins: ["https://pasarela-ident.clave.gob.es"]
+    guia: references/sede-dehu.md
+    verificado_el: 2026-10-15
+    tramites:
+      - id: dehu-notificaciones
+        nombre: "Notificaciones en DEHú (solo listar)"
+        alias: ["notificaciones", "dehu", "tengo notificaciones", "buzón notificaciones", "notificaciones electrónicas", "notificaciones pendientes"]
+        riesgo: leer
+        url: "https://dehu.redsara.es/es/notifications"
+        guia: references/tramite-vigilar-notificaciones.md
+        estado: pendiente   # DEHú rechazó el login con certificado (error=1000), causa desconocida
+      - id: dehu-publico
+        nombre: "DEHú: buscador de organismos y validador de correos (público)"
+        alias: ["validar correo notificación", "email falso notificación", "buscador organismos dehu"]
+        riesgo: leer
+        url: "https://dehu.redsara.es/es/public"
+        guia: references/sede-dehu.md
+        estado: verificado_sin_certificado
+
+  clave:
+    nombre: "Pasarela Cl@ve (solo DNIe / certificado)"
+    nivel: estatal
+    login: null   # sin entrada propia: se llega por POST SAML desde cada sede (un GET directo da error)
+    origins: ["https://pasarela-ident.clave.gob.es"]
+    guia: references/sede-clave.md
+    verificado_el: 2026-10-15
+    tramites: []
+
+  dgt:
+    nombre: "Dirección General de Tráfico (DGT): MiDGT y DEV"
+    nivel: estatal
+    login: "https://sede.dgt.gob.es/es/mi_dgt/"   # 401 + SAML a Cl@ve
+    origins: ["https://pasarela-ident.clave.gob.es", "https://auth-sedeweb.dgt.gob.es"]
+    guia: references/sede-dgt.md
+    verificado_el: 2026-10-15
+    tramites:
+      - id: dgt-puntos
+        nombre: "Consulta de puntos del carné"
+        alias: ["puntos carné", "puntos del carnet", "cuántos puntos tengo", "mi dgt"]
+        riesgo: leer
+        url: "https://sede.dgt.gob.es/es/mi_dgt/mis-puntos/"
+        guia: references/sede-dgt.md
+        estado: verificado_con_certificado
+      - id: dgt-multas
+        nombre: "Multas y sanciones de tráfico (consulta)"
+        alias: ["multas", "multas tráfico", "sanciones dgt", "tengo multas", "multa furgoneta"]
+        riesgo: leer
+        url: "https://sede.dgt.gob.es/es/mi_dgt/mis-sanciones/"
+        guia: references/sede-dgt.md
+        estado: verificado_con_certificado   # listado; detalle no abierto
+      - id: dgt-dev-notificaciones
+        nombre: "Buzón DEV de la DGT (solo listar)"
+        alias: ["dev", "dirección electrónica vial", "notificaciones dgt", "notificaciones tráfico"]
+        riesgo: leer
+        url: "https://auth-sedeweb.dgt.gob.es/WEB_NTRA_CONSULTA/listadoNotificacionesIdiomaPostback.faces?idioma=es"
+        guia: references/tramite-vigilar-notificaciones.md
+        estado: parcial   # acceso verificado; listado pendiente con una cuenta que tenga DEV (sin DEV → ErrorBuzon.faces)
+      - id: dgt-informe-conductor
+        nombre: "Informe de conductor"
+        alias: ["informe de conductor", "historial conductor", "antecedentes tráfico", "informe permiso conducir"]
+        riesgo: preparar   # "Confirmar" (enviar()) lo bloquea sede.py: lo pulsa la persona
+        url: "https://sedeclave.dgt.gob.es/WEB_HPER/HPER"
+        guia: references/sede-dgt.md
+        estado: parcial   # primera pantalla; informe no generado
+      - id: dgt-tablon-edictal
+        nombre: "Sanciones en el Tablón Edictal (TEU)"
+        alias: ["tablón edictal multas", "teu multas", "multa no notificada"]
+        riesgo: leer
+        url: "https://sede.dgt.gob.es/es/multas/consulta-del-tablon-edictal-de-sanciones/"
+        guia: references/sede-dgt.md
+        estado: verificado_sin_certificado
+
+  carpeta-ciudadana:
+    nombre: "Mi Carpeta Ciudadana"
+    nivel: estatal
+    login: "https://carpetaciudadana.gob.es/carpeta/mcc/clave"   # "Acceder a la carpeta" -> rol Ciudadano -> Keycloak -> Cl@ve
+    origins: ["https://pasarela-ident.clave.gob.es"]
+    guia: references/sede-carpeta-ciudadana.md
+    verificado_el: 2026-10-15
+    tramites:
+      - id: mcc-vida-laboral
+        nombre: "Carpeta Ciudadana: vida laboral resumida"
+        alias: ["carpeta ciudadana vida laboral", "días cotizados carpeta"]
+        riesgo: leer
+        url: "https://carpetaciudadana.gob.es/carpeta/mcc/vida-laboral"
+        guia: references/sede-carpeta-ciudadana.md
+        estado: verificado_con_certificado
+      - id: mcc-vehiculos
+        nombre: "Carpeta Ciudadana: mis vehículos"
+        alias: ["mis vehículos", "vehículos a mi nombre", "itv", "seguro vehículo"]
+        riesgo: leer
+        url: "https://carpetaciudadana.gob.es/carpeta/mcc/vehiculos"
+        guia: references/sede-carpeta-ciudadana.md
+        estado: verificado_con_certificado
+      - id: mcc-inmuebles
+        nombre: "Carpeta Ciudadana: mis inmuebles (Catastro)"
+        alias: ["mis inmuebles", "propiedades a mi nombre", "bienes inmuebles carpeta"]
+        riesgo: leer
+        url: "https://carpetaciudadana.gob.es/carpeta/mcc/bienes-inmuebles"
+        guia: references/sede-carpeta-ciudadana.md
+        estado: verificado_con_certificado
+      - id: mcc-padron
+        nombre: "Carpeta Ciudadana: padrón (domicilio) e histórico de municipios"
+        alias: ["padrón", "empadronamiento", "domicilio padrón"]
+        riesgo: leer
+        url: "https://carpetaciudadana.gob.es/carpeta/mcc/domicilio"
+        guia: references/sede-carpeta-ciudadana.md
+        estado: verificado_con_certificado
+      - id: mcc-subvenciones
+        nombre: "Carpeta Ciudadana: ayudas y subvenciones concedidas"
+        alias: ["subvenciones concedidas", "ayudas recibidas", "bdns mis ayudas"]
+        riesgo: leer
+        url: "https://carpetaciudadana.gob.es/carpeta/mcc/concesiones-ayudas-subvenciones"
+        guia: references/sede-carpeta-ciudadana.md
+        estado: verificado_con_certificado
+      - id: mcc-teu
+        nombre: "Carpeta Ciudadana: anuncios a mi nombre en el Tablón Edictal Único"
+        alias: ["tablón edictal único", "teu", "edictos a mi nombre", "notificación por edicto"]
+        riesgo: leer
+        url: "https://carpetaciudadana.gob.es/carpeta/mcc/teu"
+        guia: references/sede-carpeta-ciudadana.md
+        estado: verificado_con_certificado
+      - id: mcc-notificaciones
+        nombre: "Carpeta Ciudadana: contador de notificaciones pendientes (enlaza a DEHú)"
+        alias: ["cuántas notificaciones tengo", "notificaciones carpeta ciudadana"]
+        riesgo: leer
+        url: "https://carpetaciudadana.gob.es/carpeta/mcc/home"
+        guia: references/tramite-vigilar-notificaciones.md
+        estado: pendiente   # endpoint visto en el código de la SPA, no verificado en vivo
+      - id: mcc-carpeta-empresa
+        nombre: "Carpeta Empresa (con certificado de representante)"
+        alias: ["carpeta empresa", "carpeta ciudadana sociedad"]
+        riesgo: leer
+        url: "https://carpetaciudadana.gob.es/carpeta/mcc/carpeta-empresa"
+        guia: references/sede-carpeta-ciudadana.md
+        estado: pendiente
+
+  justicia:
+    nombre: "Ministerio de Justicia (sede.mjusticia.gob.es y Carpeta Justicia)"
+    nivel: estatal
+    login: "https://sede.mjusticia.gob.es/certape/clave/InicioSede?lang=es_es&idtramite=1288778883620&idpagina=1215197884559"   # paso 1 de antecedentes; no envía nada
+    origins: ["https://pasarela-ident.clave.gob.es"]
+    guia: references/sede-justicia.md
+    verificado_el: 2026-10-15
+    tramites:
+      - id: justicia-antecedentes-penales
+        nombre: "Certificado de antecedentes penales"
+        alias: ["antecedentes penales", "certificado de penales", "certificado antecedentes"]
+        riesgo: persona   # asistente con datos de pago (NRC) y confirmación
+        url: "https://sede.mjusticia.gob.es/certape/clave/InicioSede?lang=es_es&idtramite=1288778883620&idpagina=1215197884559"
+        guia: references/sede-justicia.md
+        estado: parcial   # paso 1, sin "Siguiente"
+      - id: justicia-antecedentes-consulta
+        nombre: "Antecedentes penales: consulta de estado y descarga"
+        alias: ["descargar antecedentes penales", "estado certificado penales"]
+        riesgo: leer
+        url: "https://sede.mjusticia.gob.es/certape/clave/FormularioConsulta?lang=es_es&idtramite=1288778883620&idpagina=1215197884559"
+        guia: references/sede-justicia.md
+        estado: pendiente
+      - id: justicia-delitos-sexuales
+        nombre: "Certificado del Registro Central de Delincuentes Sexuales"
+        alias: ["certificado delitos sexuales", "certificado registro central delincuentes sexuales", "certificado para trabajar con menores"]
+        riesgo: persona   # TRAMPA: la URL de "Acceder" (/redese/clave/solicitarCertificado) EMITE el certificado al abrirla
+        url: "https://sede.mjusticia.gob.es/es/tramites/certificado-registro-central"   # la ficha, nunca la URL de solicitud
+        guia: references/sede-justicia.md
+        estado: verificado_con_certificado   # trampa: abrir la URL con sesión emite el certificado (ver sede-justicia.md)
+      - id: justicia-delitos-sexuales-consulta
+        nombre: "Delitos sexuales: consulta de estado y descarga"
+        alias: ["descargar certificado delitos sexuales"]
+        riesgo: leer
+        url: "https://sede.mjusticia.gob.es/redese/clave/FormularioConsulta?lang=es_es&idtramite=1288778560459&idpagina=1215197884559"
+        guia: references/sede-justicia.md
+        estado: pendiente
+      - id: justicia-carpeta
+        nombre: "Carpeta Justicia (expedientes judiciales)"
+        alias: ["carpeta justicia", "expedientes judiciales", "mis juicios"]
+        riesgo: leer
+        url: "https://carpeta.justicia.es/group/guest/home"
+        guia: references/sede-justicia.md
+        estado: pendiente   # bucle de login por la cookie SESSION SameSite=Lax (fallo de Justicia)
+
+  catastro:
+    nombre: "Sede Electrónica del Catastro"
+    nivel: estatal
+    login: "https://www.sedecatastro.gob.es/Accesos/SECAccTitular.aspx?Dest=17&del=&mun=&final=&RefC="   # certificado por renegociación en esta ruta
+    origins: ["https://www.sedecatastro.gob.es"]
+    guia: references/sede-catastro.md
+    verificado_el: 2026-10-15
+    tramites:
+      - id: catastro-certificacion-titular
+        nombre: "Certificación catastral de mis inmuebles (búsqueda por NIF)"
+        alias: ["certificación catastral", "certificado catastro", "referencia catastral", "certificado catastral local"]
+        riesgo: preparar   # DATOS genera la certificación y registra el acceso con la finalidad declarada
+        url: "https://www.sedecatastro.gob.es/CYCBienInmueble/OVCBusquedaTitular.aspx"
+        guia: references/sede-catastro.md
+        estado: parcial   # hasta el formulario; certificación no generada
+      - id: catastro-accesos-inmuebles
+        nombre: "Quién ha consultado o certificado mis inmuebles"
+        alias: ["accesos a mis inmuebles", "quién ha consultado mis inmuebles"]
+        riesgo: leer
+        url: "https://www.sedecatastro.gob.es/Accesos/SECAccTitular.aspx?Dest=17&del=&mun=&final=&RefC="
+        guia: references/sede-catastro.md
+        estado: verificado_con_certificado
+      - id: catastro-consulta-publica
+        nombre: "Consulta pública de datos catastrales no protegidos"
+        alias: ["consulta catastro", "buscar referencia catastral", "catastro dirección"]
+        riesgo: leer
+        url: "https://www1.sedecatastro.gob.es/CYCBienInmueble/OVCBusqueda.aspx"
+        guia: references/sede-catastro.md
+        estado: verificado_sin_certificado
+      - id: catastro-expedientes
+        nombre: "Mis expedientes en el Catastro"
+        alias: ["expedientes catastro"]
+        riesgo: leer
+        url: "https://www.sedecatastro.gob.es/Accesos/SECAccExpedientes.aspx"
+        guia: references/sede-catastro.md
+        estado: pendiente
+      - id: catastro-valor-referencia
+        nombre: "Valor de referencia de un inmueble"
+        alias: ["valor de referencia", "valor referencia catastro"]
+        riesgo: leer
+        url: "https://www1.sedecatastro.gob.es/Accesos/SECAccvr.aspx"
+        guia: references/sede-catastro.md
+        estado: pendiente

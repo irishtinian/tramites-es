@@ -1,0 +1,338 @@
+# Calendario fiscal del autónomo: ÚNICA fuente de fechas de tramites-es.
+# references/calendario-fiscal.md y scripts/calendario.py derivan de este fichero.
+# Si cambias una fecha aquí, cambia también la tabla del .md y pasa `uv run scripts/calendario.py validar`.
+#
+# Estados:
+#   verificado    -> la fecha aparece literalmente en la fuente oficial citada.
+#   regla         -> fecha calculada con la regla literal de la norma u organismo citado más la regla
+#                    de días inhábiles. Es un plazo, pero hay que confirmarlo cuando salga el calendario
+#                    oficial del año (la AEAT suele publicarlo en diciembre).
+#   no_verificado -> sin fuente primaria comprobada. NO es un plazo; `fecha` es solo orientativa.
+# Sin datos personales. Fechas en formato AAAA-MM-DD.
+
+version: 1
+verificado_el: 2026-10-15
+cobertura:
+  desde: 2026-10-01
+  hasta: 2027-12-31
+
+territorios:
+  comun:    {nombre: "Territorio común (península y Baleares)", cobertura: completa}
+  canarias: {nombre: "Canarias (IGIC en la ATC; IRPF y retenciones en la AEAT)", cobertura: completa}
+  ceuta:    {nombre: "Ceuta", cobertura: parcial,
+             aviso: "Solo AEAT (IRPF, retenciones) y Seguridad Social. El IPSI (en lugar del IVA) no está cubierto: consulta la ciudad autónoma."}
+  melilla:  {nombre: "Melilla", cobertura: parcial,
+             aviso: "Solo AEAT (IRPF, retenciones) y Seguridad Social. El IPSI (en lugar del IVA) no está cubierto: consulta la ciudad autónoma."}
+  navarra:  {nombre: "Navarra (Hacienda Foral)", cobertura: parcial,
+             aviso: "Solo el 3T de 2026 de Hacienda Foral está verificado. El resto: calendario oficial de Navarra.",
+             enlace: "https://www.navarra.es/es/hacienda/calendario-fiscal"}
+  bizkaia:  {nombre: "Bizkaia (Hacienda Foral)", cobertura: ninguna,
+             aviso: "Calendario foral no verificado. Solo se incluye la Seguridad Social (estatal).",
+             enlace: "https://www.batuz.eus/es/inicio"}
+  gipuzkoa: {nombre: "Gipuzkoa (Hacienda Foral)", cobertura: ninguna,
+             aviso: "Calendario foral no verificado (la página oficial lo carga dinámicamente). Solo se incluye la Seguridad Social.",
+             enlace: "https://www.gipuzkoa.eus/es/web/ogasuna/calendario-fiscal"}
+  alava:    {nombre: "Álava (Hacienda Foral)", cobertura: ninguna,
+             aviso: "Calendario foral no verificado ni localizado. Solo se incluye la Seguridad Social.",
+             enlace: "https://egoitza.araba.eus"}
+
+# Catálogo de códigos admitidos en --obligaciones.
+obligaciones:
+  "303": {nombre: "IVA: autoliquidación trimestral", organismo: AEAT}
+  "349": {nombre: "Declaración recapitulativa de operaciones intracomunitarias", organismo: AEAT}
+  "390": {nombre: "IVA: resumen anual", organismo: AEAT}
+  "130": {nombre: "IRPF: pago fraccionado (estimación directa)", organismo: AEAT}
+  "131": {nombre: "IRPF: pago fraccionado (estimación objetiva, módulos)", organismo: AEAT}
+  "111": {nombre: "Retenciones de trabajo y actividades profesionales", organismo: AEAT}
+  "115": {nombre: "Retenciones por alquiler de inmuebles urbanos", organismo: AEAT}
+  "190": {nombre: "Resumen anual de retenciones (111)", organismo: AEAT}
+  "180": {nombre: "Resumen anual de retenciones por alquileres (115)", organismo: AEAT}
+  "184": {nombre: "Entidades en atribución de rentas (comunidad de bienes, sociedad civil)", organismo: AEAT}
+  "347": {nombre: "Operaciones con terceras personas", organismo: AEAT}
+  "100": {nombre: "Renta (IRPF anual)", organismo: AEAT}
+  "036": {nombre: "Declaración censal: opciones y renuncias", organismo: AEAT}
+  "420": {nombre: "IGIC: autoliquidación trimestral (régimen general)", organismo: ATC}
+  "425": {nombre: "IGIC: resumen anual", organismo: ATC}
+  "415": {nombre: "Operaciones con terceras personas (IGIC)", organismo: ATC}
+  "400": {nombre: "Declaración censal del IGIC", organismo: ATC}
+  "repep": {nombre: "Régimen especial del pequeño empresario o profesional (IGIC)", organismo: ATC}
+  "cuota_reta": {nombre: "Cuota mensual de autónomos (cargo en cuenta)", organismo: TGSS}
+  "base_reta": {nombre: "Cambio de base de cotización / rendimientos previstos", organismo: TGSS}
+  "mutua": {nombre: "Cambio de mutua colaboradora", organismo: TGSS}
+  "verifactu": {nombre: "VeriFactu: adaptación del software de facturación", organismo: AEAT}
+  "factura_e": {nombre: "Factura electrónica obligatoria entre empresas", organismo: AEAT}
+  "F69": {nombre: "IVA: autoliquidación (Navarra)", organismo: "Hacienda Foral de Navarra"}
+  "715": {nombre: "Retenciones de trabajo y actividades profesionales (Navarra)", organismo: "Hacienda Foral de Navarra"}
+  "759": {nombre: "Retenciones por alquiler de inmuebles urbanos (Navarra)", organismo: "Hacienda Foral de Navarra"}
+
+fuentes:
+  aeat-cal26-dom:   {titulo: "AEAT · Calendario 2026: plazos de autoliquidaciones y domiciliación (act. 07-10-2026)", url: "https://sede.agenciatributaria.gob.es/Sede/ayuda/calendario-contribuyente/calendario-contribuyente-2026/plazos-presentacion-autoliquidaciones-domiciliacion-bancaria.html"}
+  aeat-cal26-20oct: {titulo: "AEAT · Calendario 2026: hasta el 20 de octubre", url: "https://sede.agenciatributaria.gob.es/Sede/ayuda/calendario-contribuyente/calendario-contribuyente-2026/calendario-anual/octubre/hasta-20-octubre.html"}
+  aeat-cal26-31dic: {titulo: "AEAT · Calendario 2026: hasta el 31 de diciembre", url: "https://sede.agenciatributaria.gob.es/Sede/ayuda/calendario-contribuyente/calendario-contribuyente-2026/calendario-anual/diciembre/hasta-31-diciembre.html"}
+  aeat-cal26-30ene: {titulo: "AEAT · Calendario 2026: hasta el 30 de enero (patrón del 4T)", url: "https://sede.agenciatributaria.gob.es/Sede/ayuda/calendario-contribuyente/calendario-contribuyente-2026/calendario-anual/enero/hasta-30-enero.html"}
+  aeat-cal26-2feb:  {titulo: "AEAT · Calendario 2026: hasta el 2 de febrero (patrón de 190/180)", url: "https://sede.agenciatributaria.gob.es/Sede/ayuda/calendario-contribuyente/calendario-contribuyente-2026/calendario-anual/febrero/hasta-2-febrero.html"}
+  aeat-cal26-pf:    {titulo: "AEAT · Calendario 2026 simplificado para personas físicas", url: "https://sede.agenciatributaria.gob.es/Sede/ayuda/contenidos-lectura-facil/calendario-contribuyente-2026-simplificado-personas-fisicas.html"}
+  boe-riva:         {titulo: "BOE · Reglamento del IVA (RD 1624/1992), arts. 71.4 y 81", url: "https://www.boe.es/buscar/act.php?id=BOE-A-1992-28925"}
+  boe-rirpf:        {titulo: "BOE · Reglamento del IRPF (RD 439/2007), arts. 108.1, 109.2 y 111.1", url: "https://www.boe.es/buscar/act.php?id=BOE-A-2007-6820"}
+  boe-orden-390:    {titulo: "BOE · Orden EHA/3111/2009 (modelo 390), art. 8", url: "https://www.boe.es/eli/es/o/2009/11/05/eha3111/con"}
+  boe-orden-190:    {titulo: "BOE · Orden EHA/3127/2009 (modelo 190), art. 5", url: "https://www.boe.es/eli/es/o/2009/11/10/eha3127/con"}
+  boe-orden-347:    {titulo: "BOE · Orden EHA/3012/2008 (modelo 347), art. 10", url: "https://www.boe.es/eli/es/o/2008/10/20/eha3012/con"}
+  boe-ley39:        {titulo: "BOE · Ley 39/2015, arts. 30 y 31 (cómputo de plazos y días inhábiles)", url: "https://www.boe.es/buscar/act.php?id=BOE-A-2015-10565"}
+  atc-420:          {titulo: "ATC · Modelo 420 (mod. 13-07-2026)", url: "https://www3.gobiernodecanarias.org/tributos/atc/w/modelo-420"}
+  atc-425:          {titulo: "ATC · Modelo 425 (mod. 13-07-2026)", url: "https://www3.gobiernodecanarias.org/tributos/atc/w/modelo-425"}
+  atc-415:          {titulo: "ATC · Modelo 415 (mod. 22-06-2026)", url: "https://www3.gobiernodecanarias.org/tributos/atc/w/modelo-415"}
+  atc-400:          {titulo: "ATC · Modelo 400", url: "https://www3.gobiernodecanarias.org/tributos/atc/w/modelo-400"}
+  sicac-4015:       {titulo: "Sede Canarias · SICAC 4015 (modelo 420)", url: "https://sede.gobiernodecanarias.org/sede/procedimientos_servicios/tramites/4015"}
+  sicac-4018:       {titulo: "Sede Canarias · SICAC 4018 (modelo 425)", url: "https://sede.gobiernodecanarias.org/sede/movil/procedimientos_servicios/tramites/4018"}
+  boc-dl3-2026:     {titulo: "BOC nº 66 (7-04-2026) · Decreto ley 3/2026, art. 1 (REPEP)", url: "https://www.gobiernodecanarias.org/boc/2026/066/1094.html"}
+  tgss-guia:        {titulo: "Seguridad Social · Import@ss, guía del trabajo autónomo", url: "https://portal.seg-social.gob.es/wps/portal/importass/importass/Colectivos/Trabajo+Autonomo/guia"}
+  tgss-base:        {titulo: "Seguridad Social · Import@ss, base de cotización y rendimientos", url: "https://portal.seg-social.gob.es/wps/portal/importass/importass/Categorias/Altas,+bajas+y+modificaciones/Bajas+y+modificaciones/BCRendimientos"}
+  boe-verifactu:    {titulo: "BOE · RD 1007/2023, DF 4ª (redacción del RDL 15/2025)", url: "https://www.boe.es/buscar/act.php?id=BOE-A-2023-24840"}
+  aeat-verifactu:   {titulo: "AEAT · Nota informativa VeriFactu (act. 13-10-2026)", url: "https://sede.agenciatributaria.gob.es/Sede/iva/sistemas-informaticos-facturacion-verifactu/nota-informativa-ampliacion-plazo-adaptacion-facturacion.html"}
+  mh-verifactu:     {titulo: "Ministerio de Hacienda · Nota del 5-10-2026 (previsión, sin norma)", url: "https://www.hacienda.gob.es/sgt/gabsehacienda/nota-informativa-verifactu.pdf"}
+  boe-orden-fe:     {titulo: "BOE · Orden HAC/1028/2026 (en vigor el 6-10-2026)", url: "https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-20587"}
+  boe-rd238:        {titulo: "BOE · RD 238/2026, DF 4ª y DT 3ª (factura electrónica)", url: "https://www.boe.es/eli/es/rd/2026/03/25/238"}
+  aeat-fe:          {titulo: "AEAT · Noticia del 7-10-2026: solución pública de facturación electrónica", url: "https://sede.agenciatributaria.gob.es/Sede/en_gb/todas-noticias/2026/octubre/7/solucion-publica-facturacion-electronica.html"}
+  htn-cal26:        {titulo: "Hacienda Foral de Navarra · Calendario fiscal 2026", url: "https://www.navarra.es/es/hacienda/calendario-fiscal"}
+
+# Cada entrada se expande a una fila por modelo. Campos: id, fecha, tipo (presentacion | pago |
+# solicitud | cargo | hito), modelos, periodo, organismo, territorios (o [todos]), descripcion,
+# estado, regla (si estado = regla), domiciliacion_hasta + domiciliacion_estado, fuentes, nota.
+vencimientos:
+
+  # ---------------- AEAT · 3T 2026 ----------------
+  - {id: aeat-2026t3-303, fecha: 2026-10-20, tipo: presentacion, modelos: ["303"], periodo: "3T 2026", organismo: AEAT,
+     territorios: [comun], descripcion: "IVA del tercer trimestre",
+     estado: verificado, domiciliacion_hasta: 2026-10-15, domiciliacion_estado: verificado, fuentes: [aeat-cal26-20oct, aeat-cal26-dom]}
+  - {id: aeat-2026t3-irpf, fecha: 2026-10-20, tipo: presentacion, modelos: ["130", "131", "111", "115"], periodo: "3T 2026", organismo: AEAT,
+     territorios: [comun, canarias, ceuta, melilla], descripcion: "Pago fraccionado y retenciones del tercer trimestre",
+     estado: verificado, domiciliacion_hasta: 2026-10-15, domiciliacion_estado: verificado, fuentes: [aeat-cal26-20oct, aeat-cal26-dom]}
+  - {id: aeat-2026t3-349, fecha: 2026-10-20, tipo: presentacion, modelos: ["349"], periodo: "3T 2026", organismo: AEAT,
+     territorios: [comun], descripcion: "Operaciones intracomunitarias del tercer trimestre (informativa, sin ingreso)",
+     estado: verificado, domiciliacion_hasta: null, domiciliacion_estado: no_aplica, fuentes: [aeat-cal26-20oct]}
+
+  # ---------------- AEAT · resto de 2026 ----------------
+  - {id: aeat-2026-renta-2plazo, fecha: 2026-11-05, tipo: pago, modelos: ["100"], periodo: "Renta 2025", organismo: AEAT,
+     territorios: [comun, canarias, ceuta, melilla], descripcion: "Cargo del segundo plazo de la Renta 2025 (solo si se fraccionó el pago)",
+     estado: verificado, domiciliacion_hasta: null, domiciliacion_estado: no_aplica, fuentes: [aeat-cal26-pf]}
+  - {id: aeat-2026-036-irpf, fecha: 2026-12-31, tipo: solicitud, modelos: ["036"], periodo: "Opciones para 2027", organismo: AEAT,
+     territorios: [comun, canarias, ceuta, melilla], descripcion: "Renuncia o revocación de estimación directa simplificada y de estimación objetiva (módulos) para 2027 y siguientes",
+     estado: verificado, domiciliacion_hasta: null, domiciliacion_estado: no_aplica, fuentes: [aeat-cal26-31dic]}
+  - {id: aeat-2026-036-iva, fecha: 2026-12-31, tipo: solicitud, modelos: ["036"], periodo: "Opciones para 2027", organismo: AEAT,
+     territorios: [comun], descripcion: "IVA: renuncia o revocación del régimen simplificado y del de agricultura; opción o renuncia al criterio de caja para 2027",
+     estado: verificado, domiciliacion_hasta: null, domiciliacion_estado: no_aplica, fuentes: [aeat-cal26-31dic]}
+
+  # ---------------- AEAT · 4T 2026 y anuales (enero-marzo 2027) ----------------
+  - {id: aeat-2026t4-111-115, fecha: 2027-01-20, tipo: presentacion, modelos: ["111", "115"], periodo: "4T 2026", organismo: AEAT,
+     territorios: [comun, canarias, ceuta, melilla], descripcion: "Retenciones del cuarto trimestre",
+     estado: regla, regla: "RIRPF art. 108.1: veinte primeros días naturales de enero. El 20-01-2027 es miércoles.",
+     domiciliacion_hasta: 2027-01-15, domiciliacion_estado: regla, fuentes: [boe-rirpf, aeat-cal26-dom],
+     nota: "Domiciliación: en 2026 la AEAT la fijó del 1 al 15 para los plazos que acaban el día 20; confirmar en el calendario 2027."}
+  - {id: aeat-2026t4-303, fecha: 2027-02-01, tipo: presentacion, modelos: ["303"], periodo: "4T 2026", organismo: AEAT,
+     territorios: [comun], descripcion: "IVA del cuarto trimestre",
+     estado: verificado, domiciliacion_hasta: null, domiciliacion_estado: no_verificado, fuentes: [aeat-cal26-pf, boe-riva],
+     nota: "La AEAT publica 'Hasta el 1 de febrero de 2027' (el 30-01 es sábado). El fin de la domiciliación de 2027 no está publicado: en 2026 fue el 27 de enero."}
+  - {id: aeat-2026t4-130-131, fecha: 2027-02-01, tipo: presentacion, modelos: ["130", "131"], periodo: "4T 2026", organismo: AEAT,
+     territorios: [comun, canarias, ceuta, melilla], descripcion: "Pago fraccionado del cuarto trimestre",
+     estado: regla, regla: "RIRPF art. 111.1: cuarto trimestre entre el 1 y el 30 de enero. El 30-01-2027 es sábado: pasa al lunes 1-02.",
+     domiciliacion_hasta: null, domiciliacion_estado: no_verificado, fuentes: [boe-rirpf, aeat-cal26-30ene, boe-ley39],
+     nota: "Fin de la domiciliación no publicado para 2027 (en 2026 fue el 27 de enero)."}
+  - {id: aeat-2026t4-349, fecha: 2027-02-01, tipo: presentacion, modelos: ["349"], periodo: "4T 2026", organismo: AEAT,
+     territorios: [comun], descripcion: "Operaciones intracomunitarias del cuarto trimestre",
+     estado: regla, regla: "RIVA art. 81: último periodo en los treinta primeros días naturales de enero; 30-01-2027 sábado.",
+     domiciliacion_hasta: null, domiciliacion_estado: no_aplica, fuentes: [boe-riva, aeat-cal26-30ene, boe-ley39]}
+  - {id: aeat-2026-390, fecha: 2027-02-01, tipo: presentacion, modelos: ["390"], periodo: "Año 2026", organismo: AEAT,
+     territorios: [comun], descripcion: "Resumen anual del IVA",
+     estado: regla, regla: "Orden EHA/3111/2009 art. 8: treinta primeros días naturales de enero; 30-01-2027 sábado.",
+     domiciliacion_hasta: null, domiciliacion_estado: no_aplica, fuentes: [boe-orden-390, aeat-cal26-30ene, boe-ley39]}
+  - {id: aeat-2026-190, fecha: 2027-02-01, tipo: presentacion, modelos: ["190"], periodo: "Año 2026", organismo: AEAT,
+     territorios: [comun, canarias, ceuta, melilla], descripcion: "Resumen anual de retenciones del 111",
+     estado: regla, regla: "Orden EHA/3127/2009 art. 5: por vía telemática, del 1 al 31 de enero; 31-01-2027 domingo.",
+     domiciliacion_hasta: null, domiciliacion_estado: no_aplica, fuentes: [boe-orden-190, boe-rirpf, boe-ley39]}
+  - {id: aeat-2026-180, fecha: 2027-02-01, tipo: presentacion, modelos: ["180"], periodo: "Año 2026", organismo: AEAT,
+     territorios: [comun, canarias, ceuta, melilla], descripcion: "Resumen anual de retenciones por alquileres (115)",
+     estado: regla, regla: "RIRPF art. 108.1: resumen anual del 1 al 31 de enero (presentación electrónica); 31-01-2027 domingo. En 2026 venció el 2-02.",
+     domiciliacion_hasta: null, domiciliacion_estado: no_aplica, fuentes: [boe-rirpf, aeat-cal26-2feb, boe-ley39]}
+  - {id: aeat-2026-347, fecha: 2027-03-01, tipo: presentacion, modelos: ["347"], periodo: "Año 2026", organismo: AEAT,
+     territorios: [comun, ceuta, melilla], descripcion: "Operaciones con terceros de más de 3.005,06 euros en el año",
+     estado: regla, regla: "Orden EHA/3012/2008 art. 10: durante el mes de febrero; 28-02-2027 domingo.",
+     domiciliacion_hasta: null, domiciliacion_estado: no_aplica, fuentes: [boe-orden-347, boe-ley39],
+     nota: "En Illes Balears el 1 de marzo es festivo autonómico: no está verificado si traslada el plazo. Presenta antes."}
+  - {id: aeat-2026-184, fecha: 2027-02-01, tipo: presentacion, modelos: ["184"], periodo: "Año 2026", organismo: AEAT,
+     territorios: [comun, canarias, ceuta, melilla], descripcion: "Entidades en atribución de rentas (solo comunidades de bienes y sociedades civiles)",
+     estado: no_verificado, domiciliacion_hasta: null, domiciliacion_estado: no_aplica, fuentes: [aeat-cal26-2feb],
+     nota: "En 2026 venció el 2-02. No se ha comprobado la norma del plazo: confírmalo en el calendario 2027 de la AEAT."}
+
+  # ---------------- AEAT · 2027 ----------------
+  - {id: aeat-2027t1-303, fecha: 2027-04-20, tipo: presentacion, modelos: ["303"], periodo: "1T 2027", organismo: AEAT,
+     territorios: [comun], descripcion: "IVA del primer trimestre",
+     estado: regla, regla: "RIVA art. 71.4: veinte primeros días naturales del mes siguiente. 20-04-2027 martes.",
+     domiciliacion_hasta: 2027-04-15, domiciliacion_estado: regla, fuentes: [boe-riva, aeat-cal26-dom]}
+  - {id: aeat-2027t1-irpf, fecha: 2027-04-20, tipo: presentacion, modelos: ["130", "131", "111", "115"], periodo: "1T 2027", organismo: AEAT,
+     territorios: [comun, canarias, ceuta, melilla], descripcion: "Pago fraccionado y retenciones del primer trimestre",
+     estado: regla, regla: "RIRPF arts. 108.1 y 111.1: del 1 al 20 de abril. 20-04-2027 martes.",
+     domiciliacion_hasta: 2027-04-15, domiciliacion_estado: regla, fuentes: [boe-rirpf, aeat-cal26-dom]}
+  - {id: aeat-2027t1-349, fecha: 2027-04-20, tipo: presentacion, modelos: ["349"], periodo: "1T 2027", organismo: AEAT,
+     territorios: [comun], descripcion: "Operaciones intracomunitarias del primer trimestre",
+     estado: regla, regla: "RIVA art. 81: veinte primeros días naturales del mes siguiente al trimestre.",
+     domiciliacion_hasta: null, domiciliacion_estado: no_aplica, fuentes: [boe-riva]}
+  - {id: aeat-2027-renta-2026, fecha: 2027-06-30, tipo: presentacion, modelos: ["100"], periodo: "Renta 2026", organismo: AEAT,
+     territorios: [comun, canarias, ceuta, melilla], descripcion: "Campaña de la Renta 2026 (previsiblemente abril-junio de 2027)",
+     estado: no_verificado, domiciliacion_hasta: null, domiciliacion_estado: no_verificado, fuentes: [aeat-cal26-pf],
+     nota: "Las fechas las fija cada año una orden ministerial. Fecha orientativa: no la uses como plazo."}
+  - {id: aeat-2027t2-303, fecha: 2027-07-20, tipo: presentacion, modelos: ["303"], periodo: "2T 2027", organismo: AEAT,
+     territorios: [comun], descripcion: "IVA del segundo trimestre",
+     estado: regla, regla: "RIVA art. 71.4: veinte primeros días naturales del mes siguiente. 20-07-2027 martes.",
+     domiciliacion_hasta: 2027-07-15, domiciliacion_estado: regla, fuentes: [boe-riva, aeat-cal26-dom]}
+  - {id: aeat-2027t2-irpf, fecha: 2027-07-20, tipo: presentacion, modelos: ["130", "131", "111", "115"], periodo: "2T 2027", organismo: AEAT,
+     territorios: [comun, canarias, ceuta, melilla], descripcion: "Pago fraccionado y retenciones del segundo trimestre",
+     estado: regla, regla: "RIRPF arts. 108.1 y 111.1: del 1 al 20 de julio. 20-07-2027 martes.",
+     domiciliacion_hasta: 2027-07-15, domiciliacion_estado: regla, fuentes: [boe-rirpf, aeat-cal26-dom]}
+  - {id: aeat-2027t2-349, fecha: 2027-07-20, tipo: presentacion, modelos: ["349"], periodo: "2T 2027", organismo: AEAT,
+     territorios: [comun], descripcion: "Operaciones intracomunitarias del segundo trimestre",
+     estado: regla, regla: "RIVA art. 81: veinte primeros días naturales del mes siguiente al trimestre.",
+     domiciliacion_hasta: null, domiciliacion_estado: no_aplica, fuentes: [boe-riva]}
+  - {id: aeat-2027t3-303, fecha: 2027-10-20, tipo: presentacion, modelos: ["303"], periodo: "3T 2027", organismo: AEAT,
+     territorios: [comun], descripcion: "IVA del tercer trimestre",
+     estado: regla, regla: "RIVA art. 71.4: veinte primeros días naturales del mes siguiente. 20-10-2027 miércoles.",
+     domiciliacion_hasta: 2027-10-15, domiciliacion_estado: regla, fuentes: [boe-riva, aeat-cal26-dom]}
+  - {id: aeat-2027t3-irpf, fecha: 2027-10-20, tipo: presentacion, modelos: ["130", "131", "111", "115"], periodo: "3T 2027", organismo: AEAT,
+     territorios: [comun, canarias, ceuta, melilla], descripcion: "Pago fraccionado y retenciones del tercer trimestre",
+     estado: regla, regla: "RIRPF arts. 108.1 y 111.1: del 1 al 20 de octubre. 20-10-2027 miércoles.",
+     domiciliacion_hasta: 2027-10-15, domiciliacion_estado: regla, fuentes: [boe-rirpf, aeat-cal26-dom]}
+  - {id: aeat-2027t3-349, fecha: 2027-10-20, tipo: presentacion, modelos: ["349"], periodo: "3T 2027", organismo: AEAT,
+     territorios: [comun], descripcion: "Operaciones intracomunitarias del tercer trimestre",
+     estado: regla, regla: "RIVA art. 81: veinte primeros días naturales del mes siguiente al trimestre.",
+     domiciliacion_hasta: null, domiciliacion_estado: no_aplica, fuentes: [boe-riva]}
+  - {id: aeat-2027-renta-2plazo, fecha: 2027-11-05, tipo: pago, modelos: ["100"], periodo: "Renta 2026", organismo: AEAT,
+     territorios: [comun, canarias, ceuta, melilla], descripcion: "Segundo plazo de la Renta 2026 si se fracciona",
+     estado: no_verificado, domiciliacion_hasta: null, domiciliacion_estado: no_aplica, fuentes: [aeat-cal26-pf],
+     nota: "En 2026 fue el 5 de noviembre. Depende de la orden de la campaña 2026."}
+  - {id: aeat-2027-036, fecha: 2027-12-31, tipo: solicitud, modelos: ["036"], periodo: "Opciones para 2028", organismo: AEAT,
+     territorios: [comun, canarias, ceuta, melilla], descripcion: "Opciones y renuncias de regímenes para 2028",
+     estado: no_verificado, domiciliacion_hasta: null, domiciliacion_estado: no_aplica, fuentes: [aeat-cal26-31dic],
+     nota: "En 2026 el plazo acabó el 31 de diciembre. Confírmalo en el calendario 2027."}
+
+  # ---------------- Canarias · ATC ----------------
+  - {id: atc-2026t3-420, fecha: 2026-10-20, tipo: presentacion, modelos: ["420"], periodo: "3T 2026", organismo: ATC,
+     territorios: [canarias], descripcion: "IGIC del tercer trimestre (régimen general)",
+     estado: verificado, domiciliacion_hasta: 2026-10-15, domiciliacion_estado: verificado, fuentes: [atc-420, sicac-4015]}
+  - {id: atc-2026-400-renuncias, fecha: 2026-12-31, tipo: solicitud, modelos: ["400"], periodo: "Opciones para 2027", organismo: ATC,
+     territorios: [canarias], descripcion: "Renuncia al REPEP u otras opciones de régimen de IGIC para 2027",
+     estado: no_verificado, domiciliacion_hasta: null, domiciliacion_estado: no_aplica, fuentes: [atc-400, boc-dl3-2026],
+     nota: "Plazo y duración mínima de la renuncia no verificados (Reglamento de gestión, Decreto 268/2011). Consulta la ATC."}
+  - {id: atc-2027-repep, fecha: 2027-01-01, tipo: hito, modelos: ["repep"], periodo: "2027", organismo: ATC,
+     territorios: [canarias], descripcion: "REPEP con umbral general de 50.000 euros: inclusión automática (salvo renuncia) de las personas físicas con volumen de operaciones de 2026 no superior a 50.000 euros",
+     estado: verificado, domiciliacion_hasta: null, domiciliacion_estado: no_aplica, fuentes: [boc-dl3-2026, sicac-4015, sicac-4018],
+     nota: "Quien está en el REPEP no presenta el 420, pero sí el 425 con las casillas informativas. La 'declaración anual única' es solo un anuncio de prensa."}
+  - {id: atc-2026t4-420, fecha: 2027-02-01, tipo: presentacion, modelos: ["420"], periodo: "4T 2026", organismo: ATC,
+     territorios: [canarias], descripcion: "IGIC del cuarto trimestre (régimen general)",
+     estado: regla, regla: "ATC: el 4T se presenta durante todo el mes de enero; si el último día es inhábil, pasa al siguiente hábil. 31-01-2027 domingo.",
+     domiciliacion_hasta: 2027-01-20, domiciliacion_estado: regla, fuentes: [atc-420, boe-ley39],
+     nota: "Con domiciliación, en enero: primeros veinte días. La ATC amplía la domiciliación los mismos días que el plazo, lo que llevaría al 21-01; por prudencia, el 20-01."}
+  - {id: atc-2026-425, fecha: 2027-02-01, tipo: presentacion, modelos: ["425"], periodo: "Año 2026", organismo: ATC,
+     territorios: [canarias], descripcion: "Resumen anual del IGIC (también lo presentan los del REPEP, solo con las casillas informativas)",
+     estado: regla, regla: "ATC: durante el mes de enero del año siguiente; si vence en inhábil, al siguiente hábil. 31-01-2027 domingo.",
+     domiciliacion_hasta: null, domiciliacion_estado: no_aplica, fuentes: [atc-425, sicac-4018, boe-ley39]}
+  - {id: atc-2026-415, fecha: 2027-03-01, tipo: presentacion, modelos: ["415"], periodo: "Año 2026", organismo: ATC,
+     territorios: [canarias], descripcion: "Operaciones con terceros de más de 3.005,06 euros con un mismo cliente o proveedor (hay exenciones)",
+     estado: regla, regla: "ATC: durante el mes de febrero del año siguiente; si vence en inhábil, al siguiente hábil. 28-02-2027 domingo.",
+     domiciliacion_hasta: null, domiciliacion_estado: no_aplica, fuentes: [atc-415, boe-ley39]}
+  - {id: aeat-2026-347-canarias, fecha: 2027-03-01, tipo: presentacion, modelos: ["347"], periodo: "Año 2026", organismo: AEAT,
+     territorios: [canarias], descripcion: "347 de la AEAT para quien tributa en Canarias",
+     estado: no_verificado, domiciliacion_hasta: null, domiciliacion_estado: no_aplica, fuentes: [boe-orden-347, atc-415],
+     nota: "No verificado si en Canarias se presenta además del 415 de la ATC o si este lo sustituye."}
+  - {id: atc-2027t1-420, fecha: 2027-04-20, tipo: presentacion, modelos: ["420"], periodo: "1T 2027", organismo: ATC,
+     territorios: [canarias], descripcion: "IGIC del primer trimestre (régimen general; no si estás en el REPEP)",
+     estado: regla, regla: "ATC: primeros veinte días del mes siguiente al trimestre; con domiciliación, primeros quince.",
+     domiciliacion_hasta: 2027-04-15, domiciliacion_estado: regla, fuentes: [atc-420]}
+  - {id: atc-2027t2-420, fecha: 2027-07-20, tipo: presentacion, modelos: ["420"], periodo: "2T 2027", organismo: ATC,
+     territorios: [canarias], descripcion: "IGIC del segundo trimestre (régimen general; no si estás en el REPEP)",
+     estado: regla, regla: "ATC: primeros veinte días del mes siguiente al trimestre; con domiciliación, primeros quince.",
+     domiciliacion_hasta: 2027-07-15, domiciliacion_estado: regla, fuentes: [atc-420]}
+  - {id: atc-2027t3-420, fecha: 2027-10-20, tipo: presentacion, modelos: ["420"], periodo: "3T 2027", organismo: ATC,
+     territorios: [canarias], descripcion: "IGIC del tercer trimestre (régimen general; no si estás en el REPEP)",
+     estado: regla, regla: "ATC: primeros veinte días del mes siguiente al trimestre; con domiciliación, primeros quince.",
+     domiciliacion_hasta: 2027-10-15, domiciliacion_estado: regla, fuentes: [atc-420]}
+
+  # ---------------- Seguridad Social (TGSS, todo el Estado) ----------------
+  # Cuota: "se cargará en tu cuenta el último día hábil de cada mes" (tgss-guia). Fecha calculada (sábados y domingos excluidos).
+  - {id: tgss-cuota-2026-10, fecha: 2026-10-30, tipo: cargo, modelos: [cuota_reta], periodo: "octubre 2026", organismo: TGSS, territorios: [todos], descripcion: "Cargo de la cuota de autónomos", estado: regla, regla: "Último día hábil del mes (TGSS).", domiciliacion_hasta: null, domiciliacion_estado: no_aplica, fuentes: [tgss-guia]}
+  - {id: tgss-cuota-2026-11, fecha: 2026-11-30, tipo: cargo, modelos: [cuota_reta], periodo: "noviembre 2026", organismo: TGSS, territorios: [todos], descripcion: "Cargo de la cuota de autónomos", estado: regla, regla: "Último día hábil del mes (TGSS).", domiciliacion_hasta: null, domiciliacion_estado: no_aplica, fuentes: [tgss-guia]}
+  - {id: tgss-cuota-2026-12, fecha: 2026-12-31, tipo: cargo, modelos: [cuota_reta], periodo: "diciembre 2026", organismo: TGSS, territorios: [todos], descripcion: "Cargo de la cuota de autónomos", estado: regla, regla: "Último día hábil del mes (TGSS).", domiciliacion_hasta: null, domiciliacion_estado: no_aplica, fuentes: [tgss-guia]}
+  - {id: tgss-cuota-2027-01, fecha: 2027-01-29, tipo: cargo, modelos: [cuota_reta], periodo: "enero 2027", organismo: TGSS, territorios: [todos], descripcion: "Cargo de la cuota de autónomos", estado: regla, regla: "Último día hábil del mes (TGSS).", domiciliacion_hasta: null, domiciliacion_estado: no_aplica, fuentes: [tgss-guia]}
+  - {id: tgss-cuota-2027-02, fecha: 2027-02-26, tipo: cargo, modelos: [cuota_reta], periodo: "febrero 2027", organismo: TGSS, territorios: [todos], descripcion: "Cargo de la cuota de autónomos", estado: regla, regla: "Último día hábil del mes (TGSS).", domiciliacion_hasta: null, domiciliacion_estado: no_aplica, fuentes: [tgss-guia]}
+  - {id: tgss-cuota-2027-03, fecha: 2027-03-31, tipo: cargo, modelos: [cuota_reta], periodo: "marzo 2027", organismo: TGSS, territorios: [todos], descripcion: "Cargo de la cuota de autónomos", estado: regla, regla: "Último día hábil del mes (TGSS).", domiciliacion_hasta: null, domiciliacion_estado: no_aplica, fuentes: [tgss-guia]}
+  - {id: tgss-cuota-2027-04, fecha: 2027-04-30, tipo: cargo, modelos: [cuota_reta], periodo: "abril 2027", organismo: TGSS, territorios: [todos], descripcion: "Cargo de la cuota de autónomos", estado: regla, regla: "Último día hábil del mes (TGSS).", domiciliacion_hasta: null, domiciliacion_estado: no_aplica, fuentes: [tgss-guia]}
+  - {id: tgss-cuota-2027-05, fecha: 2027-05-31, tipo: cargo, modelos: [cuota_reta], periodo: "mayo 2027", organismo: TGSS, territorios: [todos], descripcion: "Cargo de la cuota de autónomos", estado: regla, regla: "Último día hábil del mes (TGSS).", domiciliacion_hasta: null, domiciliacion_estado: no_aplica, fuentes: [tgss-guia]}
+  - {id: tgss-cuota-2027-06, fecha: 2027-06-30, tipo: cargo, modelos: [cuota_reta], periodo: "junio 2027", organismo: TGSS, territorios: [todos], descripcion: "Cargo de la cuota de autónomos", estado: regla, regla: "Último día hábil del mes (TGSS).", domiciliacion_hasta: null, domiciliacion_estado: no_aplica, fuentes: [tgss-guia]}
+  - {id: tgss-cuota-2027-07, fecha: 2027-07-30, tipo: cargo, modelos: [cuota_reta], periodo: "julio 2027", organismo: TGSS, territorios: [todos], descripcion: "Cargo de la cuota de autónomos", estado: regla, regla: "Último día hábil del mes (TGSS).", domiciliacion_hasta: null, domiciliacion_estado: no_aplica, fuentes: [tgss-guia]}
+  - {id: tgss-cuota-2027-08, fecha: 2027-08-31, tipo: cargo, modelos: [cuota_reta], periodo: "agosto 2027", organismo: TGSS, territorios: [todos], descripcion: "Cargo de la cuota de autónomos", estado: regla, regla: "Último día hábil del mes (TGSS).", domiciliacion_hasta: null, domiciliacion_estado: no_aplica, fuentes: [tgss-guia]}
+  - {id: tgss-cuota-2027-09, fecha: 2027-09-30, tipo: cargo, modelos: [cuota_reta], periodo: "septiembre 2027", organismo: TGSS, territorios: [todos], descripcion: "Cargo de la cuota de autónomos", estado: regla, regla: "Último día hábil del mes (TGSS).", domiciliacion_hasta: null, domiciliacion_estado: no_aplica, fuentes: [tgss-guia]}
+  - {id: tgss-cuota-2027-10, fecha: 2027-10-29, tipo: cargo, modelos: [cuota_reta], periodo: "octubre 2027", organismo: TGSS, territorios: [todos], descripcion: "Cargo de la cuota de autónomos", estado: regla, regla: "Último día hábil del mes (TGSS).", domiciliacion_hasta: null, domiciliacion_estado: no_aplica, fuentes: [tgss-guia]}
+  - {id: tgss-cuota-2027-11, fecha: 2027-11-30, tipo: cargo, modelos: [cuota_reta], periodo: "noviembre 2027", organismo: TGSS, territorios: [todos], descripcion: "Cargo de la cuota de autónomos", estado: regla, regla: "Último día hábil del mes (TGSS).", domiciliacion_hasta: null, domiciliacion_estado: no_aplica, fuentes: [tgss-guia]}
+  - {id: tgss-cuota-2027-12, fecha: 2027-12-31, tipo: cargo, modelos: [cuota_reta], periodo: "diciembre 2027", organismo: TGSS, territorios: [todos], descripcion: "Cargo de la cuota de autónomos", estado: regla, regla: "Último día hábil del mes (TGSS).", domiciliacion_hasta: null, domiciliacion_estado: no_aplica, fuentes: [tgss-guia]}
+
+  # Cambio de base: 6 ventanas al año, fechas literales de la TGSS (tgss-base, tgss-guia).
+  - {id: tgss-base-2026-11, fecha: 2026-10-31, tipo: solicitud, modelos: [base_reta], periodo: "efectos 1-11-2026", organismo: TGSS, territorios: [todos],
+     descripcion: "Último día para pedir el cambio de base con efectos el 1 de noviembre", estado: verificado, domiciliacion_hasta: null, domiciliacion_estado: no_aplica, fuentes: [tgss-base, tgss-guia, boe-ley39],
+     nota: "El 31-10-2026 es sábado: por prudencia, pídelo el viernes 30 (lo presentado en día inhábil se entiende presentado el siguiente hábil, art. 31.2.b Ley 39/2015)."}
+  - {id: tgss-base-2027-01, fecha: 2026-12-31, tipo: solicitud, modelos: [base_reta], periodo: "efectos 1-01-2027", organismo: TGSS, territorios: [todos],
+     descripcion: "Último día para pedir el cambio de base con efectos el 1 de enero", estado: verificado, domiciliacion_hasta: null, domiciliacion_estado: no_aplica, fuentes: [tgss-base, tgss-guia]}
+  - {id: tgss-base-2027-03, fecha: 2027-02-28, tipo: solicitud, modelos: [base_reta], periodo: "efectos 1-03-2027", organismo: TGSS, territorios: [todos],
+     descripcion: "Último día para pedir el cambio de base con efectos el 1 de marzo", estado: verificado, domiciliacion_hasta: null, domiciliacion_estado: no_aplica, fuentes: [tgss-base, tgss-guia, boe-ley39],
+     nota: "El 28-02-2027 es domingo: por prudencia, pídelo el viernes 26 (art. 31.2.b Ley 39/2015)."}
+  - {id: tgss-base-2027-05, fecha: 2027-04-30, tipo: solicitud, modelos: [base_reta], periodo: "efectos 1-05-2027", organismo: TGSS, territorios: [todos],
+     descripcion: "Último día para pedir el cambio de base con efectos el 1 de mayo", estado: verificado, domiciliacion_hasta: null, domiciliacion_estado: no_aplica, fuentes: [tgss-base, tgss-guia]}
+  - {id: tgss-base-2027-07, fecha: 2027-06-30, tipo: solicitud, modelos: [base_reta], periodo: "efectos 1-07-2027", organismo: TGSS, territorios: [todos],
+     descripcion: "Último día para pedir el cambio de base con efectos el 1 de julio", estado: verificado, domiciliacion_hasta: null, domiciliacion_estado: no_aplica, fuentes: [tgss-base, tgss-guia]}
+  - {id: tgss-base-2027-09, fecha: 2027-08-31, tipo: solicitud, modelos: [base_reta], periodo: "efectos 1-09-2027", organismo: TGSS, territorios: [todos],
+     descripcion: "Último día para pedir el cambio de base con efectos el 1 de septiembre", estado: verificado, domiciliacion_hasta: null, domiciliacion_estado: no_aplica, fuentes: [tgss-base, tgss-guia]}
+  - {id: tgss-base-2027-11, fecha: 2027-10-31, tipo: solicitud, modelos: [base_reta], periodo: "efectos 1-11-2027", organismo: TGSS, territorios: [todos],
+     descripcion: "Último día para pedir el cambio de base con efectos el 1 de noviembre", estado: verificado, domiciliacion_hasta: null, domiciliacion_estado: no_aplica, fuentes: [tgss-base, tgss-guia, boe-ley39],
+     nota: "El 31-10-2027 es domingo: por prudencia, pídelo el viernes 29 (art. 31.2.b Ley 39/2015)."}
+  - {id: tgss-base-2028-01, fecha: 2027-12-31, tipo: solicitud, modelos: [base_reta], periodo: "efectos 1-01-2028", organismo: TGSS, territorios: [todos],
+     descripcion: "Último día para pedir el cambio de base con efectos el 1 de enero", estado: verificado, domiciliacion_hasta: null, domiciliacion_estado: no_aplica, fuentes: [tgss-base, tgss-guia]}
+  - {id: tgss-mutua-2028, fecha: 2027-09-30, tipo: solicitud, modelos: [mutua], periodo: "efectos 1-01-2028", organismo: TGSS, territorios: [todos],
+     descripcion: "Último día para pedir el cambio de mutua (antes del 1 de octubre) con efectos el 1 de enero", estado: verificado, domiciliacion_hasta: null, domiciliacion_estado: no_aplica, fuentes: [tgss-guia]}
+
+  # ---------------- Navarra · Hacienda Foral (solo lo verificado) ----------------
+  - {id: htn-2026t3-f69-rs, fecha: 2026-10-20, tipo: presentacion, modelos: ["F69"], periodo: "3T 2026", organismo: "Hacienda Foral de Navarra",
+     territorios: [navarra], descripcion: "IVA, régimen simplificado", estado: verificado, domiciliacion_hasta: null, domiciliacion_estado: no_verificado, fuentes: [htn-cal26]}
+  - {id: htn-2026t3-759, fecha: 2026-10-20, tipo: presentacion, modelos: ["759"], periodo: "3T 2026", organismo: "Hacienda Foral de Navarra",
+     territorios: [navarra], descripcion: "Retenciones por alquiler de inmuebles urbanos (IRPF)", estado: verificado, domiciliacion_hasta: null, domiciliacion_estado: no_verificado, fuentes: [htn-cal26]}
+  - {id: htn-2026t3-f69-rg, fecha: 2026-10-30, tipo: presentacion, modelos: ["F69"], periodo: "3T 2026", organismo: "Hacienda Foral de Navarra",
+     territorios: [navarra], descripcion: "IVA, régimen general", estado: verificado, domiciliacion_hasta: null, domiciliacion_estado: no_verificado, fuentes: [htn-cal26]}
+  - {id: htn-2026t3-715, fecha: 2026-10-30, tipo: presentacion, modelos: ["715"], periodo: "3T 2026", organismo: "Hacienda Foral de Navarra",
+     territorios: [navarra], descripcion: "Retenciones de trabajo y actividades profesionales (IRPF)", estado: verificado, domiciliacion_hasta: null, domiciliacion_estado: no_verificado, fuentes: [htn-cal26]}
+  - {id: htn-2026t3-130, fecha: 2026-11-03, tipo: presentacion, modelos: ["130"], periodo: "3T 2026", organismo: "Hacienda Foral de Navarra",
+     territorios: [navarra], descripcion: "Pago fraccionado del IRPF (empresarios y profesionales)", estado: verificado, domiciliacion_hasta: null, domiciliacion_estado: no_verificado, fuentes: [htn-cal26]}
+
+  # ---------------- Hitos normativos ----------------
+  - {id: hito-verifactu-is, fecha: 2027-01-01, tipo: hito, modelos: [verifactu], periodo: "2027", organismo: AEAT,
+     territorios: [comun, canarias, ceuta, melilla], descripcion: "VeriFactu: fecha límite para los contribuyentes del Impuesto sobre Sociedades (no para autónomos en IRPF)",
+     estado: verificado, domiciliacion_hasta: null, domiciliacion_estado: no_aplica, fuentes: [boe-verifactu, aeat-verifactu],
+     nota: "La norma dice 'antes del 1 de enero de 2027'."}
+  - {id: hito-verifactu-resto, fecha: 2027-07-01, tipo: hito, modelos: [verifactu], periodo: "2027", organismo: AEAT,
+     territorios: [comun, canarias, ceuta, melilla], descripcion: "VeriFactu: fecha legal vigente para el resto de obligados, autónomos incluidos (software de facturación adaptado antes del 1-07-2027)",
+     estado: verificado, domiciliacion_hasta: null, domiciliacion_estado: no_aplica, fuentes: [boe-verifactu, aeat-verifactu, mh-verifactu],
+     nota: "El aplazamiento a octubre de 2028 es solo una PREVISIÓN del Ministerio (nota del 5-10-2026), sin norma publicada. Hasta que salga en el BOE rige el 1-07-2027. País Vasco y Navarra tienen sistemas propios."}
+  - {id: hito-factura-e-grandes, fecha: 2027-10-06, tipo: hito, modelos: [factura_e], periodo: "2027", organismo: AEAT,
+     territorios: [comun, canarias, ceuta, melilla], descripcion: "Factura electrónica obligatoria para empresarios con facturación superior a 8 millones de euros (no el autónomo típico)",
+     estado: verificado, domiciliacion_hasta: null, domiciliacion_estado: no_aplica, fuentes: [boe-rd238, boe-orden-fe, aeat-fe],
+     nota: "Aplicación en territorios forales no verificada."}
+  - {id: hito-factura-e-resto, fecha: 2028-10-06, tipo: hito, modelos: [factura_e], periodo: "2028", organismo: AEAT,
+     territorios: [comun, canarias, ceuta, melilla], descripcion: "Factura electrónica obligatoria para el resto de empresarios y profesionales (autónomos incluidos)",
+     estado: verificado, domiciliacion_hasta: null, domiciliacion_estado: no_aplica, fuentes: [boe-rd238, boe-orden-fe, aeat-fe],
+     nota: "Fuera de la cobertura de este calendario; se incluye por ser un hito normativo."}
+  - {id: hito-factura-e-estados-pf, fecha: 2029-10-06, tipo: hito, modelos: [factura_e], periodo: "2029", organismo: AEAT,
+     territorios: [comun, canarias, ceuta, melilla], descripcion: "Personas físicas y entidades en atribución de rentas: obligación de informar del estado y pago de las facturas",
+     estado: verificado, domiciliacion_hasta: null, domiciliacion_estado: no_aplica, fuentes: [boe-rd238, aeat-fe],
+     nota: "Fuera de la cobertura de este calendario; se incluye por ser un hito normativo."}
+
+# Reglas sin fecha fija (no son vencimientos con día concreto).
+reglas:
+  - {id: regla-inhabiles, texto: "Si el último día de plazo es sábado, domingo o festivo nacional, pasa al primer día hábil siguiente; la domiciliación se amplía los mismos días (AEAT). La ATC aplica la misma regla.", fuentes: [aeat-cal26-dom, atc-420, boe-ley39]}
+  - {id: regla-regularizacion-reta, texto: "Regularización anual de cuotas: si sale a ingresar, el plazo acaba el último día del mes siguiente a la notificación (después, recargo del 10 % y luego del 20 %); si sale a devolver, la TGSS devuelve de oficio antes del 30 de abril.", fuentes: [tgss-guia]}
+  - {id: regla-cuenta-reta, texto: "Cambio de cuenta de cargo de la cuota: si se hace del 1 al 13, tiene efectos ese mes; desde el 14, el mes siguiente.", fuentes: [tgss-guia]}
+  - {id: regla-exencion-130, texto: "Los profesionales no hacen el pago fraccionado (130) si en el año anterior al menos el 70 % de los ingresos de la actividad tuvo retención.", fuentes: [boe-rirpf]}

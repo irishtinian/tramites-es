@@ -1,0 +1,12 @@
+{
+  "name": "tramites-es",
+  "owner": { "name": "tramites-es" },
+  "plugins": [
+    {
+      "name": "tramites-es",
+      "source": "./",
+      "category": "productivity",
+      "description": "Trámites de autónomos en sedes electrónicas españolas con tu certificado digital: notificaciones sin abrirlas, certificados, deudas, recibos, calendario fiscal y tu ayuntamiento. Tú siempre firmas, presentas y pagas."
+    }
+  ]
+}

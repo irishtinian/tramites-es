@@ -1,0 +1,70 @@
+# Hosts revisados que aparecen en skills/*/assets/*.yaml y NO están en assets/dominios-oficiales.yaml.
+#
+# Esta lista solo silencia la guarda de contenido de la CI (.github/scripts/content_guard.py).
+# NO hace que sede.py presente el certificado a estos hosts: eso lo deciden los `origins` de cada
+# sede en assets/*sedes*.yaml y assets/dominios-oficiales.yaml.
+#
+# Para añadir un host: que sea la sede o la web de una Administración pública (o la plataforma que
+# esa Administración usa como sede, p. ej. Gestiona en <entidad>.sedelectronica.es), con la fuente
+# oficial enlazada en el PR. Hosts concretos, nunca comodines de plataforma. Lo revisa un CODEOWNER.
+# Una línea por host; '#' empieza un comentario. Una entrada que empiece por '.' vale como sufijo.
+#
+# Lista inicial: hosts presentes en assets/ el 2026-10-15 (mapeo en vivo de esa fecha).
+
+# Boletines y haciendas forales (fuentes del calendario fiscal)
+www.boe.es
+www.navarra.es
+www.batuz.eus
+www.gipuzkoa.eus
+egoitza.araba.eus
+
+# Canarias: cabildos y ayuntamientos
+sede.tenerife.es
+sede.granadilladeabona.es
+sede.santacruzdetenerife.es
+ovc.santacruzdetenerife.es
+sede.arona.org
+sta.arona.org
+adeje.sedelectronica.es
+adeje.tributoslocales.es
+ayuntamientodearico.sedelectronica.es
+sedeelectronica.laspalmasgc.es
+
+# Cataluña (AOC y ayuntamientos)
+seu-e.cat
+etram.seu-e.cat
+valid.aoc.cat
+seu.sabadell.cat
+seuelectronica.ajuntament.barcelona.cat
+seuelectronica2.ajuntament.barcelona.cat
+
+# Diputaciones y plataformas provinciales
+sede.dipualba.es
+palma.sedipualba.es
+cartagena.sedipualba.es
+
+# Recaudación municipal en plataforma de proveedor (GTT)
+certifica.gtt.es
+palma.tributoslocales.es
+paterna.tributoslocales.es
+aytoleon.tributoslocales.es
+
+# Ayuntamientos (resto)
+sede.madrid.es
+www.madrid.es
+servcla.madrid.es
+cas.madrid.es
+agenciatributaria.madrid.es
+sede.valencia.es
+sede.paterna.es
+sede.benidorm.org
+sede.sevilla.org
+sede.valladolid.es
+contribuyente.valladolid.es
+sede.aytobadajoz.es
+tributos.aytobadajoz.es
+sede.aytoleon.es
+portalciudadano.ayto-alcorcon.es
+sede.mula.regiondemurcia.es
+www.zaragoza.es
+tributos.zaragoza.es

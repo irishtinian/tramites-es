@@ -1,0 +1,91 @@
+name: Sede rota
+description: Una guía no coincide con lo que ves en la sede (ruta, botón, URL o mensaje distintos).
+title: "[sede rota] <sede> - <trámite>"
+labels: ["sede-rota"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Gracias por avisar: las sedes cambian sin aviso y así mantenemos las guías al día.
+
+        **No incluyas datos personales**: ni NIF/NIE, ni nombres, ni direcciones, ni nº de expediente o de notificación, ni capturas con datos reales, ni tu certificado o su contraseña. Recorta o tapa las capturas.
+
+        ¿Es un fallo de seguridad (por ejemplo, el agente pudo firmar, presentar, pagar o abrir una notificación)? **No lo cuentes aquí**: usa el informe privado de vulnerabilidades (pestaña *Security*).
+  - type: input
+    id: sede
+    attributes:
+      label: Sede
+      description: Organismo o ayuntamiento y dirección de la sede (dominio y ruta, sin parámetros de tu sesión).
+      placeholder: "AEAT · https://sede.agenciatributaria.gob.es/Sede/..."
+    validations:
+      required: true
+  - type: input
+    id: tramite
+    attributes:
+      label: Trámite
+      placeholder: "Certificado de estar al corriente"
+    validations:
+      required: true
+  - type: input
+    id: guia
+    attributes:
+      label: Guía afectada
+      description: Fichero de references/ (te lo indica scripts/buscar.py).
+      placeholder: "references/sede-aeat.md"
+  - type: textarea
+    id: dice-la-guia
+    attributes:
+      label: Qué dice la guía
+    validations:
+      required: true
+  - type: textarea
+    id: ves-tu
+    attributes:
+      label: Qué ves tú
+      description: Texto de botones y mensajes y URL sin parámetros. Sin datos personales.
+    validations:
+      required: true
+  - type: input
+    id: fecha
+    attributes:
+      label: Fecha en que lo viste
+      placeholder: "AAAA-MM-DD"
+    validations:
+      required: true
+  - type: dropdown
+    id: sistema
+    attributes:
+      label: Sistema operativo
+      options:
+        - Windows
+        - macOS
+        - Linux
+    validations:
+      required: true
+  - type: dropdown
+    id: agente
+    attributes:
+      label: Agente
+      options:
+        - Claude Code
+        - Codex
+        - OpenClaw
+        - Hermes
+        - Gemini CLI
+        - Cursor
+        - GitHub Copilot
+        - Otro
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Versión de tramites-es
+      placeholder: "0.1.0"
+  - type: checkboxes
+    id: privacidad
+    attributes:
+      label: Datos personales
+      options:
+        - label: He revisado el texto y las capturas, y no incluyen datos personales ni secretos.
+          required: true

@@ -1,0 +1,16 @@
+# Dominios a los que tramites-es puede presentar el certificado digital del usuario.
+# Regla: solo Administraciones públicas, con fuente. Cambios aquí requieren revisión de CODEOWNERS.
+# El resto de dominios oficiales concretos (sedes con dominio propio) van como `origins` en assets/_sedes-*.yaml,
+# y los de cada ayuntamiento, en assets/municipios.csv (columna sede_url).
+verificado_el: 2026-10-15
+sufijos:
+  - .gob.es               # Administración General del Estado (AEAT, DGT, Catastro, SEPE, Carpeta Ciudadana…)
+  - .redsara.es           # Red SARA: DEHú, REG, autenticación de Carpeta Ciudadana
+  - .seg-social.es        # Seguridad Social (ipce.seg-social.es, idp.seg-social.es)
+  - .gobiernodecanarias.org  # Gobierno de Canarias y ATC
+  - .justicia.es          # Ministerio de Justicia (Carpeta Justicia, am.justicia.es)
+hosts:
+  - www.tributostenerife.es       # Consorcio de Tributos de Tenerife
+  - sede.tributostenerife.es
+# Plataformas municipales: el dominio de cada ayuntamiento se valida contra assets/municipios.csv
+# (columna sede_url) y la huella de plataforma de assets/huellas.yaml antes de presentar el certificado.

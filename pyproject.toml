@@ -1,0 +1,32 @@
+# Configuración mínima para las pruebas y la CI de tramites-es.
+# El skill no es un paquete instalable: cada script declara sus dependencias (PEP 723) en su cabecera.
+# Aquí solo se fijan las versiones que usan pytest y la CI. Mantenlas iguales a las de los scripts.
+#
+#   uv run --group test pytest
+#   (o) python -m pip install "pytest==9.1.1" "pyyaml==6.0.3" "cryptography==44.0.2" && python -m pytest
+
+[project]
+name = "tramites-es"
+version = "0.1.0.dev0"
+description = "Skill abierto para que agentes de IA ayuden a autónomos con sedes electrónicas españolas."
+requires-python = ">=3.11"
+dependencies = []
+
+[dependency-groups]
+test = [
+  "pytest==9.1.1",
+  "pyyaml==6.0.3",         # = scripts/buscar.py, calendario.py, sede.py
+  "cryptography==44.0.2",  # = scripts/cert.py (genera el PKCS#12 de prueba)
+]
+validate = [
+  "pyyaml==6.0.3",
+]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+minversion = "9.0"
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+xfail_strict = true

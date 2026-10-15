@@ -1,0 +1,29 @@
+# CODEOWNERS de tramites-es.
+# Sustituye @OWNER por la cuenta (o el equipo, @org/equipo) que mantiene el repositorio antes de publicarlo.
+# Con la regla de rama "Require review from Code Owners", todo PR que toque estas rutas necesita su aprobación.
+# Este fichero vive en .github/, así que también se protege a sí mismo.
+# Las guías (references/) y el calendario no están aquí a propósito: los revisa cualquier mantenedor con la CI en verde.
+
+# Reglas duras y guardas del skill
+/skills/**/SKILL.md                          @OWNER
+/skills/**/scripts/                          @OWNER
+
+# Dominios y sedes a los que se presenta el certificado
+/skills/**/assets/dominios-oficiales.yaml    @OWNER
+/skills/**/assets/*sedes*.yaml               @OWNER
+# sede.py también confía en la columna sede_url de este censo
+/skills/**/assets/municipios.csv             @OWNER
+
+# CI, plantillas y listas blancas de la guarda de contenido
+/.github/                                    @OWNER
+
+# Lo que se instala o se ejecuta en el equipo de la persona, e instrucciones para agentes
+/install.sh                                  @OWNER
+/install.ps1                                 @OWNER
+/.claude-plugin/                             @OWNER
+/.codex-plugin/                              @OWNER
+/.agents/                                    @OWNER
+/gemini-extension.json                       @OWNER
+/pyproject.toml                              @OWNER
+/AGENTS.md                                   @OWNER
+/CLAUDE.md                                   @OWNER

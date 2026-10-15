@@ -1,0 +1,8 @@
+{
+  "name": "tramites-es",
+  "displayName": "Trámites ES (autónomos)",
+  "version": "0.1.0-dev",
+  "description": "Skill para que tu agente consulte y prepare trámites de autónomo en sedes electrónicas españolas con tu certificado digital. Nunca firma, presenta ni paga: eso lo haces tú.",
+  "license": "MIT",
+  "keywords": ["españa", "autónomos", "sede electrónica", "certificado digital", "AEAT", "Seguridad Social", "DEHú", "Canarias"]
+}
