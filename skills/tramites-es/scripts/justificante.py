@@ -75,7 +75,7 @@ def extraer(p: Path) -> dict:
         m = re.search(r"\b([A-Z0-9]{5}(?:-[A-Z0-9]{5}){5})\b", plano)
         res["cea"] = m.group(1) if m else None
     res["organismo"] = next((o for o, pat in ORGANISMOS.items() if re.search(pat, plano, re.I)), None)
-    m = re.search(r"(certificado[^.]{0,80}|justificante[^.]{0,80}|recibo[^.]{0,60})", plano, re.I)
+    m = re.search(r"(certificado[^.]{0,80}|justificante[^.]{0,80}|informe de (?:vida laboral|bases de cotizaci[oó]n|datos de cotizaci[oó]n|situaci[oó]n|deuda)|recibo[^.]{0,60})", plano, re.I)
     res["tipo_documento"] = enmascarar(m.group(1)[:100]) if m else None
     res["prueba_de_exito"] = bool(res["csv"] or res["registro"] or res["nrc"] or res["cea"])
     if res["csv"] or res["cea"]:

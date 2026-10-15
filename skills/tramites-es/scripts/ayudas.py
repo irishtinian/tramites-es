@@ -241,6 +241,7 @@ def cmd_buscar(a: argparse.Namespace) -> dict:
               "order": "fechaRecepcion", "direccion": "desc"}
     tam = min(100, revisar) if a.abiertas else maximo
     res, revisadas, total, pagina = [], 0, None, 0
+    vistas: dict[tuple[str, str], str] = {}  # (título, órgano) → nº BDNS de la primera aparición
     while len(res) < maximo and revisadas < revisar:
         data = api("convocatorias/busqueda", {**params, "page": pagina, "pageSize": tam})
         if not isinstance(data, dict):
@@ -264,6 +265,12 @@ def cmd_buscar(a: argparse.Namespace) -> dict:
                 reg = fecha(c.get("fecha_registro"))
                 if est == "consultar_extracto" and reg and (hoy - reg).days > 365:
                     continue
+            # Misma convocatoria registrada dos veces (Cuota Cero 2026: 889775 y 889445): se marca, no se borra
+            clave = (slug(c.get("titulo") or ""), slug(str(c.get("organo") or "")))
+            if clave[0] and clave in vistas:
+                c["posible_duplicado_de"] = vistas[clave]
+            else:
+                vistas[clave] = c.get("bdns")
             res.append(c)
         if data.get("last", True) or not filas:
             break

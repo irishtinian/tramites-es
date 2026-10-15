@@ -57,36 +57,79 @@ GUIA_ALIAS = {"calendario-fiscal": "plazos vencimientos calendario fiscal fiscal
               "registro-reg-sir": "instancia general escrito registro"}
 
 
-def buscar_municipio(q: str, limite: int = 5) -> list[dict]:
+def nombre_natural(m: str) -> str:
+    """El INE pospone el artículo: "Palmas de Gran Canaria, Las" → "Las Palmas de Gran Canaria", "Coruña, A" → "A Coruña"."""
+    m2 = re.match(r"^(.+), (El|La|Los|Las|L'|Lo|Els|Les|A|O|As|Os|Es|Sa|Ses|Na)$", m or "")
+    if not m2:
+        return m or ""
+    art = m2.group(2)
+    return f"{art}{m2.group(1)}" if art.endswith("'") else f"{art} {m2.group(1)}"
+
+
+def vocabulario() -> set[str]:
+    """Palabras de trámites y guías: un municipio que se llame así ("Ibi", "Fiscal") no se toma por municipio
+    dentro de una frase salvo que la persona lo escriba con su mayúscula ("Ibi")."""
+    v = set()
+    for s in cargar_sedes().values():
+        for t in s.get("tramites", []) or []:
+            v |= palabras(" ".join([t.get("nombre", ""), " ".join(t.get("alias", []) or [])]))
+    for a in GUIA_ALIAS.values():
+        v |= palabras(a)
+    return v
+
+
+def buscar_municipio(q: str, limite: int = 5, frase: bool = False) -> list[dict]:
     p = ASSETS / "municipios.csv"
     if not p.exists():
         return []
     nq = norm(q)
     if len(nq) < 2:
         return []
+    voc = vocabulario() if frase else set()
     exactos, parciales = [], []
     with p.open(encoding="utf-8") as f:
         for row in csv.DictReader(f):
-            n = norm(row.get("municipio", ""))
-            if not n:
-                continue
-            if n == nq:
-                exactos.append(row)
-            # coincidencia por palabras completas, nunca por subcadena ("Ea" no casa con "tarea")
-            elif (len(n) >= 3 and re.search(rf"\b{re.escape(n)}\b", nq)) or (len(nq) >= 4 and re.search(rf"\b{re.escape(nq)}\b", n)):
-                parciales.append(row)
+            orig = row.get("municipio", "")
+            for nombre in dict.fromkeys([orig, nombre_natural(orig)]):
+                n = norm(nombre)
+                if not n:
+                    continue
+                if n == nq:
+                    exactos.append(row)
+                    break
+                # coincidencia por palabras completas, nunca por subcadena ("Ea" no casa con "tarea")
+                if len(n) >= 3 and re.search(rf"\b{re.escape(n)}\b", nq):
+                    # nombres cortos: con sus tildes ("Uña" no es "una"); palabras de trámite: con su mayúscula
+                    if len(n) < 5 and not re.search(rf"(?<!\w){re.escape(nombre.casefold())}(?!\w)", q.casefold()):
+                        continue
+                    if n in voc and nombre not in q:
+                        continue
+                    parciales.append(row)
+                    break
+                # "La Laguna" → "San Cristóbal de La Laguna": solo con consultas cortas (en una frase larga, no)
+                if (not frase or len(nq.split()) <= 3) and len(nq) >= 4 and re.search(rf"\b{re.escape(nq)}\b", n):
+                    parciales.append(row)
+                    break
+    # a igualdad de coincidencia, primero el más poblado ("La Laguna": San Cristóbal antes que Pajares)
+    parciales.sort(key=lambda r: -int((r.get("poblacion") or "0").strip() or 0))
     res = []
     for row in (exactos or parciales)[:limite]:
         etiqueta = (row.get("plataforma") or "").strip() or "desconocida"
         plat = PLATAFORMAS.get(etiqueta.lower(), etiqueta.lower())
         guia = REFS / f"plataforma-{plat}.md"
+        nota = None if guia.exists() else "Sin receta para esta plataforma: explora con sede.py probe o usa REG/SIR para la instancia general."
+        if etiqueta == "desconocida" and row.get("ccaa") == "Cataluña":
+            # Casi todos los ayuntamientos catalanes pequeños tienen sede en seu-e.cat (AOC), aunque el censo no la detectara
+            guia = REFS / "plataforma-aoc.md"
+            nota = ("Censo sin plataforma. En Cataluña lo probable es la Seu-e del AOC (https://seu-e.cat/ca/web/<slug>): "
+                    "compruébalo sin certificado antes de usarla.")
         res.append({
-            "tipo": "municipio", "municipio": row.get("municipio"), "provincia": row.get("provincia"),
+            "tipo": "municipio", "municipio": nombre_natural(row.get("municipio", "")), "provincia": row.get("provincia"),
             "ccaa": row.get("ccaa"), "sede_url": row.get("sede_url") or None, "web": row.get("web") or None,
             "plataforma": etiqueta, "confianza": row.get("confianza"),
             "recaudador": row.get("recaudador") or None,
             "guia": f"references/{guia.name}" if guia.exists() else "references/registro-reg-sir.md",
-            "nota": None if guia.exists() else "Sin receta para esta plataforma: explora con sede.py probe o usa REG/SIR para la instancia general.",
+            "nota": nota,
         })
     return res
 
@@ -131,7 +174,7 @@ def main() -> int:
     if a.municipio:
         res = buscar_municipio(a.municipio)
     else:
-        res = buscar_municipio(a.consulta) + buscar_tramite(a.consulta)
+        res = buscar_municipio(a.consulta, frase=True) + buscar_tramite(a.consulta)
     if not res:
         res = [{"tipo": "sin_resultados", "sugerencia": "Reformula (p. ej. 'notificaciones', 'vida laboral', nombre exacto del municipio) "
                 "o consulta la tabla de trámites de SKILL.md."}]

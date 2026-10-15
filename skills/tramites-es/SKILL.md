@@ -49,7 +49,7 @@ Los scripts se ejecutan con `uv run scripts/<script>.py …`. `uv` instala solo 
 | Datos fiscales, datos censales, declaraciones presentadas, deudas AEAT | `sede-aeat.md` | Leer |
 | Recibos y tributos municipales (IBI, tasas, IAE) | `plataforma-*.md` + `buscar.py` | Leer |
 | ¿Qué plataforma usa mi ayuntamiento? ¿Dónde presento una instancia? | `buscar.py`, `plataformas-municipales.md`, `registro-reg-sir.md` | Leer / Preparar |
-| ¿Quién me cobra el IBI, el IAE o las tasas? (recaudación local) | `canarias-recaudacion.md` (el censo de `buscar.py` aún no trae recaudador) | Leer |
+| ¿Quién me cobra el IBI, el IAE o las tasas? (recaudación local) | `buscar.py --municipio` (campo `recaudador`; en muchos municipios aún "desconocido") y, en Canarias, `canarias-recaudacion.md` | Leer |
 | Calendario fiscal personal y próximos plazos | `calendario-fiscal.md` + `scripts/calendario.py proximos --obligaciones …` (filtra por los modelos que de verdad presenta la persona: "Mis obligaciones" de la AEAT y, en Canarias, si está en el REPEP) | Leer |
 | Ayudas abiertas para autónomos | `ayudas.md` + `scripts/ayudas.py` | Leer (solicitar lo firma la persona) |
 | Puntos y sanciones DGT, certificación catastral, informe de conductor | `sede-dgt.md`, `sede-catastro.md` | Leer las consultas. La certificación y el informe se preparan, y el "Confirmar" o "Datos" lo pulsa la persona |

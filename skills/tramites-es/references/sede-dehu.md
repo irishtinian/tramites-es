@@ -5,7 +5,7 @@ fuentes:
   - https://dehu.redsara.es/es/config/env.json          # catálogo público de la API de la SPA
   - https://dehu.redsara.es/api/v1/faq                  # FAQ oficial (JSON)
   - https://www.boe.es/buscar/act.php?id=BOE-A-2015-10565   # Ley 39/2015, arts. 41 y 43
-estado_mapeo: "Mapeo en vivo 15-10-2026 (fases 1 y 2 y ronda 3). Login hasta Cl@ve verificado; DEHú rechaza después la sesión con certificado (error=1000, causa desconocida). Listado no obtenido en vivo: estructura sacada del front público."
+estado_mapeo: "Mapeo en vivo 15-10-2026 (fases 1 y 2 y ronda 3). Validación v02 (15-10-2026, tarde): login con certificado de persona física OK (sin error=1000) y pestaña de pendientes leída (0 pendientes, 0 realizadas). El error=1000 de la mañana no se reprodujo: tratarlo como intermitente."
 ---
 
 # DEHú: Dirección Electrónica Habilitada única
@@ -47,13 +47,17 @@ El agente **solo lista**: organismo, concepto, fecha de puesta a disposición y 
 uv run scripts/sede.py ejecutar clave_login.py --sede dehu --titular yo   # receta de sede-clave.md
 ```
 
-### Fallo abierto: login rechazado (`error=1000`)
+### Fallo intermitente: login rechazado (`error=1000`)
+
+- **Validación v02 (15-10-2026, ~16:30):** el mismo certificado entró sin error: `ResponseRedirect → /es/login?authData=… → /es/home → /es/home-view` ("DEHú - Inicio"). Si te sale `error=1000`, reintenta **una** vez más tarde antes de dar DEHú por caído.
 
 - **Revalidado** el 15-10-2026 en la validación de la v0.1 (1 intento útil): misma cadena `ServiceRedirect → AuthenticateCitizen → ResponseRedirect → /es/login?error=1000 → /es/public`.
 - **Cómo verlo:** la SPA borra el `error=` en menos de un segundo; `pg.url` acaba en `/es/public`. Registra las navegaciones antes de pulsar el botón de Cl@ve:
   ```python
   vistos = []
-  pg.on("framenavigated", lambda f: vistos.append(f.url.split("&")[0]) if f == pg.main_frame else None)
+  # Solo ruta y error=: la URL de vuelta lleva ?authData=<JWT de sesión con el NIF>; nunca la registres entera.
+  pg.on("framenavigated", lambda f: vistos.append(f.url.split("?")[0] + (" error=" + f.url.split("error=")[1][:6] if "error=" in f.url else ""))
+        if f == pg.main_frame else None)
   # … receta clave_login.py … y al final: RESULTADO = {"navegaciones": vistos}
   ```
 - **Qué pasó** (15-10-2026): Cl@ve autenticó bien (`AuthenticateCitizen` 200 → `ResponseRedirect`), pero `POST /api/login/login-check` respondió `302 → /es/login?error=1000`.
@@ -69,9 +73,33 @@ uv run scripts/sede.py ejecutar clave_login.py --sede dehu --titular yo   # rece
 
 ## 3. Trámites
 
-### 3.1 Listado de notificaciones (`dehu-notificaciones`) · Leer · pendiente
+### 3.1 Listado de notificaciones (`dehu-notificaciones`) · Leer · verificado (15-10-2026, pestaña de pendientes)
 
-Esta estructura sale del `env.json` público y del bundle de la SPA. **No se ha verificado en vivo.**
+Verificado en la validación v02 con certificado de persona física: la pestaña de pendientes carga y muestra los dos contadores ("Notificaciones pendientes `<N>`", "Notificaciones realizadas `<N>`"). Con 0 filas no se ha visto la tabla con datos: las columnas de abajo salen del bundle de la SPA.
+
+**Receta** (`dehu_listado.py`; la interfaz son web components, así que `inner_text("body")` no ve el texto del shadow DOM):
+
+```python
+pg.wait_for_selector("button.idp-button", timeout=60000)
+pg.click("button.idp-button:has-text('DNIe / Certificado')")
+pg.wait_for_url(lambda u: "clave.gob.es" not in u, timeout=90000)
+pg.wait_for_timeout(6000)
+TXT = """() => { const out = []; const walk = (n) => { if (!n) return;
+  if (n.nodeType === 3) { const t = n.textContent.trim(); if (t) out.push(t); return; }
+  if (n.nodeType !== 1 && n.nodeType !== 11) return;
+  if (n.tagName === 'SCRIPT' || n.tagName === 'STYLE') return;
+  if (n.shadowRoot) walk(n.shadowRoot); for (const c of n.childNodes) walk(c); };
+  walk(document.body); return out.join(' '); }"""
+nav("https://dehu.redsara.es/es/notifications", espera=12000)
+captura("dehu-pendientes")
+RESULTADO = {"url": pg.url.split("?")[0], "texto": redactar(" ".join(pg.evaluate(TXT).split()))[:3000]}
+```
+
+```bash
+xvfb-run -a uv run scripts/sede.py ejecutar dehu_listado.py --sede dehu --titular yo --json /tmp/dehu.json
+```
+
+- **Una sola carga completa por sesión.** En la validación, la tercera `nav()` seguida dentro de DEHú devolvió la página "Playwright client-certificate error: read ECONNRESET" (en `dehu.redsara.es`, que no recibe certificado: lo más probable es el WAF). Para ver otra pestaña, usa el menú de la SPA o lanza otra ejecución más tarde.
 
 | | Pendientes | Realizadas |
 |---|---|---|
@@ -79,7 +107,7 @@ Esta estructura sale del `env.json` público y del bundle de la SPA. **No se ha 
 | API que usa la SPA | `GET /api/v1/notifications?…&page=<n>&limit=10` | `GET /api/v1/realized_notifications?…&page=<n>&limit=10` |
 | Columnas | Identificador, Concepto, Organismo emisor, Organismo raíz, Titular, Vínculo, Fecha disposición, **Fecha caducidad**, Acciones | Las mismas, más **Fecha comparecencia / estado final** y **Estado** (Aceptada, Rechazada, Expirada, Expirada TEU) |
 
-- **Otras pestañas:** comunicaciones (`/es/comunications`) y anuncios del Tablón Edictal Único (`/es/notifications-edictals`).
+- **Otras pestañas:** comunicaciones (`/es/communications`, con doble "m": `/es/comunications` redirige a la portada) y anuncios del Tablón Edictal Único (`/es/notifications-edictals`).
 - **Filtros:**
   - fechas de puesta a disposición (`availabilityDate`), de expiración y de comparecencia, en dd/mm/aaaa;
   - vínculo, organismo emisor, NIF del titular, identificador;
@@ -111,7 +139,7 @@ Esta estructura sale del `env.json` público y del bundle de la SPA. **No se ha 
   - `…/change-level-clave-login-form`;
   - `PUT /api/v1/notification_center/…/mark-as-read`, que cambia el estado.
   - `sede.py` bloquea en `dehu.redsara.es` los clics de abrir, aceptar, rechazar o descargar, y las rutas de red con `/document`, `acuse` o `comparec`.
-  - Ojo: `voucher`, `full_detail` y `appearance-login-form` **no** están en esa lista de red. La protección depende de no pulsar nada en "Acciones".
+  - Desde la v0.1, la lista de red también incluye `voucher`, `full_detail` y `appearance` (`NOTIF_RED`). Aun así, no pulses nada en "Acciones".
 - **No llames a la API con `fetch`:**
   - Usa la SPA y lee la tabla. Hay un WAF F5 delante: las ráfagas dan "Request Rejected" o 403.
   - Si aparece, para y deja el control a la persona.

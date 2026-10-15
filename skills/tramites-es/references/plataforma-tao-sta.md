@@ -112,7 +112,7 @@ Receta de solo lectura para el paso 3 (no probada en vivo tal cual):
 ```python
 # sta_pagecodes.py — lista los PAGE_CODE enlazados en la página
 codigos = pg.evaluate("""() => [...new Set([...document.querySelectorAll('a[href*="PAGE_CODE="]')]
-    .map(a => (a.getAttribute('href').match(/PAGE_CODE=([A-Za-z0-9_]+)/) || [])[1]).filter(Boolean))]""")
+    .map(a => (a.href.match(/PAGE_CODE=([A-Za-z0-9_]+)/) || [])[1]).filter(Boolean))]""")
 RESULTADO = {"page_codes": codigos}
 ```
 

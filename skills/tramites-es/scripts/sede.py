@@ -150,8 +150,9 @@ RECETA_PROHIBIDO = re.compile(
     r"(xdotool|autofirma|set_input_files|unroute|remove_listener|__tGuard|__tReport|add_init_script|expose_binding|"
     r"client_certificates|passphrase|para_playwright|cert\.py|\.submit\(|requestSubmit|\.onclick|onclick\(|procesoFirma|"
     r"w_FirmaAEAT|MiniGeneraFirma|firmar[A-Za-z_]*\(|enviar[A-Za-z_]*\(|presentar[A-Za-z_]*\(|\bpagar[A-Za-z_]*\(|"
-    r"subprocess|os\.system|__import__|keyring|\.route\(|route_from|\.request\b|getattr|setattr|delattr|eval\(|exec\(|"
-    r"compile\(|globals|locals\(|vars\(|__\w+__|import\s|from\s+\w+\s+import|open\()", re.I)
+    r"subprocess|os\.system|__import__|keyring|\.route\(|route_from|\.request\b|\bgetattr\b|\bsetattr\b|\bdelattr\b|eval\(|exec\(|"
+    # \b y (?<![\w.]): getAttribute (JS) y re.compile( son legítimos en las recetas de las guías
+    r"(?<![\w.])compile\(|globals|locals\(|vars\(|__\w+__|import\s|from\s+\w+\s+import|open\()", re.I)
 # Builtins mínimos para las recetas: sin import, open, eval, exec, getattr…
 # Las recetas no son un sandbox frente a un agente malicioso (ver SECURITY.md). Sirven para evitar errores
 # y para que la vía normal no pueda desactivar las guardas.
@@ -338,6 +339,9 @@ def redactar(t: str, extra=()) -> str:
     t = re.sub(r"\bES\d{2}(?:\s?\d{4}){5}\b", "<IBAN>", t)
     t = re.sub(r"[\w.+-]+@[\w-]+\.[\w.-]+", "<EMAIL>", t)
     t = re.sub(r"\b[6789]\d{2}\s?\d{3}\s?\d{3}\b", "<TEL>", t)
+    # Domicilios (p. ej. la columna "Tributo / Referencia" de STA): tipo de vía + nombre + número
+    t = re.sub(r"\b(?:CALLE|C/|CL\.?|AVDA\.?|AVENIDA|PLAZA|PZA\.?|CTRA\.?|CARRETERA|CAMINO|PASEO|TRAVES[IÍ]A|URB\.?|"
+               r"URBANIZACI[OÓ]N|RAMBLA|RONDA|PASAJE|GLORIETA)\s[^\n|\x22]{1,60}?\d+[^\s|\x22]*(?:\s[A-Z]{0,2}-?\d[^\s|\x22]*)?", "<DOMICILIO>", t, flags=re.I)
     for x in sorted({x for x in (list(extra) + list(_IDENTIDAD)) if x and len(x) >= 3}, key=len, reverse=True):
         t = re.sub(r"\b" + re.escape(x) + r"\b", "<TITULAR>", t, flags=re.I)
     return re.sub(r"<TITULAR>(?:[\s,]+<TITULAR>)+", "<TITULAR>", t)
@@ -408,9 +412,13 @@ def cmd_abrir(a) -> int:
     def cuerpo(h):
         base = h["captura"]("abrir")
         txt = Path(base + ".txt").read_text(encoding="utf-8") if Path(base + ".txt").exists() else ""
+        # Con titular: también cuenta como sesión que el nombre o el NIF del certificado salgan en la página
+        # (la AEAT no muestra "salir" ni "mis datos" en el cuerpo de MdcAcceso).
+        ident = any(re.search(r"\b" + re.escape(x) + r"\b", txt, re.I) for x in _IDENTIDAD if len(x) >= 5)
         return {"titulo": h["pg"].title()[:120],
-                "sesion_iniciada": bool(re.search(r"(cerrar sesi|desconectar|salir|mis datos|bienvenid)", txt, re.I)),
-                "texto_inicio": redactar(" ".join(txt.split())[:600])}
+                "sesion_iniciada": ident or bool(re.search(r"(cerrar sesi|desconectar|salir|mis datos|bienvenid)", txt, re.I)),
+                # 600 caracteres no llegaban al resultado (Granadilla: "No tiene recibos pendientes." iba más abajo)
+                "texto_inicio": redactar(" ".join(txt.split())[:3000])}
     return _sesion(a, cuerpo)
 
 
@@ -428,7 +436,10 @@ def cmd_ejecutar(a) -> int:
     src = Path(a.receta).read_text(encoding="utf-8")
     m = RECETA_PROHIBIDO.search(src)
     if m:
-        print(json.dumps({"error": f"receta rechazada por las guardas: contiene '{m.group(0)}'"}, ensure_ascii=False))
+        salida = json.dumps({"error": f"receta rechazada por las guardas: contiene '{m.group(0)}'"}, ensure_ascii=False)
+        if getattr(a, "json", None):
+            Path(a.json).write_text(salida, encoding="utf-8")
+        print(salida)
         return 2
 
     def cuerpo(h):
@@ -436,7 +447,9 @@ def cmd_ejecutar(a) -> int:
         scope.pop("ctx", None)  # sin acceso directo al contexto (rutas, peticiones); para popups: pg.context.pages
         scope["__builtins__"] = _BUILTINS_RECETA
         exec(compile(src, a.receta, "exec"), scope)
-        return {"resultado": scope.get("RESULTADO")}
+        # Defensa en profundidad (regla 8): el RESULTADO pasa siempre por redactar(), lo haga o no la receta.
+        bruto = json.dumps(scope.get("RESULTADO"), ensure_ascii=False, default=str)
+        return {"resultado": json.loads(redactar(bruto))}
     return _sesion(a, cuerpo)
 
 

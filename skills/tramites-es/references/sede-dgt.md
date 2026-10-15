@@ -63,7 +63,7 @@ Cada ejecución de `sede.py` empieza sin sesión: las recetas hacen primero el p
 # dgt_sanciones.py: login por Cl@ve y listado
 pg.wait_for_selector("button.idp-button", timeout=60000)
 pg.click("button.idp-button:has-text('DNIe / Certificado')")
-pg.wait_for_url(re.compile(r"sede\.dgt\.gob\.es/es/mi_dgt/"), timeout=90000)
+pg.wait_for_url(lambda u: "sede.dgt.gob.es/es/mi_dgt/" in u, timeout=90000)
 nav("https://sede.dgt.gob.es/es/mi_dgt/mis-sanciones/")
 pg.wait_for_selector("#datatable_sanciones", timeout=60000)
 captura("sanciones")

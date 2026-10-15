@@ -21,16 +21,16 @@ Pregúntalo o dedúcelo del perfil (`perfil-autonomo.md`):
 
 | Buzón | ¿Le afecta? | Guía | Estado del listado |
 |---|---|---|---|
-| **DEHú** | A casi todos: buzón común del Estado y de muchos organismos | `sede-dehu.md` | ❌ **pendiente**: DEHú rechazó el login con certificado (`error=1000`, causa desconocida) |
+| **DEHú** | A casi todos: buzón común del Estado y de muchos organismos | `sede-dehu.md` | ✅ **verificado** (15-10-2026, pestaña de pendientes). El `error=1000` de la mañana no se repitió por la tarde: es intermitente |
 | **AEAT** (NEO) | Obligatorio para los del art. 14.2 de la Ley 39/2015 (p. ej. **profesionales con colegiación obligatoria**), los inscritos en REDEME y Grandes Empresas. El alta es automática. Pregunta si está colegiado o en el REDEME. Aunque no esté obligado, la AEAT deja aquí las notificaciones de embargos, compensaciones o requerimientos: **míralo siempre** | `sede-aeat.md` §3.6 | ✅ **verificado** (15-10-2026) |
 | **Seguridad Social** | **Todo autónomo** desde el 1-oct-2018 (Orden ESS/214/2018). También le llegan por DEHú | `sede-tgss-importass.md` §3.12 | ⏳ **pendiente**: no mapeado |
 | **DGT, buzón DEV** | Solo si tiene DEV. Si no la tiene, la DGT redirige a `ErrorBuzon.faces`, que es un estado válido | `sede-dgt.md` §3.3 | ◐ **parcial**: acceso verificado; listado pendiente de verificar con una cuenta que tenga DEV |
 | **ATC** (Canarias) | Autónomos en Canarias: "Mis notificaciones" de la sede de la ATC | `sede-atc.md` | Ver esa guía |
 | **Ayuntamiento** | Si se relaciona con él por vía electrónica | `plataforma-*.md` + `buscar.py` | ⏳ **pendiente** en todas las plataformas |
-| **Carpeta Ciudadana** (contador) | Atajo: número de notificaciones y comunicaciones pendientes en DEHú. **Es la vía que funciona mientras DEHú dé `error=1000`** | `sede-carpeta-ciudadana.md` §3.2 | ✅ **verificado** (15-10-2026) |
+| **Carpeta Ciudadana** (contador) | Atajo: número de notificaciones y comunicaciones pendientes en DEHú. **Úsalo primero** y como plan B si DEHú da `error=1000` | `sede-carpeta-ciudadana.md` §3.2 | ✅ **verificado** (15-10-2026) |
 | **Tablón Edictal Único** | Notificaciones que no se pudieron entregar | `sede-carpeta-ciudadana.md` §3.1 (`mcc-teu`) | ✅ verificado |
 
-**Verificados de punta a punta (15-10-2026):** AEAT, contador DEHú de Carpeta Ciudadana y TEU. El resto, díselo a la persona y, si algo falla, pídele que mire ella el buzón.
+**Verificados de punta a punta (15-10-2026):** AEAT, DEHú (pestaña de pendientes), contador DEHú de Carpeta Ciudadana y TEU. El resto, díselo a la persona y, si algo falla, pídele que mire ella el buzón.
 
 ## 2. Cómo listar en cada buzón
 
@@ -38,8 +38,8 @@ Usa solo `abrir`, `probe` (sin `--clic` sobre filas) o las recetas de las guías
 
 - **DEHú (contador, recomendado):** receta `mcc_notificaciones.py` de `sede-carpeta-ciudadana.md` §3.2. Da `numNotificaciones` y `numComunicaciones` pendientes en DEHú sin entrar en DEHú. Si es 0, no hace falta más. Si es > 0, el detalle lo ve la persona en DEHú (o tú, si DEHú ya acepta el login).
 - **DEHú (listado):**
-  1. Login (`sede-dehu.md` §2). Si acaba en `/es/public`, mira la cadena de navegaciones: el `error=` solo aparece un instante.
-  2. Pestaña `https://dehu.redsara.es/es/notifications` (pendientes) y, si hace falta, `?realized=true` (realizadas).
+  1. Receta `dehu_listado.py` de `sede-dehu.md` §3.1 (login + pestaña de pendientes, con el texto del shadow DOM). Si acaba en `/es/public`, mira la cadena de navegaciones: el `error=` solo aparece un instante.
+  2. La pestaña de pendientes ya muestra los dos contadores (pendientes y realizadas). Solo si hay realizadas que mirar, `?realized=true` en **otra** ejecución (tres cargas seguidas dieron `ECONNRESET`).
   3. Columnas útiles: Concepto, Organismo emisor, Fecha disposición y **Fecha caducidad**.
   4. Ventanas de fechas de 30 días como máximo, sin ráfagas.
 - **AEAT:** receta de `sede-aeat.md` §3.6, sobre `GNNO-JDIT/SvInteresadosQuery?VEZ=BUSCAR1`.

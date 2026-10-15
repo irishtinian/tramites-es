@@ -46,7 +46,7 @@ pg.select_option("select#valorSelect", label="Ciudadano")
 pg.click("button.rounded-2xl:has-text('Acceder')")
 pg.wait_for_selector("button.idp-button", timeout=60000)
 pg.click("button.idp-button:has-text('DNIe / Certificado')")
-pg.wait_for_url(re.compile(r"/carpeta/mcc/home"), timeout=90000)
+pg.wait_for_url(lambda u: "/carpeta/mcc/home" in u, timeout=90000)
 with pg.expect_response(lambda r: API in r.url, timeout=60000) as resp:
     nav("https://carpetaciudadana.gob.es/carpeta/mcc/" + SERVICIO)
 pg.wait_for_timeout(3000)
@@ -98,7 +98,7 @@ def _r(r):
         try:
             apis[r.url.split("/api/")[1].split("?")[0]] = [r.status, redactar(r.text()[:400])]
         except Exception as ex:
-            apis[r.url[-40:]] = [r.status, type(ex).__name__]
+            apis[r.url[-40:]] = [r.status, str(ex)[:80]]   # sede.py rechaza los nombres con doble guion bajo
 pg.on("response", _r)
 pg.get_by_text("Acceder a la carpeta").first.click()
 pg.wait_for_selector("select#valorSelect", timeout=60000)
@@ -106,7 +106,7 @@ pg.select_option("select#valorSelect", label="Ciudadano")
 pg.click("button.rounded-2xl:has-text('Acceder')")
 pg.wait_for_selector("button.idp-button", timeout=60000)
 pg.click("button.idp-button:has-text('DNIe / Certificado')")
-pg.wait_for_url(re.compile(r"/carpeta/mcc/home"), timeout=90000)
+pg.wait_for_url(lambda u: "/carpeta/mcc/home" in u, timeout=90000)
 pg.wait_for_timeout(12000)                     # el contador tarda en llegar
 nav("https://carpetaciudadana.gob.es/carpeta/mcc/teu", espera=9000)
 captura("teu")
