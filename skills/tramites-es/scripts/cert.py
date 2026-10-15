@@ -141,7 +141,10 @@ def _info(cert) -> dict:
                             for a in cert.issuer.get_attributes_for_oid(oid))[:120],
         "caduca": caduca.date().isoformat(),
         "dias_restantes": dias,
-        "aviso": "CADUCADO" if dias < 0 else ("caduca en menos de 30 días" if dias < 30 else None),
+        # La FNMT deja renovar por internet en los 60 días previos a la caducidad.
+        "aviso": "CADUCADO" if dias < 0 else (
+            "caduca en 60 días o menos: ya se puede renovar (references/tramite-renovar-certificado-fnmt.md)"
+            if dias <= 60 else None),
     }
 
 

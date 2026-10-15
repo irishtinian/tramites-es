@@ -1,6 +1,6 @@
 ---
 name: tramites-es
-description: "Trámites de autónomos con la Administración española usando su certificado digital: notificaciones (DEHú, AEAT, Seguridad Social, DGT), certificados de estar al corriente, vida laboral, recibos y bases de autónomo, deudas, datos fiscales y censales, declaraciones, recibos municipales, citas previas, calendario fiscal y ayudas. Sabe qué plataforma usa cada ayuntamiento (Gestiona, TAO/STA, GTT, AOC…) e incluye Canarias (ATC, IGIC 420/425). Úsalo si el usuario menciona sede electrónica, certificado digital, AEAT, Hacienda, Seguridad Social, Import@ss, DEHú, notificaciones, cita previa, modelo 303/130/420, autónomo o un trámite con su ayuntamiento. Lo que el agente puede hacer (consultar, firmar, presentar, pagar…) lo decide su usuario con sus permisos."
+description: "Trámites de autónomos con la Administración española usando su certificado digital: notificaciones (DEHú, AEAT, Seguridad Social, DGT), certificados de estar al corriente, vida laboral, recibos y bases de autónomo, deudas, datos fiscales y censales, declaraciones, recibos municipales, citas previas, renovación del certificado de la FNMT, calendario fiscal y ayudas. Sabe qué plataforma usa cada ayuntamiento (Gestiona, TAO/STA, GTT, AOC…) e incluye Canarias (ATC, IGIC 420/425). Úsalo si el usuario menciona sede electrónica, certificado digital, AEAT, Hacienda, Seguridad Social, Import@ss, DEHú, notificaciones, cita previa, modelo 303/130/420, autónomo o un trámite con su ayuntamiento. Lo que el agente puede hacer (consultar, firmar, presentar, pagar…) lo decide su usuario con sus permisos."
 license: MIT
 compatibility: "Python 3.11+ (uv recomendado), Google Chrome y Playwright. Linux, Windows o macOS. Certificado digital del usuario (.p12/.pfx o almacén del sistema). Necesita red."
 metadata:
@@ -39,7 +39,8 @@ El skill **no** decide por tu usuario. Cada paso de las guías indica qué **act
 
 ## Lo que el skill hace siempre (te protege, no te para)
 
-- **El certificado y su contraseña** solo los usa `scripts/cert.py`. No los leas, imprimas ni pidas por el chat. Si falta, guía a la persona con `references/setup-*.md`.
+- **El certificado y su contraseña** solo los usa `scripts/cert.py`. No los leas, imprimas ni pidas por el chat. Si falta, guía a la persona con `references/setup-*.md`. Si caduca pronto, `cert.py listar` lo avisa: `references/tramite-renovar-certificado-fnmt.md`.
+- **Contraseñas y datos de tarjeta** (de administrador, de una solicitud, de un `.p12`, número de tarjeta, confirmación del banco): los teclea la persona en su ventana. No los pidas por el chat ni los guardes. Pagar con permiso sí; manejar su tarjeta, no.
 - **Solo sedes oficiales:** el certificado se presenta únicamente a los dominios de `assets/`. Ante una web que no esté ahí, comprueba que es oficial antes de seguir.
 - **Datos personales enmascarados** en las salidas (NIF, IBAN, domicilio, nombre). No los envíes fuera de la sede. Un **CSV o CEA permite a cualquiera descargar el documento**: trátalo como dato personal.
 - **Verifica antes de dar algo por hecho**, y antes de repetir un envío que falló, comprueba en el listado oficial que no quedó registrado. Así no se duplica.
@@ -82,6 +83,7 @@ Los scripts se ejecutan con `uv run scripts/<script>.py …`. `uv` instala solo 
 | ¿Qué plataforma usa mi ayuntamiento? Instancia general | `buscar.py`, `plataformas-municipales.md`, `registro-reg-sir.md` | Presentar la instancia: `firmar` + `presentar` |
 | ¿Quién me cobra el IBI, el IAE o las tasas? | `buscar.py --municipio` (campo `recaudador`) y, en Canarias, `canarias-recaudacion.md` | ninguno |
 | Cita previa (AEAT, Seguridad Social, DGT, extranjería, registro civil…) | `tramite-cita-previa.md` | `cita` |
+| Renovar el certificado digital (FNMT: persona física o representante) | `tramite-renovar-certificado-fnmt.md` | `generar`; representante: `pagar` |
 | Calendario fiscal y próximos plazos | `calendario-fiscal.md` + `scripts/calendario.py proximos --obligaciones …` | ninguno |
 | Ayudas abiertas para autónomos | `ayudas.md` + `scripts/ayudas.py` | Solicitar: `firmar` + `presentar` |
 | Puntos y sanciones DGT, certificación catastral, informe de conductor | `sede-dgt.md`, `sede-catastro.md` | Consultas: ninguno. Certificaciones e informes: `generar`; pagar multas: `pagar` |

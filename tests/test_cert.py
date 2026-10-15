@@ -225,6 +225,15 @@ def test_certificado_caducado(cert, tmp_path, generar_p12, terminal, capsys):
     assert r["aviso"] == "CADUCADO" and r["dias_restantes"] < 0
 
 
+def test_certificado_en_ventana_de_renovacion(cert, tmp_path, generar_p12, terminal, capsys):
+    ruta = tmp_path / "por-caducar.p12"
+    generar_p12(ruta, CONTRASENA, dias=45)
+    pw = _fichero_contrasena(tmp_path / "pw.txt", CONTRASENA)
+    assert cert.cmd_configurar(_ns(alias="pronto", p12=str(ruta), fichero_contrasena=str(pw))) == 0
+    r = _salida(capsys)
+    assert "renovar" in r["aviso"] and "tramite-renovar-certificado-fnmt.md" in r["aviso"]
+
+
 def test_certificado_de_representante(cert, tmp_path, generar_p12, terminal, capsys):
     ruta = tmp_path / "representante.p12"
     generar_p12(ruta, CONTRASENA, organizacion="EMPRESA FICTICIA SL", id_entidad="VATES-B12345670")

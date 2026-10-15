@@ -131,6 +131,18 @@ def test_vida_laboral(buscar):
     assert r["guia"] == "references/sede-tgss-importass.md"
 
 
+@pytest.mark.parametrize("consulta, tramite", [
+    ("renovar certificado digital", "fnmt-renovar-persona-fisica"),
+    ("renovar certificado de empresa", "fnmt-renovar-representante-administrador"),
+])
+def test_renovar_certificado(buscar, skill, consulta, tramite):
+    res = buscar.buscar_tramite(consulta)
+    r = next(r for r in res if r.get("tramite") == tramite)
+    assert r["sede"] == "fnmt" and r["riesgo"] == "actuar"
+    assert r["guia"] == "references/tramite-renovar-certificado-fnmt.md"
+    assert (skill / r["guia"]).is_file()
+
+
 def test_notificaciones_empieza_por_el_playbook(buscar):
     res = buscar.buscar_tramite("notificaciones")
     assert res[0] == {"tipo": "guia", "guia": "references/tramite-vigilar-notificaciones.md"}

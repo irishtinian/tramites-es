@@ -471,6 +471,40 @@ sedes:
         guia: references/tramite-cita-previa.md
         estado: pendiente   # solo documentación pública; ninguna cita pedida
 
+  fnmt:
+    nombre: "Sede electrónica de la FNMT-RCM (certificados digitales)"
+    nivel: estatal
+    # Sin 'login': renovar se hace en el escritorio y el navegador normales de la persona (mismo equipo y usuario
+    # para solicitar y descargar, Configurador FNMT). El navegador aislado de sede.py no está verificado aquí.
+    origins: ["https://www.sede.fnmt.gob.es"]
+    guia: references/tramite-renovar-certificado-fnmt.md
+    verificado_el: 2026-10-15
+    tramites:
+      - id: fnmt-renovar-persona-fisica
+        nombre: "Renovar el certificado digital de persona física (FNMT)"
+        alias: ["renovar certificado digital", "renovar certificado fnmt", "certificado digital caducado", "mi certificado caduca", "renovar certificado persona física"]
+        riesgo: actuar   # solicitud y descarga = generar; gratuito; 60 días antes de caducar
+        permisos: [generar]
+        url: "https://www.sede.fnmt.gob.es/certificados/persona-fisica/renovar"
+        guia: references/tramite-renovar-certificado-fnmt.md
+        estado: pendiente   # pasos y requisitos de la sede; sin recorrer
+      - id: fnmt-renovar-representante-administrador
+        nombre: "Renovar el certificado de representante de administrador único o solidario (FNMT)"
+        alias: ["renovar certificado de empresa", "renovar certificado representante", "renovar certificado administrador único", "renovar certificado sociedad", "certificado de la empresa caduca"]
+        riesgo: actuar   # generar + pagar (24 € + impuestos, tarjeta); se pide con el certificado de persona física
+        permisos: [generar, pagar]
+        url: "https://www.sede.fnmt.gob.es/certificados/certificado-de-representante/administrador-unico-solidario/renovar-certificado/solicitud-de-renovacion"
+        guia: references/tramite-renovar-certificado-fnmt.md
+        estado: verificado_con_certificado   # recorrido de punta a punta el 15-10-2026 (solicitud, pago y descarga)
+      - id: fnmt-certificado-representante-nuevo
+        nombre: "Pedir un certificado de representante nuevo (FNMT)"
+        alias: ["certificado de representante", "certificado digital empresa", "certificado persona jurídica", "certificado administrador único"]
+        riesgo: actuar   # generar + pagar
+        permisos: [generar, pagar]
+        url: "https://www.sede.fnmt.gob.es/certificados/certificado-de-representante"
+        guia: references/tramite-renovar-certificado-fnmt.md
+        estado: pendiente
+
   catastro:
     nombre: "Sede Electrónica del Catastro"
     nivel: estatal

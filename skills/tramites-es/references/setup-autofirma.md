@@ -123,7 +123,7 @@ Si la sede lo tiene configurado así, AutoFirma puede saltarse la lista cuando s
 - En Windows, abre el certificado (`certmgr.msc` → Personal → Certificados): debe decir que tiene una clave privada.
 - Si sale al abrir AutoFirma directamente, pero no desde la web, la sede está filtrando qué certificados admite (manual, §9.3).
 
-**Certificado caducado.** La FNMT deja renovar por internet durante los **60 días previos** a la caducidad, con condiciones (https://www.sede.fnmt.gob.es/certificados/persona-fisica/renovar). Después, instálalo en tu navegador (paso 1) y actualiza también el del agente (`setup-<sistema>.md`).
+**Certificado caducado o a punto de caducar.** La FNMT deja renovar por internet durante los **60 días previos** a la caducidad, con condiciones: ver `tramite-renovar-certificado-fnmt.md`. Después, instálalo en tu navegador (paso 1) y actualiza también el del agente (`setup-<sistema>.md`).
 
 **Falla la instalación de los certificados de confianza.** Hace falta ser administrador. Prueba **Herramientas → Restaurar instalación** (manual, §9.1).
 

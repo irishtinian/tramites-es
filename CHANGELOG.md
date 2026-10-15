@@ -13,6 +13,9 @@
 - Guías y YAML reescritos con el acto de cada paso (`riesgo: persona` → `riesgo: actuar`). `reglas-y-seguridad.md` explica permisos y protecciones.
 - Siguen fuera del alcance aunque haya permiso: automatizar Cl@ve PIN/Móvil/Permanente o SMS, resolver CAPTCHAs y acaparar citas.
 - Arreglo: `permisos.py ver` fallaba al mostrar la fecha de `fijado_el`.
+- Guía nueva `tramite-renovar-certificado-fnmt.md`: renovar el certificado de persona física o de representante, en modo completo o acompañado. La de representante de administrador único se recorrió de punta a punta el 15-10-2026. Sede `fnmt` en `_sedes-estatal.yaml`.
+- `cert.py` avisa cuando faltan 60 días o menos para la caducidad, que es cuando la FNMT abre la renovación.
+- `SKILL.md`: las contraseñas y los datos de tarjeta los teclea siempre la persona.
 
 ## [0.1.0-dev] — sin publicar
 
